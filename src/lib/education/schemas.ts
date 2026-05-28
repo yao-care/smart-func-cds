@@ -11,6 +11,16 @@ export const CDSS_INDICATOR_NAMES = [
   'sleep_quality', 'activity_level', 'sugar_intake',
 ] as const;
 
+// --- IC domain (smart-func-cds 成人功能健康評估) ---
+export const IC_DOMAIN_NAMES = [
+  'vitality',      // 身體活力
+  'locomotion',    // 行動功能
+  'cognition',     // 認知功能
+  'psychological', // 心理功能
+  'sensory',       // 感官功能
+] as const;
+export type ICDomain = typeof IC_DOMAIN_NAMES[number];
+
 // --- 影片元資料 ---
 export const videoCatalogItemSchema = z.object({
   videoId: z.string().regex(/^[A-Za-z0-9_-]{11}$/),
