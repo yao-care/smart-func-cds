@@ -1,6 +1,7 @@
 import type { IndicatorScore, DomainScore } from './scorer';
 import type { ICDomain } from '../../lib/education/schemas';
 import type { AgeGroupAdult } from '../../lib/utils/age-groups';
+import { recommendationsFor } from './recommendations';
 
 export type TriageCategory = 'normal' | 'observe' | 'consult' | 'incomplete';
 
@@ -133,7 +134,5 @@ function makeRecommendations(
   indicatorScores: IndicatorScore[],
   cutoffs: TriageResult['clinicalCutoffs'],
 ): Recommendation[] {
-  const recs: Recommendation[] = [];
-  // 此處 stub — 完整對照表於 Task 1.7 recommendations.ts 落實
-  return recs;
+  return recommendationsFor(category, domainScores, indicatorScores, cutoffs);
 }
