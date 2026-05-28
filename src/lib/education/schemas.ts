@@ -1,5 +1,5 @@
 import { z } from 'astro/zod';   // = zod v4
-import { AGE_GROUPS_CDSA } from '../utils/age-groups';
+import { AGE_GROUPS_CDSA, AGE_GROUPS_ADULT } from '../utils/age-groups';
 
 // --- 可重用列舉常數（單一源）---
 export const CDSA_DOMAIN_NAMES = [
@@ -86,6 +86,39 @@ export const cdssVitalSignEntrySchema = z.object({
 }).refine(
   d => d.trigger === `cdss.${d.indicator}.${d.level}.${d.ageGroup}`,
   { message: 'trigger 字串與 indicator + level + ageGroup 不一致', path: ['trigger'] },
+);
+
+// --- IC trigger schemas (共存於舊 CDSA schema) ---
+const IC_DOMAIN_ENUM = z.enum(IC_DOMAIN_NAMES);
+const IC_AGE_GROUP_ENUM = z.enum(AGE_GROUPS_ADULT);
+const IC_BAND_ENUM = z.enum(['low', 'moderate']);
+const IC_TRIAGE_CATEGORY_ENUM = z.enum(['normal', 'observe', 'consult', 'incomplete']);
+
+export const funcTriageEntrySchema = z.object({
+  trigger: z.string(),
+  category: z.literal('triage'),
+  triageCategory: IC_TRIAGE_CATEGORY_ENUM,
+  ageGroup: IC_AGE_GROUP_ENUM,
+  educationSlug: z.string().optional(),
+  inapplicable: z.literal(true).optional(),
+  videoIds: videoIdsField,
+}).refine(
+  d => d.trigger === `func.triage.${d.triageCategory}.${d.ageGroup}`,
+  { message: 'trigger 字串與 triageCategory + ageGroup 不一致', path: ['trigger'] },
+);
+
+export const funcDomainEntrySchema = z.object({
+  trigger: z.string(),
+  category: z.literal('domain'),
+  domain: IC_DOMAIN_ENUM,
+  band: IC_BAND_ENUM,
+  ageGroup: IC_AGE_GROUP_ENUM,
+  educationSlug: z.string().optional(),
+  inapplicable: z.literal(true).optional(),
+  videoIds: videoIdsField,
+}).refine(
+  d => d.trigger === `func.domain.${d.domain}.${d.band}.${d.ageGroup}`,
+  { message: 'trigger 字串與 domain + band + ageGroup 不一致', path: ['trigger'] },
 );
 
 export const triggerEntrySchema = z.discriminatedUnion('category', [
