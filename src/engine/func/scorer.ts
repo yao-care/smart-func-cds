@@ -4,6 +4,16 @@ import { reverseScoreOf, zToPercentile, median, clamp } from './utils';
 import type { ICDomain } from '../../lib/education/schemas';
 import type { AgeGroupAdult } from '../../lib/utils/age-groups';
 
+export interface DomainScore {
+  domain: ICDomain;
+  score: number;
+  band: 'high' | 'moderate' | 'low';
+  capacityScore?: number;
+  symptomScore?: number;
+  contributingIndicators: number;
+  missingIndicators: string[];
+}
+
 export interface SubScaleScore {
   subScaleId: string;
   score: number | null;
@@ -176,4 +186,98 @@ export function scoreObjectiveIndicator(
     validTrialCount: validTrials.length,
     totalTrialCount: trials.length,
   };
+}
+
+export function scoreDomain(
+  domain: ICDomain,
+  indicatorScores: IndicatorScore[],
+  indicatorWeights: Record<string, number>,
+): DomainScore | null {
+  const inDomain = indicatorScores.filter(s => s.domain === domain);
+  if (inDomain.length === 0) return null;
+
+  const weighted = inDomain.map(s => ({
+    score: s.score,
+    weight: indicatorWeights[s.indicatorId] ?? 1.0,
+    style: s.style,
+  }));
+
+  const totalWeight = weighted.reduce((s, x) => s + x.weight, 0);
+  if (totalWeight === 0) {
+    throw new Error(`scoreDomain: total weight for domain ${domain} is 0`);
+  }
+
+  const score = Math.round(
+    weighted.reduce((s, x) => s + x.score * x.weight, 0) / totalWeight
+  );
+
+  const computeView = (view: typeof weighted): number | undefined => {
+    if (view.length === 0) return undefined;
+    const w = view.reduce((s, x) => s + x.weight, 0);
+    if (w === 0) return undefined;
+    return Math.round(view.reduce((s, x) => s + x.score * x.weight, 0) / w);
+  };
+
+  const capView = weighted.filter(x => x.style === 'capacity');
+  const symView = weighted.filter(x => x.style === 'symptom');
+
+  return {
+    domain,
+    score,
+    band: score >= 70 ? 'high' : score >= 40 ? 'moderate' : 'low',
+    capacityScore: computeView(capView),
+    symptomScore: computeView(symView),
+    contributingIndicators: inDomain.length,
+    missingIndicators: getMissingIndicatorIds(domain, indicatorScores, indicatorWeights),
+  };
+}
+
+function getMissingIndicatorIds(
+  domain: ICDomain,
+  scoredIndicators: IndicatorScore[],
+  applicableWeights: Record<string, number>,
+): string[] {
+  const scoredIds = new Set(scoredIndicators.map(s => s.indicatorId));
+  return Object.keys(applicableWeights).filter(id =>
+    id.startsWith(`${domain}.`) && !scoredIds.has(id)
+  );
+}
+
+export function scoreAssessment(input: {
+  indicators: Indicator[];
+  answers: Record<string, number>;
+  objectiveResults: Record<string, number[]>;
+  ageGroup: AgeGroupAdult;
+}): {
+  indicatorScores: IndicatorScore[];
+  domainScores: DomainScore[];
+  applicableWeights: Record<string, number>;
+} {
+  const { indicators, answers, objectiveResults, ageGroup } = input;
+
+  const applicable = indicators.filter(ind =>
+    !ind.ageApplicability || ind.ageApplicability.includes(ageGroup)
+  );
+
+  const applicableWeights: Record<string, number> = {};
+  for (const ind of applicable) applicableWeights[ind.id] = ind.weight;
+
+  const indicatorScores: IndicatorScore[] = [];
+  for (const ind of applicable) {
+    if (ind.kind === 'likert') {
+      const s = scoreLikertIndicator(ind, answers);
+      if (s) indicatorScores.push(s);
+    } else {
+      const trials = objectiveResults[ind.id] ?? [];
+      const s = scoreObjectiveIndicator(ind, trials, ageGroup);
+      if (s) indicatorScores.push(s);
+    }
+  }
+
+  const domains: ICDomain[] = ['vitality', 'locomotion', 'cognition', 'psychological', 'sensory'];
+  const domainScores = domains
+    .map(d => scoreDomain(d, indicatorScores, applicableWeights))
+    .filter((d): d is DomainScore => d !== null);
+
+  return { indicatorScores, domainScores, applicableWeights };
 }

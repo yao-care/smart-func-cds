@@ -1,7 +1,7 @@
 // tests/engine/func/scorer.test.ts
 import { describe, it, expect } from 'vitest';
 import type { LikertIndicator, ObjectiveIndicator } from '../../../src/engine/func/questionnaire';
-import { scoreLikertIndicator, scoreObjectiveIndicator } from '../../../src/engine/func/scorer';
+import { scoreLikertIndicator, scoreObjectiveIndicator, scoreDomain, scoreAssessment, type DomainScore, type IndicatorScore } from '../../../src/engine/func/scorer';
 
 const PHQ2: LikertIndicator = {
   kind: 'likert', id: 'psychological.depression', domain: 'psychological',
@@ -209,5 +209,73 @@ describe('scoreObjectiveIndicator — reaction-time', () => {
     const r = scoreObjectiveIndicator(RT, trials, '18-39');
     expect(r!.zScore).toBeGreaterThanOrEqual(-4);
     expect(r!.zScore).toBeLessThanOrEqual(4);
+  });
+});
+
+describe('scoreDomain', () => {
+  const mkScore = (id: string, score: number, style: 'capacity'|'symptom', weight: number = 1): IndicatorScore => ({
+    indicatorId: id, domain: 'vitality', style, kind: 'likert', score,
+  } as IndicatorScore);
+
+  it('weighted avg', () => {
+    const r = scoreDomain('vitality',
+      [mkScore('vitality.a', 80, 'capacity'), mkScore('vitality.b', 40, 'symptom')],
+      { 'vitality.a': 1, 'vitality.b': 1 },
+    );
+    expect(r?.score).toBe(60);  // (80+40)/2
+  });
+
+  it('band: 70+ → high, 40-69 → moderate, <40 → low', () => {
+    const r1 = scoreDomain('vitality', [mkScore('vitality.a', 75, 'capacity')], { 'vitality.a': 1 });
+    expect(r1?.band).toBe('high');
+    const r2 = scoreDomain('vitality', [mkScore('vitality.a', 50, 'capacity')], { 'vitality.a': 1 });
+    expect(r2?.band).toBe('moderate');
+    const r3 = scoreDomain('vitality', [mkScore('vitality.a', 30, 'capacity')], { 'vitality.a': 1 });
+    expect(r3?.band).toBe('low');
+  });
+
+  it('capacity / symptom view 拆分', () => {
+    const r = scoreDomain('vitality',
+      [mkScore('vitality.cap', 80, 'capacity'), mkScore('vitality.sym', 40, 'symptom')],
+      { 'vitality.cap': 1, 'vitality.sym': 1 },
+    );
+    expect(r?.capacityScore).toBe(80);
+    expect(r?.symptomScore).toBe(40);
+  });
+
+  it('totalWeight=0 throws', () => {
+    expect(() => scoreDomain('vitality',
+      [mkScore('vitality.a', 50, 'capacity')],
+      { 'vitality.a': 0 },
+    )).toThrow();
+  });
+
+  it('empty domain → null', () => {
+    expect(scoreDomain('vitality', [], { 'vitality.a': 1 })).toBeNull();
+  });
+});
+
+describe('scoreAssessment integration', () => {
+  it('end-to-end with 2 indicators in 1 domain', () => {
+    const PHQ2_min: LikertIndicator = {
+      kind: 'likert', id: 'psychological.depression', domain: 'psychological',
+      label: 'PHQ-2', style: 'symptom', direction: 'higher_is_worse',
+      weight: 1, license: 'public-domain', maxScore: 3,
+      questions: [
+        { id: 'psychological.depression.q1', text: '', options: [] },
+        { id: 'psychological.depression.q2', text: '', options: [] },
+      ],
+      minCompletionPolicy: 1.0,
+    };
+    const r = scoreAssessment({
+      indicators: [PHQ2_min],
+      answers: { 'psychological.depression.q1': 0, 'psychological.depression.q2': 0 },
+      objectiveResults: {},
+      ageGroup: '18-39',
+    });
+    expect(r.indicatorScores).toHaveLength(1);
+    expect(r.domainScores).toHaveLength(1);
+    expect(r.domainScores[0].score).toBe(100);  // PHQ-2 全 0 + higher_is_worse → capacity 100
+    expect(r.applicableWeights['psychological.depression']).toBe(1);
   });
 });
