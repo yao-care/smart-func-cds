@@ -87,6 +87,7 @@ describe('scoreLikertIndicator — BAT-12 (CRITICAL: 1-5 Likert 公式驗算)', 
     expect(exh?.subMean).toBe(3);
     expect(exh?.cutoffFlag).toBe(true);
     expect(exh?.cutoffSeverity).toBe('advisory');
+    expect(exh?.cutoffFlagLabel).toBe('bat12-exhaustion-redzone');
   });
 });
 
@@ -125,13 +126,14 @@ describe('scoreLikertIndicator — PHQ-2 cutoff', () => {
     expect(r?.cutoffFlag).toBe(false);
   });
 
-  it('sum=3 → cutoff', () => {
+  it('sum=3 → cutoff, preserves flagLabel from schema', () => {
     const r = scoreLikertIndicator(PHQ2, {
       'psychological.depression.q1': 2,
       'psychological.depression.q2': 1,
     });
     expect(r?.rawSum).toBe(3);
     expect(r?.cutoffFlag).toBe(true);
+    expect(r?.cutoffFlagLabel).toBe('positive-depression-screen');
   });
 
   it('partial answer (only q1) → return null (minCompletionPolicy=1.0)', () => {

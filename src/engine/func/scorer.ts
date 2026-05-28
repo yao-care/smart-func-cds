@@ -20,6 +20,7 @@ export interface SubScaleScore {
   subMean?: number;
   cutoffFlag?: boolean;
   cutoffSeverity?: 'consult' | 'advisory';
+  cutoffFlagLabel?: string;
 }
 
 export interface IndicatorScore {
@@ -31,6 +32,7 @@ export interface IndicatorScore {
   rawSum?: number;
   cutoffFlag?: boolean;
   cutoffSeverity?: 'consult' | 'advisory';
+  cutoffFlagLabel?: string;
   subScaleScores?: SubScaleScore[];
   measuredValue?: number;
   zScore?: number;
@@ -78,10 +80,14 @@ export function scoreLikertIndicator(
 
   let cutoffFlag: boolean | undefined;
   let cutoffSeverity: 'consult' | 'advisory' | undefined;
+  let cutoffFlagLabel: string | undefined;
   if (indicator.clinicalCutoff && validAnswerEntries.length === N) {
-    const { threshold, comparator, severity } = indicator.clinicalCutoff;
+    const { threshold, comparator, severity, flagLabel } = indicator.clinicalCutoff;
     cutoffFlag = comparator === '>=' ? rawSum >= threshold : rawSum <= threshold;
-    if (cutoffFlag) cutoffSeverity = severity;
+    if (cutoffFlag) {
+      cutoffSeverity = severity;
+      cutoffFlagLabel = flagLabel;
+    }
   }
 
   let subScaleScores: SubScaleScore[] | undefined;
@@ -100,10 +106,14 @@ export function scoreLikertIndicator(
 
       let subCutoffFlag: boolean | undefined;
       let subCutoffSeverity: 'consult' | 'advisory' | undefined;
+      let subCutoffFlagLabel: string | undefined;
       if (sub.clinicalCutoff) {
-        const { threshold, comparator, severity } = sub.clinicalCutoff;
+        const { threshold, comparator, severity, flagLabel } = sub.clinicalCutoff;
         subCutoffFlag = comparator === '>=' ? subMean >= threshold : subMean <= threshold;
-        if (subCutoffFlag) subCutoffSeverity = severity;
+        if (subCutoffFlag) {
+          subCutoffSeverity = severity;
+          subCutoffFlagLabel = flagLabel;
+        }
       }
 
       return {
@@ -112,6 +122,7 @@ export function scoreLikertIndicator(
         subMean,
         cutoffFlag: subCutoffFlag,
         cutoffSeverity: subCutoffSeverity,
+        cutoffFlagLabel: subCutoffFlagLabel,
       };
     });
   }
@@ -125,6 +136,7 @@ export function scoreLikertIndicator(
     rawSum,
     cutoffFlag,
     cutoffSeverity,
+    cutoffFlagLabel,
     subScaleScores,
     questionsAnswered: validAnswerEntries.length,
     questionsTotal: N,
