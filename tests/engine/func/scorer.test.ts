@@ -1,7 +1,7 @@
 // tests/engine/func/scorer.test.ts
 import { describe, it, expect } from 'vitest';
-import type { LikertIndicator } from '../../../src/engine/func/questionnaire';
-import { scoreLikertIndicator } from '../../../src/engine/func/scorer';
+import type { LikertIndicator, ObjectiveIndicator } from '../../../src/engine/func/questionnaire';
+import { scoreLikertIndicator, scoreObjectiveIndicator } from '../../../src/engine/func/scorer';
 
 const PHQ2: LikertIndicator = {
   kind: 'likert', id: 'psychological.depression', domain: 'psychological',
@@ -150,5 +150,64 @@ describe('scoreLikertIndicator — direction', () => {
     };
     const r = scoreLikertIndicator(ind, { 'vitality.sleep_quality.q1': 3 });
     expect(r?.score).toBe(100);
+  });
+});
+
+const RT: ObjectiveIndicator = {
+  kind: 'objective', id: 'cognition.processing_speed', domain: 'cognition',
+  label: 'RT', style: 'capacity', direction: 'higher_is_worse',
+  weight: 1, license: 'research-open-noncommercial',
+  test: {
+    type: 'reaction-time', paradigm: 'simple-visual',
+    trials: 20, warmupTrials: 5,
+    validRangeMs: { min: 100, max: 2000 },
+    norms: {
+      '18-39': { mean: 350, std: 80, citation: 'NIH Toolbox' },
+      '40-54': null,
+      '55-64': null,
+    },
+  },
+};
+
+describe('scoreObjectiveIndicator — reaction-time', () => {
+  it('measure = norm mean → percentile 0.5 → score 50', () => {
+    // 5 warmup + 20 trials, median 350
+    const trials = [...Array(5).fill(999), ...Array(20).fill(350)];
+    const r = scoreObjectiveIndicator(RT, trials, '18-39');
+    expect(r?.score).toBeGreaterThanOrEqual(49);
+    expect(r?.score).toBeLessThanOrEqual(51);
+  });
+
+  it('measure << norm mean (fast)、direction=higher_is_worse → 高 capacity', () => {
+    const trials = [...Array(5).fill(999), ...Array(20).fill(200)];  // very fast
+    const r = scoreObjectiveIndicator(RT, trials, '18-39');
+    expect(r!.score).toBeGreaterThan(90);
+  });
+
+  it('measure >> norm mean (slow) → 低 capacity', () => {
+    const trials = [...Array(5).fill(999), ...Array(20).fill(700)];  // very slow
+    const r = scoreObjectiveIndicator(RT, trials, '18-39');
+    expect(r!.score).toBeLessThan(10);
+  });
+
+  it('離群試次 < 100ms 與 > 2000ms 被排除', () => {
+    // 4 fast outliers + 16 valid @ 350 + 5 warmup
+    const trials = [...Array(5).fill(999), 50, 80, 90, 50, ...Array(16).fill(350)];
+    const r = scoreObjectiveIndicator(RT, trials, '18-39');
+    expect(r?.validTrialCount).toBe(16);
+  });
+
+  it('age band 無 norm（null）in dev mode → return null', () => {
+    const trials = [...Array(5).fill(999), ...Array(20).fill(350)];
+    const r = scoreObjectiveIndicator(RT, trials, '40-54');
+    expect(r).toBeNull();
+  });
+
+  it('z-clamp at ±4', () => {
+    // mean=350 std=80, raw=3000 → z=33 → clamped to 4 (then -4 for higher_is_worse) → percentile ~0
+    const trials = [...Array(5).fill(999), ...Array(20).fill(1999)];
+    const r = scoreObjectiveIndicator(RT, trials, '18-39');
+    expect(r!.zScore).toBeGreaterThanOrEqual(-4);
+    expect(r!.zScore).toBeLessThanOrEqual(4);
   });
 });

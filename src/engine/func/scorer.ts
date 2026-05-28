@@ -1,6 +1,6 @@
 // src/engine/func/scorer.ts (部分 — 後續 Task 1.4-1.6 補)
 import type { Indicator, LikertIndicator, ObjectiveIndicator } from './questionnaire';
-import { reverseScoreOf } from './utils';
+import { reverseScoreOf, zToPercentile, median, clamp } from './utils';
 import type { ICDomain } from '../../lib/education/schemas';
 import type { AgeGroupAdult } from '../../lib/utils/age-groups';
 
@@ -118,5 +118,62 @@ export function scoreLikertIndicator(
     subScaleScores,
     questionsAnswered: validAnswerEntries.length,
     questionsTotal: N,
+  };
+}
+
+export function scoreObjectiveIndicator(
+  indicator: ObjectiveIndicator,
+  trials: number[],
+  ageGroup: AgeGroupAdult,
+): IndicatorScore | null {
+  const { test } = indicator;
+
+  // TS discriminated narrowing: only RT has warmupTrials + validRangeMs;
+  // TMT-A is a single timing value with no per-trial outlier handling.
+  let scoredTrials = trials;
+  let validTrials: number[] | undefined;
+
+  if (test.type === 'reaction-time') {
+    scoredTrials = trials.slice(test.warmupTrials ?? 0);
+    if (scoredTrials.length === 0) return null;
+
+    const { min, max } = test.validRangeMs;
+    validTrials = scoredTrials.filter(v => v >= min && v <= max);
+  } else if (test.type === 'tmt-a') {
+    validTrials = scoredTrials;
+  }
+
+  if (!validTrials || validTrials.length === 0) return null;
+
+  const measuredValue = test.type === 'reaction-time'
+    ? median(validTrials)
+    : validTrials[0];
+
+  const norm = test.norms[ageGroup];
+  if (norm === null) {
+    if (import.meta.env?.PROD) {
+      throw new Error(`Norm for ${indicator.id}@${ageGroup} is null in prod build`);
+    }
+    return null;
+  }
+  const { mean: normMean, std: normStd } = norm;
+  if (normStd <= 0 || normStd < Math.abs(normMean) * 0.01) return null;
+
+  let z = (measuredValue - normMean) / normStd;
+  if (indicator.direction === 'higher_is_worse') z = -z;
+  z = clamp(z, -4, 4);
+
+  const percentile = zToPercentile(z);
+
+  return {
+    indicatorId: indicator.id,
+    domain: indicator.domain,
+    style: indicator.style,
+    kind: 'objective',
+    score: Math.round(100 * percentile),
+    measuredValue,
+    zScore: z,
+    validTrialCount: validTrials.length,
+    totalTrialCount: trials.length,
   };
 }
