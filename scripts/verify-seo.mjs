@@ -13,7 +13,7 @@ robots.includes('Sitemap:') ? ok('robots.txt 含 Sitemap') : fail('robots.txt �
 
 // llms.txt 網域正確、無 yaocare
 const llms = await readFile(resolve(dist, 'llms.txt'), 'utf-8').catch(() => '');
-(llms.includes('smart-pedi-cds.yao.care') && !llms.includes('yaocare'))
+(llms.includes('smart-func-cds.yao.care') && !llms.includes('yaocare'))
   ? ok('llms.txt 網域正確') : fail('llms.txt 網域錯誤或含 yaocare');
 
 // 404.html 存在

@@ -8,7 +8,7 @@ import { BASE_PATH } from './scripts/base.mjs';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  site: 'https://smart-pedi-cds.yao.care',
+  site: 'https://smart-func-cds.yao.care',
   base: BASE_PATH || '/',
   integrations: [
     svelte(),
