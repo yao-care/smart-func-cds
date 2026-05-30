@@ -15,8 +15,8 @@ function makeReport(overrides: Record<string, any> = {}): Record<string, any> {
     id: 'fhir-report-1',
     status: 'final',
     identifier: [{ system: ID_SYSTEM, value: ASSESSMENT_ID }],
-    code: { coding: [{ system: CODE_SYSTEM, code: 'cdsa-assessment' }] },
-    subject: { reference: 'Patient/child-123' },
+    code: { coding: [{ system: CODE_SYSTEM, code: 'func-assessment' }] },
+    subject: { reference: 'Patient/patient-123' },
     effectivePeriod: { start: '2026-05-14T10:00:00Z', end: '2026-05-14T10:25:00Z' },
     extension: [{ url: CONFIDENCE_EXT_URL, valueDecimal: 0.87 }],
     conclusion: '部分面向需追蹤',
@@ -26,20 +26,14 @@ function makeReport(overrides: Record<string, any> = {}): Record<string, any> {
 }
 
 describe('parseObservationCode', () => {
-  it('parses new format', () => {
-    expect(parseObservationCode('CDSA gross_motor::reactionLatency')).toEqual({
-      domain: 'gross_motor', metric: 'reactionLatency',
-    });
-  });
-
-  it('accepts legacy single-colon format for backward compat', () => {
-    expect(parseObservationCode('CDSA fine_motor: drawingScore')).toEqual({
-      domain: 'fine_motor', metric: 'drawingScore',
+  it('parses Func IC domain code', () => {
+    expect(parseObservationCode('Func IC vitality')).toEqual({
+      domain: 'vitality',
     });
   });
 
   it('returns null on mismatch', () => {
-    expect(parseObservationCode('not a CDSA code')).toBeNull();
+    expect(parseObservationCode('not a func code')).toBeNull();
   });
 });
 
@@ -47,8 +41,8 @@ describe('bundleToAssessment', () => {
   it('reconstructs an Assessment from DiagnosticReport extension + period', () => {
     const a = bundleToAssessment(makeReport(), []);
     expect(a.id).toBe(ASSESSMENT_ID);
-    expect(a.childId).toBe('child-123');
-    expect(a.triageResult?.category).toBe('monitor');
+    expect(a.patientId).toBe('patient-123');
+    expect(a.triageResult?.category).toBe('observe');
     expect(a.triageResult?.confidence).toBe(0.87);
     expect(a.triageResult?.summary).toBe('部分面向需追蹤');
     expect(a.fhirSubmitted).toBe(true);
@@ -80,10 +74,11 @@ describe('bundleToAssessment', () => {
   });
 
   it('maps SNOMED codes to triage categories', () => {
-    const cases: Array<[string, 'normal' | 'monitor' | 'refer']> = [
+    const cases: Array<[string, 'normal' | 'observe' | 'consult' | 'incomplete']> = [
       ['17621005', 'normal'],
-      ['394848005', 'monitor'],
-      ['3457005', 'refer'],
+      ['394848005', 'observe'],
+      ['3457005', 'consult'],
+      ['385660001', 'incomplete'],
     ];
     for (const [code, expected] of cases) {
       const a = bundleToAssessment(
@@ -114,17 +109,17 @@ describe('fetchAssessmentFromFhir', () => {
     const client = { request: vi.fn().mockResolvedValue({ entry: [{ resource: makeReport() }] }) };
     const a = await fetchAssessmentFromFhir(ASSESSMENT_ID, client);
     expect(a?.id).toBe(ASSESSMENT_ID);
-    expect(a?.triageResult?.category).toBe('monitor');
+    expect(a?.triageResult?.category).toBe('observe');
   });
 });
 
 describe('listAssessmentsFromFhir', () => {
-  it('queries by patient subject and CDSA report code', async () => {
+  it('queries by patient subject and func report code', async () => {
     const client = { request: vi.fn().mockResolvedValue({ entry: [] }) };
     await listAssessmentsFromFhir('patient-1', client);
     const url = client.request.mock.calls[0][0];
     expect(url).toContain('subject=Patient/patient-1');
-    expect(url).toContain(`code=${CODE_SYSTEM}|cdsa-assessment`);
+    expect(url).toContain(`code=${CODE_SYSTEM}|func-assessment`);
     expect(url).toContain('_sort=-date');
   });
 
@@ -137,6 +132,6 @@ describe('listAssessmentsFromFhir', () => {
     const list = await listAssessmentsFromFhir('patient-1', client);
     expect(list).toHaveLength(2);
     expect(list[0].id).toBe(ASSESSMENT_ID);
-    expect(list[0].category).toBe('monitor');
+    expect(list[0].category).toBe('observe');
   });
 });

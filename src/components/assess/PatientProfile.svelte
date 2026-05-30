@@ -67,17 +67,17 @@
 
 <style>
   .patient-profile { display: flex; flex-direction: column; gap: 1rem; max-width: 480px; }
-  label { display: flex; flex-direction: column; gap: 0.25rem; font-size: var(--text-base, 18px); }
+  label { display: flex; flex-direction: column; gap: 0.25rem; font-size: var(--text-base); }
   input, select, button {
-    font-size: var(--text-base, 18px);
+    font-size: var(--text-base);
     min-height: 44px;
     padding: 0.5rem;
   }
-  .error { color: var(--color-risk-critical, oklch(60% 0.15 25)); font-size: var(--text-sm, 16px); }
+  .error { color: var(--color-risk-critical, oklch(60% 0.15 25)); font-size: var(--text-sm); }
   .advisory {
     padding: 0.75rem;
     background: var(--color-risk-advisory-bg, oklch(95% 0.05 80));
     border-left: 4px solid var(--color-risk-advisory, oklch(70% 0.15 60));
-    font-size: var(--text-sm, 16px);
+    font-size: var(--text-sm);
   }
 </style>

@@ -3,16 +3,16 @@ import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/sv
 import QuestionnaireModule from '../../src/components/assess/QuestionnaireModule.svelte';
 import { assessmentStore } from '../../src/lib/stores/assessment.svelte';
 import { db } from '../../src/lib/db/schema';
-import type { Child, Assessment } from '../../src/lib/db/schema';
+import type { AssessmentPatient, Assessment } from '../../src/lib/db/schema';
 
-/** Build a Child whose age in months equals `monthsOld`. */
-function makeChild(monthsOld: number): Child {
+/** Build an adult patient (age in 18-39). */
+function makePatient(yearsOld: number): AssessmentPatient {
   const birth = new Date();
-  birth.setMonth(birth.getMonth() - monthsOld);
+  birth.setFullYear(birth.getFullYear() - yearsOld);
   return {
-    id: 'q-test-child',
-    birthDate: birth,
-    sex: 'male',
+    id: 'q-test-patient',
+    birthDate: birth.toISOString().slice(0, 10),
+    gender: 'male',
     createdAt: new Date(),
   };
 }
@@ -20,12 +20,15 @@ function makeChild(monthsOld: number): Child {
 function makeAssessment(): Assessment {
   return {
     id: 'q-test-assess',
-    childId: 'q-test-child',
-    status: 'in-progress',
+    patientId: 'q-test-patient',
+    status: 'started',
+    language: 'zh-TW',
     currentStep: 1,
     startedAt: new Date(),
     fhirSubmitted: false,
-  };
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  } as Assessment;
 }
 
 describe('QuestionnaireModule', () => {
@@ -40,37 +43,31 @@ describe('QuestionnaireModule', () => {
   });
 
   it('renders without crashing when assessment is uninitialised', () => {
-    // No ageGroup → questions[] is empty → first-question branch falls through.
     const { container } = render(QuestionnaireModule);
     expect(container).toBeDefined();
   });
 
   it('renders progress bar + first question when ageGroup is set', () => {
-    assessmentStore.child = makeChild(30); // 30mo → 25-36m
+    assessmentStore.patient = makePatient(30);
     assessmentStore.assessment = makeAssessment();
 
     render(QuestionnaireModule);
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '0');
-    // Domain badge + question text both render
     expect(screen.getAllByRole('button').length).toBeGreaterThan(0);
   });
 
-  it('advances to the next question after clicking an answer and recording event', async () => {
-    assessmentStore.child = makeChild(30);
+  it('advances and records a questionnaire_answer event after clicking an answer', async () => {
+    assessmentStore.patient = makePatient(30);
     assessmentStore.assessment = makeAssessment();
 
     render(QuestionnaireModule);
 
     const initialButtons = screen.getAllByRole('button');
-    const initialFirstButton = initialButtons[0];
-    const initialQuestionText = initialFirstButton.textContent;
-    expect(initialQuestionText).toBeTruthy();
+    const firstOption = initialButtons.find((b) => b.classList.contains('option-btn'))!;
+    expect(firstOption).toBeTruthy();
 
-    // Click the first option of the first question
-    await fireEvent.click(initialFirstButton);
+    await fireEvent.click(firstOption);
 
-    // The DB event must be recorded (questionnaire_answer) — wait for the
-    // async recordEvent + the 520ms feedback delay before advance.
     await waitFor(
       async () => {
         const events = await db.assessmentEvents
@@ -86,50 +83,38 @@ describe('QuestionnaireModule', () => {
     );
   });
 
-  it('persists scores to the store after answering all questions', { timeout: 15000 }, async () => {
-    // Use 2-6m age group (4 questions in questions.json) so the per-question
-    // 520ms feedback delay × N stays under the default test timeout.
-    assessmentStore.child = makeChild(4);
+  it('persists IC indicator/domain scores to the store after answering all questions', { timeout: 60000 }, async () => {
+    assessmentStore.patient = makePatient(30);
     assessmentStore.assessment = makeAssessment();
 
     render(QuestionnaireModule);
 
-    // Loop: read first button text, click it, wait for advance, repeat.
-    // 4 questions × ~600ms ≈ 2.4s plus overhead.
-    const MAX_ITERATIONS = 20;
+    const MAX_ITERATIONS = 80;
     for (let i = 0; i < MAX_ITERATIONS; i++) {
-      // Stop once summary phase appears
       if (screen.queryByText('問卷完成！')) break;
-
       const buttons = screen.queryAllByRole('button');
-      // Find first option button (skip progressbar children, only buttons)
       const optionBtn = buttons.find((b) => b.classList.contains('option-btn'));
       if (!optionBtn) break;
-
       await fireEvent.click(optionBtn);
-      // Wait for advance (520ms feedback + persist)
-      await new Promise((r) => setTimeout(r, 600));
+      await new Promise((r) => setTimeout(r, 380));
     }
 
-    // After all answered, summary screen + store should be populated
     await waitFor(
       () => {
         expect(screen.getByText('問卷完成！')).toBeInTheDocument();
       },
-      { timeout: 3000 },
+      { timeout: 5000 },
     );
 
-    const scores = assessmentStore.partialAnalysis.questionnaireScores;
-    const maxScores = assessmentStore.partialAnalysis.questionnaireMaxScores;
-    expect(scores).toBeDefined();
-    expect(maxScores).toBeDefined();
-    expect(Object.keys(scores ?? {}).length).toBeGreaterThan(0);
-
-    // Every score must be ≤ its max (sanity check on the aggregation)
-    for (const [domain, score] of Object.entries(scores ?? {})) {
-      const max = (maxScores ?? {})[domain];
-      expect(max).toBeGreaterThan(0);
-      expect(score).toBeLessThanOrEqual(max);
+    const pa = assessmentStore.partialAnalysis;
+    expect(pa.indicatorScores).toBeDefined();
+    expect(pa.domainScores).toBeDefined();
+    expect((pa.indicatorScores ?? []).length).toBeGreaterThan(0);
+    // 5 IC domains should be representable; at least 3 scored from Likert answers.
+    expect((pa.domainScores ?? []).length).toBeGreaterThanOrEqual(3);
+    for (const d of pa.domainScores ?? []) {
+      expect(d.score).toBeGreaterThanOrEqual(0);
+      expect(d.score).toBeLessThanOrEqual(100);
     }
   });
 });

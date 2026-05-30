@@ -6,7 +6,7 @@
  * overlays remain 3-part key (tenant::category::domain).
  *
  * This test uses the global fetch mock from tests/setup.ts which returns
- * a minimal index with a couple of monitor::gross_motor items.
+ * a minimal index with a couple of observe::vitality items.
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
@@ -20,20 +20,20 @@ const TEST_INDEX: RuntimeIndex = {
   triggers: {},
   educationSlugToTriggers: {},
   recommendations: {
-    'monitor::gross_motor::13-24m': [
+    'observe::vitality::18-39': [
       { source: 'internal', slug: 'gross-motor-activities', title: '粗動作發展促進活動', summary: '適合各年齡層的粗動作訓練遊戲' },
       { source: 'internal', slug: 'exercise-guide', title: '兒童運動建議指南', summary: '各年齡層兒童適當運動量' },
     ],
-    'monitor::fine_motor::13-24m': [
+    'observe::locomotion::18-39': [
       { source: 'internal', slug: 'fine-motor-activities', title: '精細動作發展促進活動', summary: '手部精細動作' },
     ],
-    'monitor::language_comprehension::13-24m': [
+    'observe::psychological::18-39': [
       { source: 'internal', slug: 'language-stimulation', title: '語言發展促進技巧', summary: '語言理解' },
     ],
-    'monitor::language_expression::13-24m': [
+    'observe::sensory::18-39': [
       { source: 'internal', slug: 'language-stimulation', title: '語言發展促進技巧', summary: '語言表達' },
     ],
-    'refer::gross_motor::13-24m': [
+    'consult::vitality::18-39': [
       { source: 'internal', slug: 'gross-motor-activities', title: '粗動作發展促進活動', summary: '各年齡層粗動作訓練' },
       { source: 'internal', slug: 'when-to-seek-help', title: '何時該尋求專業協助', summary: '發展警訊' },
     ],
@@ -87,78 +87,78 @@ describe('recommendations DAO + merge', () => {
   const TENANT_B = 'tenant-b';
 
   describe('DOMAINS and CATEGORIES constants', () => {
-    it('exposes 8 CDSA domains (no diet, updated canonical names)', () => {
-      expect(DOMAINS.length).toBe(8);
-      // Should include canonical CDSA names
-      expect(DOMAINS).toContain('gross_motor');
-      expect(DOMAINS).toContain('language_comprehension');
-      expect(DOMAINS).toContain('language_expression');
-      // Should NOT include old abbreviated names or diet
-      expect(DOMAINS).not.toContain('language_comp');
-      expect(DOMAINS).not.toContain('language_expr');
+    it('exposes the 5 IC domains', () => {
+      expect(DOMAINS.length).toBe(5);
+      expect(DOMAINS).toContain('vitality');
+      expect(DOMAINS).toContain('locomotion');
+      expect(DOMAINS).toContain('cognition');
+      expect(DOMAINS).toContain('psychological');
+      expect(DOMAINS).toContain('sensory');
+      // Should NOT include retired pediatric domains
+      expect(DOMAINS).not.toContain('gross_motor');
       expect(DOMAINS).not.toContain('diet');
     });
 
-    it('CATEGORIES is normal/monitor/refer', () => {
-      expect(CATEGORIES).toEqual(['normal', 'monitor', 'refer']);
+    it('CATEGORIES is the 4-class IC triage set', () => {
+      expect(CATEGORIES).toEqual(['normal', 'observe', 'consult', 'incomplete']);
     });
   });
 
   describe('getDefaultRecommendations (async, age-aware)', () => {
-    it('returns items from index for monitor::gross_motor::13-24m', async () => {
-      const items = await getDefaultRecommendations('monitor', 'gross_motor', '13-24m');
+    it('returns items from index for observe::vitality::18-39', async () => {
+      const items = await getDefaultRecommendations('observe', 'vitality', '18-39');
       expect(items.length).toBe(2);
       expect(items.some(i => i.slug === 'gross-motor-activities')).toBe(true);
     });
 
     it('returns empty array for an unmatched key', async () => {
-      const items = await getDefaultRecommendations('normal', 'gross_motor', '13-24m');
+      const items = await getDefaultRecommendations('normal', 'vitality', '18-39');
       expect(items).toEqual([]);
     });
   });
 
   describe('overlay CRUD', () => {
     it('returns null when no overlay exists', async () => {
-      expect(await getOverlay(TENANT_A, 'monitor', 'gross_motor')).toBeNull();
+      expect(await getOverlay(TENANT_A, 'observe', 'vitality')).toBeNull();
     });
 
     it('saves and reads an overlay', async () => {
       const items: RecommendationItem[] = [{ source: 'external', url: 'https://example.com', title: 'X' }];
-      await saveOverlay(TENANT_A, 'monitor', 'gross_motor', items, false);
-      const out = await getOverlay(TENANT_A, 'monitor', 'gross_motor');
+      await saveOverlay(TENANT_A, 'observe', 'vitality', items, false);
+      const out = await getOverlay(TENANT_A, 'observe', 'vitality');
       expect(out).not.toBeNull();
       expect(out?.items[0]?.url).toBe('https://example.com');
       expect(out?.mergeWithDefault).toBe(false);
     });
 
     it('upserts on the same composite key', async () => {
-      await saveOverlay(TENANT_A, 'monitor', 'gross_motor', [{ source: 'internal', slug: 'a' }], true);
-      await saveOverlay(TENANT_A, 'monitor', 'gross_motor', [{ source: 'internal', slug: 'b' }], false);
-      const out = await getOverlay(TENANT_A, 'monitor', 'gross_motor');
+      await saveOverlay(TENANT_A, 'observe', 'vitality', [{ source: 'internal', slug: 'a' }], true);
+      await saveOverlay(TENANT_A, 'observe', 'vitality', [{ source: 'internal', slug: 'b' }], false);
+      const out = await getOverlay(TENANT_A, 'observe', 'vitality');
       expect(out?.items.length).toBe(1);
       expect(out?.items[0]?.slug).toBe('b');
       expect(out?.mergeWithDefault).toBe(false);
     });
 
     it('isolates overlays per tenant', async () => {
-      await saveOverlay(TENANT_A, 'monitor', 'gross_motor', [{ source: 'internal', slug: 'a' }], true);
-      await saveOverlay(TENANT_B, 'monitor', 'gross_motor', [{ source: 'internal', slug: 'b' }], true);
-      const a = await getOverlay(TENANT_A, 'monitor', 'gross_motor');
-      const b = await getOverlay(TENANT_B, 'monitor', 'gross_motor');
+      await saveOverlay(TENANT_A, 'observe', 'vitality', [{ source: 'internal', slug: 'a' }], true);
+      await saveOverlay(TENANT_B, 'observe', 'vitality', [{ source: 'internal', slug: 'b' }], true);
+      const a = await getOverlay(TENANT_A, 'observe', 'vitality');
+      const b = await getOverlay(TENANT_B, 'observe', 'vitality');
       expect(a?.items[0]?.slug).toBe('a');
       expect(b?.items[0]?.slug).toBe('b');
     });
 
     it('clearOverlay deletes the row', async () => {
-      await saveOverlay(TENANT_A, 'monitor', 'gross_motor', [{ source: 'internal', slug: 'a' }], true);
-      await clearOverlay(TENANT_A, 'monitor', 'gross_motor');
-      expect(await getOverlay(TENANT_A, 'monitor', 'gross_motor')).toBeNull();
+      await saveOverlay(TENANT_A, 'observe', 'vitality', [{ source: 'internal', slug: 'a' }], true);
+      await clearOverlay(TENANT_A, 'observe', 'vitality');
+      expect(await getOverlay(TENANT_A, 'observe', 'vitality')).toBeNull();
     });
 
     it('getAllOverlays returns only the tenant rows', async () => {
-      await saveOverlay(TENANT_A, 'monitor', 'gross_motor', [], true);
-      await saveOverlay(TENANT_A, 'refer', 'cognition', [], true);
-      await saveOverlay(TENANT_B, 'monitor', 'gross_motor', [], true);
+      await saveOverlay(TENANT_A, 'observe', 'vitality', [], true);
+      await saveOverlay(TENANT_A, 'consult', 'cognition', [], true);
+      await saveOverlay(TENANT_B, 'observe', 'vitality', [], true);
       const list = await getAllOverlays(TENANT_A);
       expect(list).toHaveLength(2);
     });
@@ -166,49 +166,49 @@ describe('recommendations DAO + merge', () => {
 
   describe('mergeRecommendations (now requires ageGroup)', () => {
     it('returns defaults when no overlay exists', async () => {
-      const out = await mergeRecommendations(TENANT_A, 'monitor', 'gross_motor', '13-24m');
-      const defaults = await getDefaultRecommendations('monitor', 'gross_motor', '13-24m');
+      const out = await mergeRecommendations(TENANT_A, 'observe', 'vitality', '18-39');
+      const defaults = await getDefaultRecommendations('observe', 'vitality', '18-39');
       expect(out).toEqual(defaults);
     });
 
     it('replaces default when mergeWithDefault=false', async () => {
       await saveOverlay(
         TENANT_A,
-        'monitor',
-        'gross_motor',
+        'observe',
+        'vitality',
         [{ source: 'external', url: 'https://only.example.com' }],
         false,
       );
-      const out = await mergeRecommendations(TENANT_A, 'monitor', 'gross_motor', '13-24m');
+      const out = await mergeRecommendations(TENANT_A, 'observe', 'vitality', '18-39');
       expect(out).toHaveLength(1);
       expect(out[0]?.url).toBe('https://only.example.com');
     });
 
     it('appends to default when mergeWithDefault=true (deduped)', async () => {
-      const defaults = await getDefaultRecommendations('monitor', 'gross_motor', '13-24m');
+      const defaults = await getDefaultRecommendations('observe', 'vitality', '18-39');
       await saveOverlay(
         TENANT_A,
-        'monitor',
-        'gross_motor',
+        'observe',
+        'vitality',
         [{ source: 'external', url: 'https://extra.example.com', title: '額外' }],
         true,
       );
-      const out = await mergeRecommendations(TENANT_A, 'monitor', 'gross_motor', '13-24m');
+      const out = await mergeRecommendations(TENANT_A, 'observe', 'vitality', '18-39');
       expect(out.length).toBe(defaults.length + 1);
       expect(out[out.length - 1]?.url).toBe('https://extra.example.com');
     });
 
     it('dedups overlay items already present in defaults', async () => {
-      const defaults = await getDefaultRecommendations('monitor', 'gross_motor', '13-24m');
+      const defaults = await getDefaultRecommendations('observe', 'vitality', '18-39');
       const defaultSlug = defaults[0]?.slug;
       await saveOverlay(
         TENANT_A,
-        'monitor',
-        'gross_motor',
+        'observe',
+        'vitality',
         [{ source: 'internal', slug: defaultSlug! }],
         true,
       );
-      const out = await mergeRecommendations(TENANT_A, 'monitor', 'gross_motor', '13-24m');
+      const out = await mergeRecommendations(TENANT_A, 'observe', 'vitality', '18-39');
       const matches = out.filter((i) => i.slug === defaultSlug);
       expect(matches.length).toBe(1);
     });
@@ -216,41 +216,41 @@ describe('recommendations DAO + merge', () => {
 
   describe('mergeRecommendationsForContext (replaces mergeRecommendationsForDomains)', () => {
     it('dedups items across domains', async () => {
-      // language-stimulation is the default for both language_comprehension and language_expression
+      // language-stimulation is the default for both psychological and sensory
       const out = await mergeRecommendationsForContext(
         TENANT_A,
-        'monitor',
-        ['language_comprehension', 'language_expression'],
-        '13-24m',
+        'observe',
+        ['psychological', 'sensory'],
+        '18-39',
       );
       const langStim = out.filter((i) => i.slug === 'language-stimulation');
       expect(langStim.length).toBe(1);
     });
 
     it('returns empty when domains is empty', async () => {
-      expect(await mergeRecommendationsForContext(TENANT_A, 'monitor', [], '13-24m')).toEqual([]);
+      expect(await mergeRecommendationsForContext(TENANT_A, 'observe', [], '18-39')).toEqual([]);
     });
 
     it('respects overlay replacement on one domain only', async () => {
       await saveOverlay(
         TENANT_A,
-        'monitor',
-        'gross_motor',
+        'observe',
+        'vitality',
         [{ source: 'external', url: 'https://override.example.com' }],
         false,
       );
       const out = await mergeRecommendationsForContext(
         TENANT_A,
-        'monitor',
-        ['gross_motor', 'fine_motor'],
-        '13-24m',
+        'observe',
+        ['vitality', 'locomotion'],
+        '18-39',
       );
-      // gross_motor should only have the override (no gross-motor-activities etc.)
+      // vitality should only have the override (no gross-motor-activities etc.)
       const hasGrossMotorDefault = out.some((i) => i.slug === 'gross-motor-activities');
       const hasOverride = out.some((i) => i.url === 'https://override.example.com');
       expect(hasGrossMotorDefault).toBe(false);
       expect(hasOverride).toBe(true);
-      // fine_motor should still have its default
+      // locomotion should still have its default
       const hasFineMotorDefault = out.some((i) => i.slug === 'fine-motor-activities');
       expect(hasFineMotorDefault).toBe(true);
     });

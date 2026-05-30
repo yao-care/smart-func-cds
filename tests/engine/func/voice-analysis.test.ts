@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { analyzeVoiceFromEvents } from '../../src/engine/cdsa/voice-analysis';
+import { analyzeVoiceFromEvents } from '../../../src/engine/func/voice-analysis';
 
 /**
  * `analyzeVoiceFromEvents` is the event-only fallback used when no audio
