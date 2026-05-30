@@ -4,54 +4,55 @@ import JsonLd from '../components/seo/JsonLd.astro';
 import { organizationSchema } from '../lib/seo/schema';
 
 const introHighlights = [
-  '家長可自行操作的兒童發展篩檢',
+  '成人可自行操作的功能健康自評',
   '隱私優先：資料不離開瀏覽器',
   '開源免費，免登入、免安裝',
-  '六大發展面向，依年齡適性出題',
+  '五大內在能力面向，依年齡適性計分',
 ];
 
 const flowSteps = [
   {
     title: '輸入年齡',
-    desc: '以出生日期換算月齡。適用 0–72 個月，自動歸入 7 個年齡組（2–6m、7–12m、13–24m、25–36m、37–48m、49–60m、61–72m）。',
+    desc: '以出生日期換算年齡。適用 18 歲以上，校準範圍 18–64 歲，自動歸入 3 個年齡組（18–39、40–54、55–64）。',
   },
   {
-    title: '依年齡施測',
-    desc: '按年齡組給對應的發展題目，引導家長完成各評估模組：問卷、互動遊戲、語音、繪圖、動作。',
+    title: '完成功能問卷',
+    desc: '依五大內在能力面向（活力、行動、認知、心理、感官）施測，採用國際通用篩檢工具（WHO-5、BAT-12、PHQ-2、GAD-2、PSS-4、PROMIS Fatigue 等）。',
   },
   {
-    title: '逐面向計分、標記「需注意」',
-    desc: '六大發展面向（粗動作、精細動作、語言理解、語言表達、認知、社會情緒）各自評分，符合下列任一條件即標記為「需注意」：',
+    title: '逐面向計分、分級',
+    desc: '五大面向各自彙整為 0–100 的功能分數，並依分數分為三級：',
     criteria: [
-      '問卷面向得分未達滿分的一半',
-      '行為／繪圖／語音明顯偏離同齡常模（約 1.5 個標準差）',
-      '動作經 AI 姿態分析判讀為疑似遲緩',
+      '70 分以上：功能良好',
+      '40–69 分：待觀察',
+      '低於 40 分：偏低',
     ],
   },
   {
-    title: '綜合判讀（三級分流）',
-    desc: '同時看「需注意」的項目數，以及它們橫跨幾個發展面向，分為三級：',
+    title: '綜合判讀（四級分流）',
+    desc: '依各面向分級、臨床切點旗標與完成面向數，分為四級：',
   },
 ];
 
 const outcomes = [
-  { key: 'normal', tag: '正常', cond: '無「需注意」項目', action: '各面向發展在正常範圍' },
-  { key: 'monitor', tag: '追蹤觀察', cond: '1 項以上「需注意」', action: '建議持續追蹤' },
-  { key: 'refer', tag: '建議轉介', cond: '「需注意」≥ 3 項，且橫跨 ≥ 2 個面向', action: '建議進一步專業評估' },
+  { key: 'normal', tag: '功能良好', cond: '所有已測面向皆良好且無臨床切點', action: '維持良好生活習慣' },
+  { key: 'observe', tag: '建議觀察', cond: '1 個面向待觀察，或有 advisory 切點', action: '建議自我管理並追蹤' },
+  { key: 'consult', tag: '建議諮詢醫師', cond: '任一面向偏低、≥ 2 面向待觀察，或達 consult 切點', action: '建議找醫師討論' },
+  { key: 'incomplete', tag: '評估未完成', cond: '完成面向少於 3 個', action: '建議完成評估再看整體結果' },
 ];
 ---
 
-<App title="關於" description="關於 Smart Pedi 兒童發展智慧評估：免費、純瀏覽器、保護隱私的兒童發展篩檢自評工具。">
+<App title="關於" description="關於 Smart Func 成人功能健康評估：免費、純瀏覽器、保護隱私的成人內在能力（IC）自評工具。">
   <JsonLd data={organizationSchema(Astro.site!)} />
 
-  <h1>關於 Smart Pedi 兒童發展智慧評估</h1>
+  <h1>關於 Smart Func 成人功能健康評估</h1>
 
   <section class="about-section about-twocol" aria-label="系統介紹">
     <div class="twocol-main">
       <h2>系統介紹</h2>
       <p>
-        Smart Pedi 是一套開源、免費的兒童發展篩檢自評工具。
-        家長依孩子的年齡引導式作答，當下取得六大發展面向的風險分級與對應衛教建議。
+        Smart Func 是一套開源、免費的成人功能健康自評工具，聚焦世界衛生組織提出的「內在能力（Intrinsic Capacity, IC）」框架。
+        使用者依年齡引導式作答，當下取得五大內在能力面向的功能分級與對應衛教建議。
         所有運算都在瀏覽器端完成，資料不離開裝置、不收集、不轉傳。
       </p>
     </div>
@@ -66,8 +67,8 @@ const outcomes = [
   <section class="about-section flow-section" aria-label="評估判讀流程">
     <h2>評估判讀流程</h2>
     <p class="flow-intro">
-      從孩子的年齡開始，到產生衛教建議為止，系統的判讀邏輯如下。
-      本流程僅為發展分流參考，不取代專業臨床判斷。
+      從使用者的年齡開始，到產生衛教建議為止，系統的判讀邏輯如下。
+      本流程僅為功能健康分流參考，不取代專業臨床判斷。
     </p>
 
     <ol class="flow">
@@ -86,7 +87,7 @@ const outcomes = [
 
     <div class="flow-branch" aria-hidden="true">↓</div>
 
-    <div class="flow-outcomes" role="list" aria-label="三級分流結果">
+    <div class="flow-outcomes" role="list" aria-label="四級分流結果">
       {outcomes.map((o) => (
         <div class={`outcome outcome-${o.key}`} role="listitem">
           <span class="outcome-tag">{o.tag}</span>
@@ -100,12 +101,12 @@ const outcomes = [
 
     <div class="flow-edu">
       <h3>提供衛教資源</h3>
-      <p>判讀為<strong>追蹤觀察</strong>或<strong>建議轉介</strong>時，依「分級 × 需注意面向」自動帶出：</p>
+      <p>判讀為<strong>建議觀察</strong>或<strong>建議諮詢醫師</strong>時，依「分級 × 待加強面向」自動帶出：</p>
       <ul class="flow-criteria">
         <li><strong>建議閱讀</strong>：對應的衛教文章（內容可由各院所自訂）</li>
         <li><strong>參考影片</strong>：對應主題的精選衛教影片</li>
       </ul>
-      <p class="flow-note">判讀為「正常」時，僅顯示結果摘要與發展雷達圖，不另行推送衛教資源。</p>
+      <p class="flow-note">判讀為「功能良好」時，僅顯示結果摘要與內在能力雷達圖，不另行推送衛教資源。</p>
     </div>
   </section>
 
@@ -313,20 +314,28 @@ const outcomes = [
     background-color: var(--accent);
   }
 
-  .outcome-monitor {
+  .outcome-observe {
     border-top-color: var(--warn);
     background-color: color-mix(in srgb, var(--warn) 10%, var(--bg));
   }
-  .outcome-monitor .outcome-tag {
+  .outcome-observe .outcome-tag {
     background-color: var(--warn);
   }
 
-  .outcome-refer {
+  .outcome-consult {
     border-top-color: var(--danger);
     background-color: color-mix(in srgb, var(--danger) 12%, var(--bg));
   }
-  .outcome-refer .outcome-tag {
+  .outcome-consult .outcome-tag {
     background-color: var(--danger);
+  }
+
+  .outcome-incomplete {
+    border-top-color: var(--line);
+    background-color: color-mix(in srgb, var(--text) 5%, var(--bg));
+  }
+  .outcome-incomplete .outcome-tag {
+    background-color: color-mix(in srgb, var(--text), var(--bg) 25%);
   }
 
   .flow-edu {
