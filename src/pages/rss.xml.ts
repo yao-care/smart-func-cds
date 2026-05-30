@@ -5,7 +5,7 @@ import { SITE } from '../lib/seo/site';
 import { CORE_ARTICLE_SLUGS } from '../lib/education/core-articles';
 
 export async function GET(context: APIContext) {
-  // 只列系統核心文章（六大發展領域主衛教），不對外曝光孤兒食譜/補充類
+  // 只列系統核心文章（五大內在能力面向主衛教），不對外曝光孤兒食譜/補充類
   const coreSet = new Set(CORE_ARTICLE_SLUGS);
   const education = (await getCollection('education')).filter((e) => coreSet.has(e.id));
   return rss({
