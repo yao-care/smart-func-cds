@@ -12,11 +12,16 @@ const educationCollection = defineCollection({
     title: z.string(),
     summary: z.string(),
     category: z.enum([
-      'diet', 'sleep', 'respiratory', 'exercise',
-      'milestone', 'general',
+      // 成人內在能力（IC）衛教分類，對應五大功能域之評估主題
+      'sleep', 'fatigue', 'nutrition',        // 身體活力 vitality
+      'activity', 'sedentary',                // 行動功能 locomotion
+      'cognition',                            // 認知功能 cognition
+      'burnout', 'stress', 'mood', 'wellbeing', // 心理功能 psychological
+      'vision', 'hearing', 'screen',          // 感官功能 sensory
+      'general',
     ]),
     ageGroup: z.array(
-      z.enum(['infant', 'toddler', 'preschool']),
+      z.enum(['18-39', '40-54', '55-64']),
     ),
     format: z.literal('article'),  // 移除 'video' / 'questionnaire' — 影片走 yaml catalog；CDSA 評估問卷在 /（不在衛教頁）
     // videoUrl / triggerIndicators 刻意不在 schema 中；任何 markdown 帶這兩個欄位

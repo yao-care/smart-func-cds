@@ -10,10 +10,10 @@ import { MATRIX_ARTICLE_SLUGS } from '../../lib/education/core-articles';
 export async function getStaticPaths() {
   const entries = await getCollection('education');
   const matrixSet = new Set(MATRIX_ARTICLE_SLUGS);
-  // 只產生「矩陣對應文章」與「里程碑」頁；排除無對外入口的孤兒食譜（nutrition-*），
-  // 使其不存在於 dist → 不進 sitemap、不被 Pagefind 索引、頁面 source 無食譜全文
+  // 只產生「矩陣對應文章」頁（被 content-relevance trigger 對應者）；
+  // 未被任何 trigger 對應的孤兒文章不存在於 dist → 不進 sitemap、不被 Pagefind 索引
   return entries
-    .filter((entry) => matrixSet.has(entry.id) || entry.data.category === 'milestone')
+    .filter((entry) => matrixSet.has(entry.id))
     .map((entry) => ({
       params: { slug: entry.id },
       props: { entry },
@@ -24,24 +24,30 @@ const { entry } = Astro.props;
 const { Content } = await render(entry);
 
 const categoryLabels: Record<string, string> = {
-  diet: '飲食',
   sleep: '睡眠',
-  respiratory: '呼吸',
-  exercise: '運動',
-  milestone: '發展里程碑',
+  fatigue: '疲勞與活力',
+  nutrition: '營養',
+  activity: '身體活動',
+  sedentary: '久坐',
+  cognition: '認知',
+  burnout: '職業倦怠',
+  stress: '壓力',
+  mood: '情緒',
+  wellbeing: '心理福祉',
+  vision: '視力',
+  hearing: '聽力',
+  screen: '螢幕護眼',
   general: '一般',
 };
 
 const ageGroupLabels: Record<string, string> = {
-  infant: '嬰兒',
-  toddler: '幼兒',
-  preschool: '學齡前',
+  '18-39': '18–39 歲',
+  '40-54': '40–54 歲',
+  '55-64': '55–64 歲',
 };
 
 const formatLabels: Record<string, string> = {
   article: '文章',
-  video: '影片',
-  questionnaire: '問卷',
 };
 
 const breadcrumbs = [

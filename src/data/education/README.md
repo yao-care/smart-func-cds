@@ -10,9 +10,16 @@
 {
   title: string;
   summary: string;
-  category: 'diet' | 'sleep' | 'respiratory' | 'exercise' | 'milestone' | 'general';
-  ageGroup: ('infant' | 'toddler' | 'preschool')[];
-  format: 'article' | 'questionnaire';   // ← 不可為 'video'
+  // 成人內在能力（IC）衛教分類，對應五大功能域
+  category:
+    | 'sleep' | 'fatigue' | 'nutrition'           // 身體活力 vitality
+    | 'activity' | 'sedentary'                    // 行動功能 locomotion
+    | 'cognition'                                 // 認知功能 cognition
+    | 'burnout' | 'stress' | 'mood' | 'wellbeing' // 心理功能 psychological
+    | 'vision' | 'hearing' | 'screen'             // 感官功能 sensory
+    | 'general';
+  ageGroup: ('18-39' | '40-54' | '55-64')[];
+  format: 'article';   // ← 不可為 'video' / 'questionnaire'
   publishedAt: Date;
   updatedAt?: Date;
   locale?: string;                       // 預設 'zh-TW'
