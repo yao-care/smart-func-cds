@@ -9,7 +9,7 @@
     "predev": "tsx scripts/build-content-index.ts && tsx scripts/build-questionnaire-applicability.ts",
     "build": "astro build",
     "build:video-index": "tsx scripts/build-content-index.ts",
-    "prebuild": "tsx scripts/build-content-index.ts && tsx scripts/build-questionnaire-applicability.ts",
+    "prebuild": "tsx scripts/build-content-index.ts && tsx scripts/validate-indicators.ts && tsx scripts/build-questionnaire-applicability.ts",
     "preview": "astro preview",
     "check": "astro check && svelte-check --tsconfig ./tsconfig.json",
     "lint": "eslint src/",
