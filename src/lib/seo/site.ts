@@ -18,6 +18,6 @@ export const SITE = {
     legalName: 'yao.care 藥提醒科技',
     url: 'https://yao.care',
   },
-  repo: 'https://github.com/yao-care/smart-pedi-cds',
+  repo: 'https://github.com/yao-care/smart-func-cds',
   sameAs: [] as string[],
 } as const;
