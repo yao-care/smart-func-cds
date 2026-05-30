@@ -1,28 +1,19 @@
 {
   "articleSlugs": [
-    "behavior-guidance",
-    "cognitive-play",
-    "diet-control",
-    "exercise-guide",
-    "fine-motor-activities",
-    "gross-motor-activities",
-    "language-comprehension",
-    "language-expression",
-    "language-stimulation",
-    "milestones/0-6m",
-    "milestones/1-2y",
-    "milestones/2-3y",
-    "milestones/3-6y",
-    "milestones/6-12m",
-    "nutrition-calcium-tofu",
-    "nutrition-garlic-tip",
-    "nutrition-grow-tall",
-    "nutrition-okra-cooking",
-    "nutrition-vitamin-d-mushroom",
-    "respiratory-care",
-    "sleep-hygiene",
-    "social-emotional-guide",
-    "when-to-seek-help"
+    "adult-sleep-hygiene",
+    "attention-memory-care",
+    "balanced-nutrition",
+    "cognitive-health",
+    "fatigue-management",
+    "hearing-care",
+    "mood-self-awareness",
+    "physical-activity-benefits",
+    "psychological-wellbeing",
+    "screen-eye-strain",
+    "sedentary-harms",
+    "stress-management",
+    "understanding-burnout",
+    "vision-care"
   ],
   "catalog": {
     "-d0DmEv8qVs": {
@@ -469,125 +460,846 @@
   },
   "clinicalEducation": {},
   "educationSlugToTriggers": {},
-  "recommendations": {},
+  "recommendations": {
+    "consult::cognition::18-39": [
+      {
+        "slug": "cognitive-health",
+        "source": "internal",
+        "summary": "透過生活型態、社交與身心活動維護大腦健康的實證取向建議",
+        "title": "維持認知健康"
+      },
+      {
+        "slug": "attention-memory-care",
+        "source": "internal",
+        "summary": "提升專注力、改善日常記憶與減少分心的實用策略",
+        "title": "注意力與記憶保養"
+      }
+    ],
+    "consult::cognition::40-54": [
+      {
+        "slug": "cognitive-health",
+        "source": "internal",
+        "summary": "透過生活型態、社交與身心活動維護大腦健康的實證取向建議",
+        "title": "維持認知健康"
+      },
+      {
+        "slug": "attention-memory-care",
+        "source": "internal",
+        "summary": "提升專注力、改善日常記憶與減少分心的實用策略",
+        "title": "注意力與記憶保養"
+      }
+    ],
+    "consult::cognition::55-64": [
+      {
+        "slug": "cognitive-health",
+        "source": "internal",
+        "summary": "透過生活型態、社交與身心活動維護大腦健康的實證取向建議",
+        "title": "維持認知健康"
+      },
+      {
+        "slug": "attention-memory-care",
+        "source": "internal",
+        "summary": "提升專注力、改善日常記憶與減少分心的實用策略",
+        "title": "注意力與記憶保養"
+      }
+    ],
+    "consult::locomotion::18-39": [
+      {
+        "slug": "physical-activity-benefits",
+        "source": "internal",
+        "summary": "成人規律運動對健康與行動功能的益處，以及 WHO 建議的活動量",
+        "title": "規律身體活動的好處"
+      },
+      {
+        "slug": "sedentary-harms",
+        "source": "internal",
+        "summary": "認識長時間久坐對健康與行動功能的影響，以及減少久坐的實用做法",
+        "title": "久坐的危害與改善"
+      }
+    ],
+    "consult::locomotion::40-54": [
+      {
+        "slug": "physical-activity-benefits",
+        "source": "internal",
+        "summary": "成人規律運動對健康與行動功能的益處，以及 WHO 建議的活動量",
+        "title": "規律身體活動的好處"
+      },
+      {
+        "slug": "sedentary-harms",
+        "source": "internal",
+        "summary": "認識長時間久坐對健康與行動功能的影響，以及減少久坐的實用做法",
+        "title": "久坐的危害與改善"
+      }
+    ],
+    "consult::locomotion::55-64": [
+      {
+        "slug": "physical-activity-benefits",
+        "source": "internal",
+        "summary": "成人規律運動對健康與行動功能的益處，以及 WHO 建議的活動量",
+        "title": "規律身體活動的好處"
+      },
+      {
+        "slug": "sedentary-harms",
+        "source": "internal",
+        "summary": "認識長時間久坐對健康與行動功能的影響，以及減少久坐的實用做法",
+        "title": "久坐的危害與改善"
+      }
+    ],
+    "consult::psychological::18-39": [
+      {
+        "slug": "understanding-burnout",
+        "source": "internal",
+        "summary": "了解職業倦怠的徵兆與成因，以及恢復身心能量的實用方法",
+        "title": "認識職業倦怠"
+      },
+      {
+        "slug": "stress-management",
+        "source": "internal",
+        "summary": "認識壓力反應並運用實證技巧調節身心、維持心理韌性",
+        "title": "壓力管理"
+      },
+      {
+        "slug": "mood-self-awareness",
+        "source": "internal",
+        "summary": "認識憂鬱與焦慮的常見徵兆，學習自我覺察與適時求助",
+        "title": "情緒覺察：憂鬱與焦慮的自我了解"
+      },
+      {
+        "slug": "psychological-wellbeing",
+        "source": "internal",
+        "summary": "從正向心理與生活習慣著手，提升日常幸福感與心理韌性",
+        "title": "提升心理福祉"
+      }
+    ],
+    "consult::psychological::40-54": [
+      {
+        "slug": "understanding-burnout",
+        "source": "internal",
+        "summary": "了解職業倦怠的徵兆與成因，以及恢復身心能量的實用方法",
+        "title": "認識職業倦怠"
+      },
+      {
+        "slug": "stress-management",
+        "source": "internal",
+        "summary": "認識壓力反應並運用實證技巧調節身心、維持心理韌性",
+        "title": "壓力管理"
+      },
+      {
+        "slug": "mood-self-awareness",
+        "source": "internal",
+        "summary": "認識憂鬱與焦慮的常見徵兆，學習自我覺察與適時求助",
+        "title": "情緒覺察：憂鬱與焦慮的自我了解"
+      },
+      {
+        "slug": "psychological-wellbeing",
+        "source": "internal",
+        "summary": "從正向心理與生活習慣著手，提升日常幸福感與心理韌性",
+        "title": "提升心理福祉"
+      }
+    ],
+    "consult::psychological::55-64": [
+      {
+        "slug": "understanding-burnout",
+        "source": "internal",
+        "summary": "了解職業倦怠的徵兆與成因，以及恢復身心能量的實用方法",
+        "title": "認識職業倦怠"
+      },
+      {
+        "slug": "stress-management",
+        "source": "internal",
+        "summary": "認識壓力反應並運用實證技巧調節身心、維持心理韌性",
+        "title": "壓力管理"
+      },
+      {
+        "slug": "mood-self-awareness",
+        "source": "internal",
+        "summary": "認識憂鬱與焦慮的常見徵兆，學習自我覺察與適時求助",
+        "title": "情緒覺察：憂鬱與焦慮的自我了解"
+      },
+      {
+        "slug": "psychological-wellbeing",
+        "source": "internal",
+        "summary": "從正向心理與生活習慣著手，提升日常幸福感與心理韌性",
+        "title": "提升心理福祉"
+      }
+    ],
+    "consult::sensory::18-39": [
+      {
+        "slug": "vision-care",
+        "source": "internal",
+        "summary": "保護視力、預防眼睛疾病與維持感官功能的實用建議",
+        "title": "成人視力保健"
+      },
+      {
+        "slug": "hearing-care",
+        "source": "internal",
+        "summary": "預防噪音性聽損、覺察聽力變化並維持良好聽覺與溝通功能",
+        "title": "成人聽力保健"
+      },
+      {
+        "slug": "screen-eye-strain",
+        "source": "internal",
+        "summary": "緩解數位螢幕造成的眼睛疲勞，建立健康的用眼與螢幕習慣",
+        "title": "螢幕疲勞與護眼"
+      }
+    ],
+    "consult::sensory::40-54": [
+      {
+        "slug": "vision-care",
+        "source": "internal",
+        "summary": "保護視力、預防眼睛疾病與維持感官功能的實用建議",
+        "title": "成人視力保健"
+      },
+      {
+        "slug": "hearing-care",
+        "source": "internal",
+        "summary": "預防噪音性聽損、覺察聽力變化並維持良好聽覺與溝通功能",
+        "title": "成人聽力保健"
+      },
+      {
+        "slug": "screen-eye-strain",
+        "source": "internal",
+        "summary": "緩解數位螢幕造成的眼睛疲勞，建立健康的用眼與螢幕習慣",
+        "title": "螢幕疲勞與護眼"
+      }
+    ],
+    "consult::sensory::55-64": [
+      {
+        "slug": "vision-care",
+        "source": "internal",
+        "summary": "保護視力、預防眼睛疾病與維持感官功能的實用建議",
+        "title": "成人視力保健"
+      },
+      {
+        "slug": "hearing-care",
+        "source": "internal",
+        "summary": "預防噪音性聽損、覺察聽力變化並維持良好聽覺與溝通功能",
+        "title": "成人聽力保健"
+      },
+      {
+        "slug": "screen-eye-strain",
+        "source": "internal",
+        "summary": "緩解數位螢幕造成的眼睛疲勞，建立健康的用眼與螢幕習慣",
+        "title": "螢幕疲勞與護眼"
+      }
+    ],
+    "consult::vitality::18-39": [
+      {
+        "slug": "adult-sleep-hygiene",
+        "source": "internal",
+        "summary": "建立規律作息與良好睡眠習慣，提升睡眠品質與日間精力的實證建議",
+        "title": "成人睡眠衛生：找回優質睡眠"
+      },
+      {
+        "slug": "fatigue-management",
+        "source": "internal",
+        "summary": "辨識疲勞成因並透過作息、營養與活動安排重建日常精力的實用策略",
+        "title": "疲勞與活力管理"
+      },
+      {
+        "slug": "balanced-nutrition",
+        "source": "internal",
+        "summary": "成人均衡飲食原則、食慾變化的覺察與維持良好營養狀態的實用建議",
+        "title": "均衡營養與食慾照護"
+      }
+    ],
+    "consult::vitality::40-54": [
+      {
+        "slug": "adult-sleep-hygiene",
+        "source": "internal",
+        "summary": "建立規律作息與良好睡眠習慣，提升睡眠品質與日間精力的實證建議",
+        "title": "成人睡眠衛生：找回優質睡眠"
+      },
+      {
+        "slug": "fatigue-management",
+        "source": "internal",
+        "summary": "辨識疲勞成因並透過作息、營養與活動安排重建日常精力的實用策略",
+        "title": "疲勞與活力管理"
+      },
+      {
+        "slug": "balanced-nutrition",
+        "source": "internal",
+        "summary": "成人均衡飲食原則、食慾變化的覺察與維持良好營養狀態的實用建議",
+        "title": "均衡營養與食慾照護"
+      }
+    ],
+    "consult::vitality::55-64": [
+      {
+        "slug": "adult-sleep-hygiene",
+        "source": "internal",
+        "summary": "建立規律作息與良好睡眠習慣，提升睡眠品質與日間精力的實證建議",
+        "title": "成人睡眠衛生：找回優質睡眠"
+      },
+      {
+        "slug": "fatigue-management",
+        "source": "internal",
+        "summary": "辨識疲勞成因並透過作息、營養與活動安排重建日常精力的實用策略",
+        "title": "疲勞與活力管理"
+      },
+      {
+        "slug": "balanced-nutrition",
+        "source": "internal",
+        "summary": "成人均衡飲食原則、食慾變化的覺察與維持良好營養狀態的實用建議",
+        "title": "均衡營養與食慾照護"
+      }
+    ],
+    "observe::cognition::18-39": [
+      {
+        "slug": "cognitive-health",
+        "source": "internal",
+        "summary": "透過生活型態、社交與身心活動維護大腦健康的實證取向建議",
+        "title": "維持認知健康"
+      },
+      {
+        "slug": "attention-memory-care",
+        "source": "internal",
+        "summary": "提升專注力、改善日常記憶與減少分心的實用策略",
+        "title": "注意力與記憶保養"
+      }
+    ],
+    "observe::cognition::40-54": [
+      {
+        "slug": "cognitive-health",
+        "source": "internal",
+        "summary": "透過生活型態、社交與身心活動維護大腦健康的實證取向建議",
+        "title": "維持認知健康"
+      },
+      {
+        "slug": "attention-memory-care",
+        "source": "internal",
+        "summary": "提升專注力、改善日常記憶與減少分心的實用策略",
+        "title": "注意力與記憶保養"
+      }
+    ],
+    "observe::cognition::55-64": [
+      {
+        "slug": "cognitive-health",
+        "source": "internal",
+        "summary": "透過生活型態、社交與身心活動維護大腦健康的實證取向建議",
+        "title": "維持認知健康"
+      },
+      {
+        "slug": "attention-memory-care",
+        "source": "internal",
+        "summary": "提升專注力、改善日常記憶與減少分心的實用策略",
+        "title": "注意力與記憶保養"
+      }
+    ],
+    "observe::locomotion::18-39": [
+      {
+        "slug": "physical-activity-benefits",
+        "source": "internal",
+        "summary": "成人規律運動對健康與行動功能的益處，以及 WHO 建議的活動量",
+        "title": "規律身體活動的好處"
+      },
+      {
+        "slug": "sedentary-harms",
+        "source": "internal",
+        "summary": "認識長時間久坐對健康與行動功能的影響，以及減少久坐的實用做法",
+        "title": "久坐的危害與改善"
+      }
+    ],
+    "observe::locomotion::40-54": [
+      {
+        "slug": "physical-activity-benefits",
+        "source": "internal",
+        "summary": "成人規律運動對健康與行動功能的益處，以及 WHO 建議的活動量",
+        "title": "規律身體活動的好處"
+      },
+      {
+        "slug": "sedentary-harms",
+        "source": "internal",
+        "summary": "認識長時間久坐對健康與行動功能的影響，以及減少久坐的實用做法",
+        "title": "久坐的危害與改善"
+      }
+    ],
+    "observe::locomotion::55-64": [
+      {
+        "slug": "physical-activity-benefits",
+        "source": "internal",
+        "summary": "成人規律運動對健康與行動功能的益處，以及 WHO 建議的活動量",
+        "title": "規律身體活動的好處"
+      },
+      {
+        "slug": "sedentary-harms",
+        "source": "internal",
+        "summary": "認識長時間久坐對健康與行動功能的影響，以及減少久坐的實用做法",
+        "title": "久坐的危害與改善"
+      }
+    ],
+    "observe::psychological::18-39": [
+      {
+        "slug": "understanding-burnout",
+        "source": "internal",
+        "summary": "了解職業倦怠的徵兆與成因，以及恢復身心能量的實用方法",
+        "title": "認識職業倦怠"
+      },
+      {
+        "slug": "stress-management",
+        "source": "internal",
+        "summary": "認識壓力反應並運用實證技巧調節身心、維持心理韌性",
+        "title": "壓力管理"
+      },
+      {
+        "slug": "mood-self-awareness",
+        "source": "internal",
+        "summary": "認識憂鬱與焦慮的常見徵兆，學習自我覺察與適時求助",
+        "title": "情緒覺察：憂鬱與焦慮的自我了解"
+      },
+      {
+        "slug": "psychological-wellbeing",
+        "source": "internal",
+        "summary": "從正向心理與生活習慣著手，提升日常幸福感與心理韌性",
+        "title": "提升心理福祉"
+      }
+    ],
+    "observe::psychological::40-54": [
+      {
+        "slug": "understanding-burnout",
+        "source": "internal",
+        "summary": "了解職業倦怠的徵兆與成因，以及恢復身心能量的實用方法",
+        "title": "認識職業倦怠"
+      },
+      {
+        "slug": "stress-management",
+        "source": "internal",
+        "summary": "認識壓力反應並運用實證技巧調節身心、維持心理韌性",
+        "title": "壓力管理"
+      },
+      {
+        "slug": "mood-self-awareness",
+        "source": "internal",
+        "summary": "認識憂鬱與焦慮的常見徵兆，學習自我覺察與適時求助",
+        "title": "情緒覺察：憂鬱與焦慮的自我了解"
+      },
+      {
+        "slug": "psychological-wellbeing",
+        "source": "internal",
+        "summary": "從正向心理與生活習慣著手，提升日常幸福感與心理韌性",
+        "title": "提升心理福祉"
+      }
+    ],
+    "observe::psychological::55-64": [
+      {
+        "slug": "understanding-burnout",
+        "source": "internal",
+        "summary": "了解職業倦怠的徵兆與成因，以及恢復身心能量的實用方法",
+        "title": "認識職業倦怠"
+      },
+      {
+        "slug": "stress-management",
+        "source": "internal",
+        "summary": "認識壓力反應並運用實證技巧調節身心、維持心理韌性",
+        "title": "壓力管理"
+      },
+      {
+        "slug": "mood-self-awareness",
+        "source": "internal",
+        "summary": "認識憂鬱與焦慮的常見徵兆，學習自我覺察與適時求助",
+        "title": "情緒覺察：憂鬱與焦慮的自我了解"
+      },
+      {
+        "slug": "psychological-wellbeing",
+        "source": "internal",
+        "summary": "從正向心理與生活習慣著手，提升日常幸福感與心理韌性",
+        "title": "提升心理福祉"
+      }
+    ],
+    "observe::sensory::18-39": [
+      {
+        "slug": "vision-care",
+        "source": "internal",
+        "summary": "保護視力、預防眼睛疾病與維持感官功能的實用建議",
+        "title": "成人視力保健"
+      },
+      {
+        "slug": "hearing-care",
+        "source": "internal",
+        "summary": "預防噪音性聽損、覺察聽力變化並維持良好聽覺與溝通功能",
+        "title": "成人聽力保健"
+      },
+      {
+        "slug": "screen-eye-strain",
+        "source": "internal",
+        "summary": "緩解數位螢幕造成的眼睛疲勞，建立健康的用眼與螢幕習慣",
+        "title": "螢幕疲勞與護眼"
+      }
+    ],
+    "observe::sensory::40-54": [
+      {
+        "slug": "vision-care",
+        "source": "internal",
+        "summary": "保護視力、預防眼睛疾病與維持感官功能的實用建議",
+        "title": "成人視力保健"
+      },
+      {
+        "slug": "hearing-care",
+        "source": "internal",
+        "summary": "預防噪音性聽損、覺察聽力變化並維持良好聽覺與溝通功能",
+        "title": "成人聽力保健"
+      },
+      {
+        "slug": "screen-eye-strain",
+        "source": "internal",
+        "summary": "緩解數位螢幕造成的眼睛疲勞，建立健康的用眼與螢幕習慣",
+        "title": "螢幕疲勞與護眼"
+      }
+    ],
+    "observe::sensory::55-64": [
+      {
+        "slug": "vision-care",
+        "source": "internal",
+        "summary": "保護視力、預防眼睛疾病與維持感官功能的實用建議",
+        "title": "成人視力保健"
+      },
+      {
+        "slug": "hearing-care",
+        "source": "internal",
+        "summary": "預防噪音性聽損、覺察聽力變化並維持良好聽覺與溝通功能",
+        "title": "成人聽力保健"
+      },
+      {
+        "slug": "screen-eye-strain",
+        "source": "internal",
+        "summary": "緩解數位螢幕造成的眼睛疲勞，建立健康的用眼與螢幕習慣",
+        "title": "螢幕疲勞與護眼"
+      }
+    ],
+    "observe::vitality::18-39": [
+      {
+        "slug": "adult-sleep-hygiene",
+        "source": "internal",
+        "summary": "建立規律作息與良好睡眠習慣，提升睡眠品質與日間精力的實證建議",
+        "title": "成人睡眠衛生：找回優質睡眠"
+      },
+      {
+        "slug": "fatigue-management",
+        "source": "internal",
+        "summary": "辨識疲勞成因並透過作息、營養與活動安排重建日常精力的實用策略",
+        "title": "疲勞與活力管理"
+      },
+      {
+        "slug": "balanced-nutrition",
+        "source": "internal",
+        "summary": "成人均衡飲食原則、食慾變化的覺察與維持良好營養狀態的實用建議",
+        "title": "均衡營養與食慾照護"
+      }
+    ],
+    "observe::vitality::40-54": [
+      {
+        "slug": "adult-sleep-hygiene",
+        "source": "internal",
+        "summary": "建立規律作息與良好睡眠習慣，提升睡眠品質與日間精力的實證建議",
+        "title": "成人睡眠衛生：找回優質睡眠"
+      },
+      {
+        "slug": "fatigue-management",
+        "source": "internal",
+        "summary": "辨識疲勞成因並透過作息、營養與活動安排重建日常精力的實用策略",
+        "title": "疲勞與活力管理"
+      },
+      {
+        "slug": "balanced-nutrition",
+        "source": "internal",
+        "summary": "成人均衡飲食原則、食慾變化的覺察與維持良好營養狀態的實用建議",
+        "title": "均衡營養與食慾照護"
+      }
+    ],
+    "observe::vitality::55-64": [
+      {
+        "slug": "adult-sleep-hygiene",
+        "source": "internal",
+        "summary": "建立規律作息與良好睡眠習慣，提升睡眠品質與日間精力的實證建議",
+        "title": "成人睡眠衛生：找回優質睡眠"
+      },
+      {
+        "slug": "fatigue-management",
+        "source": "internal",
+        "summary": "辨識疲勞成因並透過作息、營養與活動安排重建日常精力的實用策略",
+        "title": "疲勞與活力管理"
+      },
+      {
+        "slug": "balanced-nutrition",
+        "source": "internal",
+        "summary": "成人均衡飲食原則、食慾變化的覺察與維持良好營養狀態的實用建議",
+        "title": "均衡營養與食慾照護"
+      }
+    ]
+  },
   "triggers": {
     "func.domain.cognition.low.18-39": {
+      "articleSlugs": [
+        "cognitive-health",
+        "attention-memory-care"
+      ],
+      "educationSlug": "cognitive-health",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.cognition.low.40-54": {
+      "articleSlugs": [
+        "cognitive-health",
+        "attention-memory-care"
+      ],
+      "educationSlug": "cognitive-health",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.cognition.low.55-64": {
+      "articleSlugs": [
+        "cognitive-health",
+        "attention-memory-care"
+      ],
+      "educationSlug": "cognitive-health",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.cognition.moderate.18-39": {
+      "articleSlugs": [
+        "attention-memory-care"
+      ],
+      "educationSlug": "attention-memory-care",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.cognition.moderate.40-54": {
+      "articleSlugs": [
+        "attention-memory-care"
+      ],
+      "educationSlug": "attention-memory-care",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.cognition.moderate.55-64": {
+      "articleSlugs": [
+        "attention-memory-care"
+      ],
+      "educationSlug": "attention-memory-care",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.locomotion.low.18-39": {
+      "articleSlugs": [
+        "physical-activity-benefits",
+        "sedentary-harms"
+      ],
+      "educationSlug": "physical-activity-benefits",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.locomotion.low.40-54": {
+      "articleSlugs": [
+        "physical-activity-benefits",
+        "sedentary-harms"
+      ],
+      "educationSlug": "physical-activity-benefits",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.locomotion.low.55-64": {
+      "articleSlugs": [
+        "physical-activity-benefits",
+        "sedentary-harms"
+      ],
+      "educationSlug": "physical-activity-benefits",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.locomotion.moderate.18-39": {
+      "articleSlugs": [
+        "sedentary-harms"
+      ],
+      "educationSlug": "sedentary-harms",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.locomotion.moderate.40-54": {
+      "articleSlugs": [
+        "sedentary-harms"
+      ],
+      "educationSlug": "sedentary-harms",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.locomotion.moderate.55-64": {
+      "articleSlugs": [
+        "sedentary-harms"
+      ],
+      "educationSlug": "sedentary-harms",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.psychological.low.18-39": {
+      "articleSlugs": [
+        "understanding-burnout",
+        "stress-management",
+        "mood-self-awareness"
+      ],
+      "educationSlug": "understanding-burnout",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.psychological.low.40-54": {
+      "articleSlugs": [
+        "understanding-burnout",
+        "stress-management",
+        "mood-self-awareness"
+      ],
+      "educationSlug": "understanding-burnout",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.psychological.low.55-64": {
+      "articleSlugs": [
+        "understanding-burnout",
+        "stress-management",
+        "mood-self-awareness"
+      ],
+      "educationSlug": "understanding-burnout",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.psychological.moderate.18-39": {
+      "articleSlugs": [
+        "stress-management",
+        "mood-self-awareness",
+        "psychological-wellbeing"
+      ],
+      "educationSlug": "stress-management",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.psychological.moderate.40-54": {
+      "articleSlugs": [
+        "stress-management",
+        "mood-self-awareness",
+        "psychological-wellbeing"
+      ],
+      "educationSlug": "stress-management",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.psychological.moderate.55-64": {
+      "articleSlugs": [
+        "stress-management",
+        "mood-self-awareness",
+        "psychological-wellbeing"
+      ],
+      "educationSlug": "stress-management",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.sensory.low.18-39": {
+      "articleSlugs": [
+        "vision-care",
+        "hearing-care",
+        "screen-eye-strain"
+      ],
+      "educationSlug": "vision-care",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.sensory.low.40-54": {
+      "articleSlugs": [
+        "vision-care",
+        "hearing-care",
+        "screen-eye-strain"
+      ],
+      "educationSlug": "vision-care",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.sensory.low.55-64": {
+      "articleSlugs": [
+        "vision-care",
+        "hearing-care",
+        "screen-eye-strain"
+      ],
+      "educationSlug": "vision-care",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.sensory.moderate.18-39": {
+      "articleSlugs": [
+        "hearing-care",
+        "screen-eye-strain"
+      ],
+      "educationSlug": "hearing-care",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.sensory.moderate.40-54": {
+      "articleSlugs": [
+        "hearing-care",
+        "screen-eye-strain"
+      ],
+      "educationSlug": "hearing-care",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.sensory.moderate.55-64": {
+      "articleSlugs": [
+        "hearing-care",
+        "screen-eye-strain"
+      ],
+      "educationSlug": "hearing-care",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.vitality.low.18-39": {
+      "articleSlugs": [
+        "adult-sleep-hygiene",
+        "fatigue-management",
+        "balanced-nutrition"
+      ],
+      "educationSlug": "adult-sleep-hygiene",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.vitality.low.40-54": {
+      "articleSlugs": [
+        "adult-sleep-hygiene",
+        "fatigue-management",
+        "balanced-nutrition"
+      ],
+      "educationSlug": "adult-sleep-hygiene",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.vitality.low.55-64": {
+      "articleSlugs": [
+        "adult-sleep-hygiene",
+        "fatigue-management",
+        "balanced-nutrition"
+      ],
+      "educationSlug": "adult-sleep-hygiene",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.vitality.moderate.18-39": {
+      "articleSlugs": [
+        "fatigue-management",
+        "balanced-nutrition"
+      ],
+      "educationSlug": "fatigue-management",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.vitality.moderate.40-54": {
+      "articleSlugs": [
+        "fatigue-management",
+        "balanced-nutrition"
+      ],
+      "educationSlug": "fatigue-management",
       "inapplicable": false,
       "videoIds": []
     },
     "func.domain.vitality.moderate.55-64": {
+      "articleSlugs": [
+        "fatigue-management",
+        "balanced-nutrition"
+      ],
+      "educationSlug": "fatigue-management",
       "inapplicable": false,
       "videoIds": []
     },
