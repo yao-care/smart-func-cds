@@ -119,9 +119,4 @@ function polarToCartesian(angle: number, r: number): { x: number; y: number } {
 .radar-chart { display: block; }
 .radar-label { font-size: var(--text-sm); fill: var(--text); }
 .radar-score { font-size: var(--text-sm); fill: var(--accent); font-weight: var(--font-bold); }
-.radar-hybrid-icon {
-  font-family: var(--font-sans, system-ui), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-  fill: var(--text);
-  font-size: var(--text-sm);
-}
 </style>

@@ -8,19 +8,16 @@
    * instead of a synthetic prior.
    */
   import { db, type NormThreshold } from '../../lib/db/schema';
-  import { AGE_GROUPS_CDSA, AGE_GROUP_LABELS, type AgeGroupCDSA } from '../../lib/utils/age-groups';
+  import { AGE_GROUPS_ADULT, AGE_GROUP_LABELS, type AgeGroupAdult } from '../../lib/utils/age-groups';
 
-  // Metrics the engine consults. Keep aligned with triage.ts NORMS keys.
+  // Metrics the objective scorer consults (norms keyed by indicator id).
+  // Defaults are placeholders pending literature norms (see indicators.yaml).
   const METRICS: Array<{ key: string; label: string; defaultMean: number; defaultStd: number; unit: string }> = [
-    { key: 'completionRate', label: '完成率', defaultMean: 0.75, defaultStd: 0.15, unit: '0-1' },
-    { key: 'operationConsistency', label: '操作一致性', defaultMean: 0.70, defaultStd: 0.15, unit: '0-1' },
-    { key: 'reactionLatency', label: '反應延遲', defaultMean: 2000, defaultStd: 800, unit: 'ms' },
-    { key: 'interactionRhythm', label: '互動節奏', defaultMean: 0.5, defaultStd: 0.2, unit: 'CV' },
-    { key: 'drawingScore', label: '繪圖總分', defaultMean: 55, defaultStd: 20, unit: '分' },
-    { key: 'voiceDuration', label: '發聲總時長', defaultMean: 8, defaultStd: 4, unit: '秒' },
+    { key: 'cognition.processing_speed', label: '處理速度（反應時間）', defaultMean: 350, defaultStd: 80, unit: 'ms' },
+    { key: 'cognition.executive_function', label: '執行功能（TMT-A）', defaultMean: 35, defaultStd: 12, unit: '秒' },
   ];
 
-  let activeAgeGroup = $state<AgeGroupCDSA>('25-36m');
+  let activeAgeGroup = $state<AgeGroupAdult>('18-39');
   let rows = $state<NormThreshold[]>([]);
   let dirty = $state<Set<string>>(new Set());
   let saving = $state(false);
@@ -120,7 +117,7 @@
   </header>
 
   <nav class="age-tabs" aria-label="年齡層">
-    {#each AGE_GROUPS_CDSA as ag}
+    {#each AGE_GROUPS_ADULT as ag}
       <button
         type="button"
         class="age-tab"

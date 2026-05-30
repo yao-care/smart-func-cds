@@ -1,31 +1,33 @@
 <script lang="ts">
-  import { getAllChildren, getAssessmentsForChild } from '../../lib/db/assessments';
-  import { ageInMonths } from '../../lib/utils/age-groups';
+  import { getAllPatients, getAssessmentsForPatient } from '../../lib/db/assessments';
+  import { ageInYears } from '../../lib/utils/age-groups';
   import { isAuthorized } from '../../lib/fhir/client';
-  import type { Assessment, Child } from '../../lib/db/schema';
+  import type { Assessment, AssessmentPatient } from '../../lib/db/schema';
 
-  interface ChildWithAssessments {
-    child: Child;
+  interface PatientWithAssessments {
+    child: AssessmentPatient;
     assessments: Assessment[];
   }
 
   let loading = $state(true);
-  let childrenData = $state<ChildWithAssessments[]>([]);
+  let childrenData = $state<PatientWithAssessments[]>([]);
   let compareIds = $state<Set<string>>(new Set());
   let showCompare = $state(false);
 
   const physicianMode = $derived(isAuthorized());
 
   const categoryLabels: Record<string, string> = {
-    normal: '正常',
-    monitor: '追蹤觀察',
-    refer: '建議轉介',
+    normal: '功能良好',
+    observe: '建議觀察',
+    consult: '建議諮詢醫師',
+    incomplete: '評估未完成',
   };
 
   const categoryClasses: Record<string, string> = {
     normal: 'badge-normal',
-    monitor: 'badge-monitor',
-    refer: 'badge-refer',
+    observe: 'badge-observe',
+    consult: 'badge-consult',
+    incomplete: 'badge-incomplete',
   };
 
   function formatDate(d: Date | string): string {
@@ -41,13 +43,14 @@
     return id.length > 8 ? id.slice(0, 8) + '…' : id;
   }
 
-  function computeAgeAtAssessment(child: Child, assessment: Assessment): number {
+  function computeAgeAtAssessment(child: AssessmentPatient, assessment: Assessment): number {
     const birth = new Date(child.birthDate);
     const assessDate = assessment.completedAt ?? assessment.startedAt;
     const d = typeof assessDate === 'string' ? new Date(assessDate) : assessDate;
-    const months = (d.getFullYear() - birth.getFullYear()) * 12 + (d.getMonth() - birth.getMonth());
-    const dayAdjust = d.getDate() < birth.getDate() ? -1 : 0;
-    return Math.max(0, months + dayAdjust);
+    let years = d.getFullYear() - birth.getFullYear();
+    const m = d.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && d.getDate() < birth.getDate())) years--;
+    return Math.max(0, years);
   }
 
   function detailLink(id: string): string {
@@ -68,10 +71,10 @@
   async function loadData() {
     loading = true;
     try {
-      const children = await getAllChildren();
-      const result: ChildWithAssessments[] = [];
+      const children = await getAllPatients();
+      const result: PatientWithAssessments[] = [];
       for (const child of children) {
-        const assessments = await getAssessmentsForChild(child.id);
+        const assessments = await getAssessmentsForPatient(child.id);
         if (assessments.length > 0) {
           // newest first
           assessments.sort((a, b) => {
@@ -117,25 +120,11 @@
   );
 
   const DOMAIN_LABELS: Record<string, string> = {
-    gross_motor: '粗動作',
-    fine_motor: '細動作',
-    language_comprehension: '語言理解',
-    language_expression: '語言表達',
-    cognitive: '認知',
-    social_emotional: '社交情緒',
-    behavior: '行為',
-    sensory_processing: '感官處理',
-  };
-
-  const METRIC_LABELS: Record<string, string> = {
-    completionRate: '完成率',
-    operationConsistency: '操作一致性',
-    reactionLatency: '反應延遲',
-    interactionRhythm: '互動節奏',
-    drawingScore: '繪圖總分',
-    voiceDuration: '發聲總時長',
-    questionnaireScore: '問卷得分',
-    poseClassification: '姿態分析',
+    vitality: '身體活力',
+    locomotion: '行動功能',
+    cognition: '認知功能',
+    psychological: '心理功能',
+    sensory: '感官功能',
   };
 
   // SVG palette for compare overlay. Distinct hues so multi-series stays
@@ -148,32 +137,21 @@
     return DOMAIN_LABELS[d] ?? d;
   }
 
-  function metricLabel(m: string): string {
-    return METRIC_LABELS[m] ?? m;
-  }
-
-  /** Average directionalZ per domain for one assessment. null when the domain
-   *  has no z-based metric (e.g. questionnaire-only). */
-  function perDomainZ(assessment: Assessment): Record<string, number | null> {
-    const out: Record<string, number[]> = {};
-    if (!assessment.triageResult) return {};
-    for (const d of assessment.triageResult.details ?? []) {
-      if (d.directionalZ === null) continue;
-      (out[d.domain] ??= []).push(d.directionalZ);
-    }
+  /** Per-domain functional score (0-100) for one assessment. null when the
+   *  domain was not scored in that assessment. */
+  function perDomainScore(assessment: Assessment): Record<string, number | null> {
     const result: Record<string, number | null> = {};
-    for (const dom of Object.keys(out)) {
-      const arr = out[dom];
-      result[dom] = arr.reduce((a, b) => a + b, 0) / arr.length;
+    if (!assessment.triageResult) return {};
+    for (const d of assessment.triageResult.domainScores ?? []) {
+      result[d.domain] = d.score;
     }
     return result;
   }
 
-  /** Convert directionalZ → 0-100 score for radar plotting.
-   *  z=0 (on norm) → 50, z=+2 → 70, z=-2 → 30, clamped. */
-  function zToScore(z: number | null): number {
-    if (z === null) return 50;
-    return Math.max(0, Math.min(100, 50 + 10 * z));
+  /** Score is already 0-100 from the scorer; identity for radar plotting. */
+  function scoreForRadar(s: number | null): number {
+    if (s === null) return 0;
+    return Math.max(0, Math.min(100, s));
   }
 
   /** Union of all domains across compared assessments, in a stable order. */
@@ -181,36 +159,34 @@
     const seen = new Set<string>();
     for (const row of compareRows) {
       if (!row.assessment.triageResult) continue;
-      for (const d of row.assessment.triageResult.details ?? []) {
+      for (const d of row.assessment.triageResult.domainScores ?? []) {
         seen.add(d.domain);
       }
     }
-    // preserve DOMAIN_LABELS order for known domains, append unknowns after
     const known = Object.keys(DOMAIN_LABELS).filter((d) => seen.has(d));
     const extra = [...seen].filter((d) => !DOMAIN_LABELS[d]);
     return [...known, ...extra];
   });
 
-  /** Metric × series matrix for the diff table. */
+  /** Domain × series matrix for the diff table (per-domain score deltas). */
   const compareMetricRows = $derived.by(() => {
     const map = new Map<string, { domain: string; metric: string; cells: Array<{ value: number; directionalZ: number | null }> }>();
     compareRows.forEach((row, seriesIdx) => {
       if (!row.assessment.triageResult) return;
-      for (const d of row.assessment.triageResult.details ?? []) {
-        const key = `${d.domain}::${d.metric}`;
+      for (const d of row.assessment.triageResult.domainScores ?? []) {
+        const key = d.domain;
         let entry = map.get(key);
         if (!entry) {
-          entry = { domain: d.domain, metric: d.metric, cells: [] };
+          entry = { domain: d.domain, metric: '功能分數', cells: [] };
           map.set(key, entry);
         }
-        // pad to seriesIdx then fill
         while (entry.cells.length < seriesIdx) {
           entry.cells.push({ value: NaN, directionalZ: null });
         }
-        entry.cells.push({ value: d.value, directionalZ: d.directionalZ });
+        // directionalZ slot reused as a normalised trend signal: (score-50)/10.
+        entry.cells.push({ value: d.score, directionalZ: (d.score - 50) / 10 });
       }
     });
-    // pad trailing
     for (const entry of map.values()) {
       while (entry.cells.length < compareRows.length) {
         entry.cells.push({ value: NaN, directionalZ: null });
@@ -312,7 +288,7 @@
       <section class="child-section">
         <h2 class="child-header">
           <span class="child-id">ID: {abbreviateId(child.id)}</span>
-          <span class="child-age">目前 {ageInMonths(child.birthDate)} 個月</span>
+          <span class="child-age">目前 {ageInYears(child.birthDate)} 歲</span>
         </h2>
 
         <ol class="timeline">
@@ -323,7 +299,7 @@
             <li class="timeline-row" class:selected>
               <div class="timeline-main">
                 <span class="row-date">{formatDate(assessment.completedAt ?? assessment.startedAt)}</span>
-                <span class="row-age">{ageAtAssess} 個月</span>
+                <span class="row-age">{ageAtAssess} 歲</span>
                 {#if isCompleted && assessment.triageResult}
                   <span class="badge {categoryClasses[assessment.triageResult.category] ?? ''}">
                     {categoryLabels[assessment.triageResult.category] ?? assessment.triageResult.category}
@@ -376,7 +352,7 @@
           <li class="meta-chip" style="--series-color: {SERIES_COLORS[i % SERIES_COLORS.length]}">
             <span class="meta-swatch" aria-hidden="true"></span>
             <span class="meta-date">{formatDate(row.assessment.completedAt ?? row.assessment.startedAt)}</span>
-            <span class="meta-age">{computeAgeAtAssessment(row.child, row.assessment)} 個月</span>
+            <span class="meta-age">{computeAgeAtAssessment(row.child, row.assessment)} 歲</span>
             {#if cat}
               <span class="badge {categoryClasses[cat] ?? ''}">{categoryLabels[cat]}</span>
             {/if}
@@ -439,8 +415,8 @@
             {/each}
             <!-- one polygon per series -->
             {#each compareRows as row, i}
-              {@const zMap = perDomainZ(row.assessment)}
-              {@const scores = compareDomains.map((d) => zToScore(zMap[d] ?? null))}
+              {@const scoreMap = perDomainScore(row.assessment)}
+              {@const scores = compareDomains.map((d) => scoreForRadar(scoreMap[d] ?? null))}
               {@const color = SERIES_COLORS[i % SERIES_COLORS.length]}
               <path
                 d={radarPolygonPath(scores)}
@@ -485,7 +461,7 @@
                 {@const delta = firstZ !== null && lastZ !== null ? lastZ - firstZ : null}
                 {@const trend = delta !== null ? trendSymbol(delta) : null}
                 <tr>
-                  <th scope="row">{metricLabel(mrow.metric)}</th>
+                  <th scope="row">{mrow.metric}</th>
                   <td class="muted">{domainLabel(mrow.domain)}</td>
                   {#each mrow.cells as cell}
                     <td class="value-cell" class:value-missing={Number.isNaN(cell.value)}>
@@ -734,8 +710,8 @@
   }
 
   .badge-normal { background: color-mix(in srgb, var(--accent) 12%, var(--bg)); color: var(--accent); }
-  .badge-monitor { background: color-mix(in srgb, var(--warn) 12%, var(--bg)); color: var(--warn); }
-  .badge-refer { background: color-mix(in srgb, var(--danger) 14%, var(--bg)); color: var(--danger); }
+  .badge-observe { background: color-mix(in srgb, var(--warn) 12%, var(--bg)); color: var(--warn); }
+  .badge-consult { background: color-mix(in srgb, var(--danger) 14%, var(--bg)); color: var(--danger); }
   .badge-incomplete { background: var(--surface); color: color-mix(in srgb, var(--text), var(--bg) 45%); border: 1px solid var(--line); }
 
   .compare-bar {

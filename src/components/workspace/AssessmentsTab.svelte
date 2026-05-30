@@ -13,15 +13,16 @@
   import { getClient, isAuthorized } from '../../lib/fhir/client';
   import { db } from '../../lib/db/schema';
 
-  type Category = 'refer' | 'monitor' | 'normal';
+  type Category = 'consult' | 'observe' | 'incomplete' | 'normal';
 
   const CATEGORY_LABELS: Record<Category, string> = {
-    refer: '建議轉介',
-    monitor: '追蹤觀察',
-    normal: '正常',
+    consult: '建議諮詢醫師',
+    observe: '建議觀察',
+    incomplete: '評估未完成',
+    normal: '功能良好',
   };
 
-  const CATEGORY_ORDER: Category[] = ['refer', 'monitor', 'normal'];
+  const CATEGORY_ORDER: Category[] = ['consult', 'observe', 'incomplete', 'normal'];
 
   let loading = $state(true);
   let error = $state<string | null>(null);
@@ -57,7 +58,7 @@
       .map((a) => ({
         id: a.id,
         fhirReportId: a.fhirDiagnosticReportId ?? a.id,
-        patientRef: `Local/${a.childId}`,
+        patientRef: `Local/${a.patientId}`,
         date: new Date(a.completedAt ?? a.startedAt),
         category: a.triageResult!.category,
         summary: a.triageResult!.summary,
@@ -65,7 +66,7 @@
   }
 
   const grouped = $derived.by(() => {
-    const map: Record<Category, AssessmentSummary[]> = { refer: [], monitor: [], normal: [] };
+    const map: Record<Category, AssessmentSummary[]> = { consult: [], observe: [], incomplete: [], normal: [] };
     for (const r of rows) {
       map[r.category].push(r);
     }
@@ -89,7 +90,7 @@
 
 <section class="assessments-tab" aria-label="所有評估清單">
   <header class="tab-header">
-    <h2>所有 CDSA 評估</h2>
+    <h2>所有功能健康評估</h2>
     {#if demoMode}
       <span class="mode-badge mode-demo">示範模式（本機資料）</span>
     {/if}
@@ -108,7 +109,7 @@
         <p>本機尚無評估紀錄。完成一次家長端評估後會出現在這裡。</p>
         <a href="/assess/" class="empty-cta">前往評估流程 →</a>
       {:else}
-        <p>FHIR Server 上目前沒有 CDSA 評估報告。</p>
+        <p>FHIR Server 上目前沒有功能健康評估報告。</p>
       {/if}
     </div>
   {:else}
@@ -124,7 +125,7 @@
             {#each list as row}
               <li class="row">
                 <span class="row-date">{formatDate(row.date)}</span>
-                <span class="row-patient">{demoMode ? '兒童' : '病人'} {shortRef(row.patientRef)}</span>
+                <span class="row-patient">{demoMode ? '受測者' : '病人'} {shortRef(row.patientRef)}</span>
                 <span class="row-summary" title={row.summary}>{row.summary || '—'}</span>
                 <a class="row-link" href={detailHref(row.id)}>看詳細 →</a>
               </li>
@@ -223,14 +224,19 @@
     font-weight: var(--font-medium);
   }
 
-  .badge-refer {
+  .badge-consult {
     background: color-mix(in srgb, var(--danger) 14%, var(--bg));
     color: var(--danger);
   }
 
-  .badge-monitor {
+  .badge-observe {
     background: color-mix(in srgb, var(--warn) 12%, var(--bg));
     color: var(--warn);
+  }
+
+  .badge-incomplete {
+    background: color-mix(in srgb, var(--text) 8%, var(--bg));
+    color: color-mix(in srgb, var(--text), var(--bg) 20%);
   }
 
   .badge-normal {

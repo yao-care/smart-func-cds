@@ -17,23 +17,21 @@
   } from '../../lib/db/schema';
   import { getCustomEducation } from '../../lib/db/custom-education';
   import { loadVideoIndex } from '../../lib/education/index-loader';
-  import { AGE_GROUPS_CDSA } from '../../lib/utils/age-groups';
+  import { AGE_GROUPS_ADULT } from '../../lib/utils/age-groups';
 
   const DOMAIN_LABELS: Record<string, string> = {
-    behavior: '生活行為',
-    gross_motor: '粗動作',
-    fine_motor: '精細動作',
-    language: '語言',
-    language_comprehension: '語言理解',
-    language_expression: '語言表達',
-    cognition: '認知',
-    social_emotional: '社會情緒',
+    vitality: '身體活力',
+    locomotion: '行動功能',
+    cognition: '認知功能',
+    psychological: '心理功能',
+    sensory: '感官功能',
   };
 
   const CATEGORY_LABELS: Record<RecommendationCategory, string> = {
-    normal: '正常',
-    monitor: '追蹤觀察',
-    refer: '建議轉介',
+    normal: '功能良好',
+    observe: '建議觀察',
+    consult: '建議諮詢醫師',
+    incomplete: '評估未完成',
   };
 
   const SOURCE_LABELS: Record<RecommendationSource, string> = {
@@ -60,7 +58,7 @@
   const tenantId = $derived(getTenantId(authStore.fhirBaseUrl));
   const tenantDisplay = $derived(getTenantDisplayName(authStore.fhirBaseUrl));
 
-  let activeCategory = $state<RecommendationCategory>('monitor');
+  let activeCategory = $state<RecommendationCategory>('observe');
   let customEducation = $state<CustomEducation[]>([]);
 
   // Per-domain editor state — keyed by domain
@@ -108,7 +106,7 @@
       // so the user can tweak instead of starting blank.
       const seen = new Set<string>();
       const seed: RecommendationItem[] = [];
-      for (const age of AGE_GROUPS_CDSA) {
+      for (const age of AGE_GROUPS_ADULT) {
         const items = await getDefaultRecommendations(activeCategory, domain, age);
         for (const item of items) {
           const k = item.slug ?? item.url ?? item.customId ?? '';
