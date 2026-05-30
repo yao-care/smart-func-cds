@@ -19,7 +19,6 @@ import {
   videoCatalogItemSchema,
   contentRelevanceSchema,
   runtimeIndexSchema,
-  CDSA_DOMAIN_NAMES,
   type VideoCatalogItem,
   type RuntimeIndex,
 } from '../src/lib/education/schemas.js';
@@ -150,10 +149,14 @@ export async function buildContentIndex(opts: BuildOptions = {}): Promise<Runtim
   //   Record<domain, ageCDSA[]>
   // Expand to Set<trigger string> e.g. "cdsa.domain.behavior.anomaly.2-6m"
 
+  // func.domain triggers carry a band segment (low | moderate). An inapplicable
+  // domain×age cell flips BOTH bands inapplicable.
   const inapplicableTriggerSet = new Set<string>();
   for (const [domain, ages] of Object.entries(contentRelevance.inapplicable)) {
     for (const age of ages) {
-      inapplicableTriggerSet.add(`cdsa.domain.${domain}.anomaly.${age}`);
+      for (const band of ['low', 'moderate'] as const) {
+        inapplicableTriggerSet.add(`func.domain.${domain}.${band}.${age}`);
+      }
     }
   }
 
@@ -188,7 +191,7 @@ export async function buildContentIndex(opts: BuildOptions = {}): Promise<Runtim
     const browseArticle = entry.articles.find(a => a.browse === true);
     const educationSlugSource = browseArticle
       ? browseArticle.slug
-      : (entry.trigger.startsWith('cdsa.domain.') ? undefined : entry.articles[0]?.slug);
+      : (entry.trigger.startsWith('func.domain.') ? undefined : entry.articles[0]?.slug);
     // 該情境的所有相關文章（browse 主文章 + 補充推薦），去重保序，供矩陣每格列出。
     const allArticleSlugs = [...new Set(entry.articles.map(a => a.slug))];
     triggers[entry.trigger] = {
@@ -240,13 +243,15 @@ export async function buildContentIndex(opts: BuildOptions = {}): Promise<Runtim
   const allEducationSlugs = new Set<string>();
 
   for (const entry of contentRelevance.triggers) {
-    // Only cdsa.domain triggers contribute to recommendations
+    // Only func.domain triggers contribute to recommendations.
+    // func.domain.<domain>.<band>.<age> — recommendations are keyed by band
+    // as the "severity" slot (low | moderate), matching the runtime lookup.
     const domainMatch = entry.trigger.match(
-      /^cdsa\.domain\.([^.]+)\.anomaly\.([^.]+)$/,
+      /^func\.domain\.([^.]+)\.(low|moderate)\.([^.]+)$/,
     );
     if (!domainMatch) continue;
 
-    const [, domain, age] = domainMatch;
+    const [, domain, , age] = domainMatch;
 
     for (const article of entry.articles) {
       allEducationSlugs.add(article.slug);

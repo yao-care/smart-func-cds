@@ -3,12 +3,12 @@
   import { authStore } from '../../lib/stores/auth.svelte';
   import { setTriageResult } from '../../lib/db/assessments';
   import { submitAssessmentToFhir } from '../../lib/fhir/cdsa-submit';
-  import { computeTriage, type TriageResult } from '../../engine/cdsa/triage';
-  import { computeDomainScores } from '../../engine/cdsa/radar-scoring';
+  import { computeTriage, type TriageResult } from '../../engine/func/triage';
+  import { buildRadarData } from '../../engine/func/radar-scoring';
   import RadarChart from './RadarChart.svelte';
   import EducationMatch from './EducationMatch.svelte';
   import AssessmentPdfReport from './AssessmentPdfReport.svelte';
-  import { deriveCdsaTriggers } from '$lib/education/trigger-derivation';
+  import { deriveFuncTriggers } from '$lib/education/trigger-derivation';
   import TriggerVideoList from '../education/TriggerVideoList.svelte';
 
   let fhirSubmitting = $state(false);
@@ -18,94 +18,75 @@
   let isComputing = $state(true);
 
   const categoryLabels: Record<string, string> = {
-    normal: '正常',
-    monitor: '追蹤觀察',
-    refer: '建議轉介',
+    normal: '功能良好',
+    observe: '建議觀察',
+    consult: '建議諮詢醫師',
+    incomplete: '評估未完成',
   };
 
   const categoryColors: Record<string, string> = {
-    normal: 'var(--accent)',
-    monitor: 'var(--warn)',
-    refer: 'var(--danger)',
+    normal: 'var(--color-risk-normal, var(--accent))',
+    observe: 'var(--color-risk-advisory, var(--warn))',
+    consult: 'var(--color-risk-warning, var(--danger))',
+    incomplete: 'var(--text)',
   };
 
   const categoryBgColors: Record<string, string> = {
     normal: 'color-mix(in srgb, var(--accent) 12%, var(--bg))',
-    monitor: 'color-mix(in srgb, var(--warn) 12%, var(--bg))',
-    refer: 'color-mix(in srgb, var(--danger) 14%, var(--bg))',
+    observe: 'color-mix(in srgb, var(--warn) 12%, var(--bg))',
+    consult: 'color-mix(in srgb, var(--danger) 14%, var(--bg))',
+    incomplete: 'color-mix(in srgb, var(--text) 6%, var(--bg))',
   };
 
-  // 進入結果頁時，從 partialAnalysis 即時計算分流（<1 秒）
+  // 進入結果頁時，用問卷模組已計算好的分數即時分流（<1 秒）
   $effect(() => {
-    if (!assessmentStore.ageGroup) return;
+    const ageGroup = assessmentStore.ageGroup;
+    if (!ageGroup) return;
     const pa = assessmentStore.partialAnalysis;
 
-    computeTriage({
-      ageGroup: assessmentStore.ageGroup,
-      behavior: pa.behaviorMetrics ?? {
-        responseTimeDistribution: { p50: 0, p95: 0, std: 0 },
-        interactionRhythm: 0, operationConsistency: 0, retryCount: 0,
-        interruptionPattern: 0, reactionLatency: 0, completionRate: 0,
-      },
-      voice: pa.voiceMetrics ?? {
-        pitchMean: null, pitchStd: null, intensityMean: null, intensityStd: null,
-        speechRate: null, fluencyPauseCount: 0, voiceLatencyMean: null,
-        voiceDurationTotal: 0, speechRatio: 0, mfccMean: null, spectralCentroid: null,
-      },
-      drawing: pa.drawingResult ?? { shapes: [], overallScore: 0, maturityLevel: 'age_appropriate' },
-      questionnaireScores: pa.questionnaireScores,
-      questionnaireMaxScores: pa.questionnaireMaxScores,
-      grossMotor: pa.grossMotorResult ? {
-        classification: pa.grossMotorResult.classification,
-        confidence: pa.grossMotorResult.confidence,
-        features: pa.grossMotorResult.features as unknown as Record<string, number>,
-      } : undefined,
-    }).then(result => {
-      triageResult = result;
-      isComputing = false;
-      saveResult(result);
-    }).catch(() => {
-      // 分流計算失敗時用預設結果
-      triageResult = {
-        category: 'normal', confidence: 0.5,
-        summary: '評估資料不足，無法完整分析。建議諮詢專業醫師。',
-        anomalyCount: 0, details: [],
-      };
-      isComputing = false;
+    const result = computeTriage({
+      indicatorScores: pa.indicatorScores ?? [],
+      domainScores: pa.domainScores ?? [],
+      applicableWeights: pa.applicableWeights ?? {},
+      ageGroup,
+      assessmentDate: new Date().toISOString().slice(0, 10),
     });
+    triageResult = result;
+    isComputing = false;
+    saveResult(result);
   });
 
-  const domainScores = $derived(computeDomainScores(triageResult));
-
-  const anomalyDomains = $derived(
-    triageResult?.details.filter(d => d.isAnomaly).map(d => d.domain) ?? []
+  const radarData = $derived(
+    triageResult
+      ? buildRadarData(triageResult, assessmentStore.partialAnalysis.indicatorScores ?? []).axes.map(a => ({
+          domain: a.domain,
+          score: a.score,
+          band: a.band,
+        }))
+      : []
   );
+
+  const flaggedDomains = $derived(triageResult?.flaggedDomains ?? []);
 
   const videoTriggers = $derived(
     triageResult && assessmentStore.ageGroup
-      ? deriveCdsaTriggers(triageResult, assessmentStore.ageGroup)
+      ? deriveFuncTriggers(triageResult, assessmentStore.ageGroup)
       : [],
   );
 
   async function saveResult(result: TriageResult) {
     if (!assessmentStore.assessment) return;
-    await setTriageResult(assessmentStore.assessment.id, {
-      category: result.category,
-      confidence: result.confidence,
-      summary: result.summary,
-      details: result.details,
-      anomalyCount: result.anomalyCount,
-    });
+    await setTriageResult(assessmentStore.assessment.id, result);
     await assessmentStore.complete();
   }
 
   async function submitToFhir() {
-    if (!assessmentStore.assessment || !assessmentStore.child || !authStore.isAuthenticated || !triageResult) return;
+    if (!assessmentStore.assessment || !assessmentStore.patient || !authStore.isAuthenticated || !triageResult) return;
     fhirSubmitting = true;
     fhirError = null;
     try {
       const result = await submitAssessmentToFhir(
-        assessmentStore.assessment, assessmentStore.child.id, triageResult,
+        assessmentStore.assessment, assessmentStore.patient.id, triageResult,
       );
       fhirSubmitted = result.success;
       if (!result.success) fhirError = result.error ?? '傳送失敗';
@@ -124,7 +105,7 @@
 {:else}
 <div class="result-view">
   <div class="disclaimer" role="alert">
-    本評估結果僅供參考，不構成醫療診斷。如有疑慮，請諮詢專業兒科醫師。
+    本評估結果僅供參考，不構成醫療診斷。如有疑慮，請諮詢專業醫療人員。
   </div>
 
   <div
@@ -138,19 +119,19 @@
     <p class="summary">{triageResult.summary}</p>
   </div>
 
-  {#if domainScores.length > 0}
+  {#if radarData.length > 0}
     <section class="radar-section" aria-label="各面向評估結果">
-      <h3>各面向評估</h3>
-      <RadarChart data={domainScores} />
+      <h3>五大內在能力面向</h3>
+      <RadarChart data={radarData} />
     </section>
   {/if}
 
-  {#if triageResult && assessmentStore.ageGroup && (anomalyDomains.length > 0 || triageResult.category !== 'normal')}
+  {#if triageResult && assessmentStore.ageGroup && (flaggedDomains.length > 0 || triageResult.category !== 'normal')}
     <section class="education-section" aria-label="衛教建議">
       <h3>建議閱讀</h3>
       <EducationMatch
         category={triageResult.category}
-        domains={anomalyDomains.length > 0 ? [...new Set(anomalyDomains)] : ['behavior']}
+        domains={flaggedDomains.length > 0 ? [...new Set(flaggedDomains)] : ['vitality']}
         ageGroup={assessmentStore.ageGroup}
       />
     </section>
@@ -176,8 +157,8 @@
       <p class="fhir-error">{fhirError}</p>
     {/if}
 
-    {#if assessmentStore.assessment && assessmentStore.child}
-      <AssessmentPdfReport assessment={assessmentStore.assessment} child={assessmentStore.child} />
+    {#if assessmentStore.assessment && assessmentStore.patient}
+      <AssessmentPdfReport assessment={assessmentStore.assessment} patient={assessmentStore.patient} />
     {/if}
 
     <a href="/history/" class="btn-history">查看評估紀錄</a>

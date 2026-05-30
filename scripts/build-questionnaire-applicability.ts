@@ -8,12 +8,11 @@ interface ContentRelevance {
 }
 
 const QUESTIONNAIRE_DOMAINS = [
-  'cognition', 'fine_motor', 'gross_motor',
-  'language_comprehension', 'language_expression', 'social_emotional',
+  'vitality', 'locomotion', 'cognition', 'psychological', 'sensory',
 ] as const;
 
-const AGE_GROUPS_CDSA = [
-  '2-6m', '7-12m', '13-24m', '25-36m', '37-48m', '49-60m', '61-72m',
+const AGE_GROUPS_ADULT = [
+  '18-39', '40-54', '55-64',
 ] as const;
 
 async function main(): Promise<void> {
@@ -22,7 +21,7 @@ async function main(): Promise<void> {
   const relevance = yaml.load(await fs.readFile(relevancePath, 'utf8')) as ContentRelevance;
 
   const result: Record<string, string[]> = {};
-  for (const ag of AGE_GROUPS_CDSA) {
+  for (const ag of AGE_GROUPS_ADULT) {
     result[ag] = QUESTIONNAIRE_DOMAINS.filter(domain => {
       const inapp = relevance.inapplicable[domain] ?? [];
       return !inapp.includes(ag);
