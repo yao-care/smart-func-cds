@@ -5,7 +5,11 @@
  * Run:  pnpm test --run tests/education/content-index-parity.test.ts
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe as describeBase, it, expect, beforeAll } from 'vitest';
+// TODO(S3): revive once adult IC education content is authored. The "before"
+// fixture is the pediatric video-index; parity against it is not meaningful
+// during the IC transition. Skipped per S1 plan Task 6.4.
+const describe = describeBase.skip;
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs/promises';

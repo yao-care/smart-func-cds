@@ -1,23 +1,11 @@
 <script lang="ts">
   import StepIndicator from './StepIndicator.svelte';
-  import ChildProfile from './ChildProfile.svelte';
+  import PatientProfile from './PatientProfile.svelte';
   import QuestionnaireModule from './QuestionnaireModule.svelte';
-  import GameModule from './GameModule.svelte';
-  import VoiceModule from './VoiceModule.svelte';
-  import VideoModule from './VideoModule.svelte';
-  import DrawingModule from './DrawingModule.svelte';
   import ResultView from './ResultView.svelte';
-  import { tick } from 'svelte';
-  import { assessmentStore, STEP_LABELS, type AssessmentStep, type SkippableModule } from '../../lib/stores/assessment.svelte';
+  import { assessmentStore, STEP_LABELS, type AssessmentStep } from '../../lib/stores/assessment.svelte';
   import { getIncompleteAssessments } from '../../lib/db/assessments';
   import type { Assessment } from '../../lib/db/schema';
-  import type { CardItem } from '../../engine/cdsa/card-selector';
-
-  interface Props {
-    cards?: CardItem[];
-  }
-
-  let { cards = [] }: Props = $props();
 
   let incompleteAssessments = $state<Assessment[]>([]);
   let showResume = $state(true);
@@ -26,13 +14,6 @@
     getIncompleteAssessments().then(list => {
       incompleteAssessments = list;
     });
-  });
-
-  $effect(() => {
-    const current = assessmentStore.currentStep;
-    if (assessmentStore.skippedModules.has(current as SkippableModule)) {
-      tick().then(() => assessmentStore.nextStep());
-    }
   });
 
   async function handleResume(id: string) {
@@ -44,12 +25,24 @@
     assessmentStore.reset();
     showResume = false;
   }
+
+  async function handleProfileComplete(profile: {
+    name: string;
+    gender: 'male' | 'female' | 'other';
+    birthDate: string;
+  }) {
+    await assessmentStore.startNew({
+      birthDate: profile.birthDate,
+      gender: profile.gender,
+      nickName: profile.name,
+    });
+  }
 </script>
 
 <div class="assessment-shell">
   <StepIndicator
-    steps={assessmentStore.effectiveSteps.map(s => STEP_LABELS[s as AssessmentStep])}
-    currentStep={assessmentStore.effectiveStepIndex}
+    steps={assessmentStore.steps.map(s => STEP_LABELS[s as AssessmentStep])}
+    currentStep={assessmentStore.currentStepIndex}
   />
 
   <div class="step-content">
@@ -71,22 +64,10 @@
       </div>
 
     {:else if assessmentStore.currentStep === 'profile'}
-      <ChildProfile />
+      <PatientProfile onComplete={handleProfileComplete} />
 
     {:else if assessmentStore.currentStep === 'questionnaire'}
       <QuestionnaireModule />
-
-    {:else if assessmentStore.currentStep === 'game'}
-      <GameModule {cards} />
-
-    {:else if assessmentStore.currentStep === 'voice'}
-      <VoiceModule />
-
-    {:else if assessmentStore.currentStep === 'video'}
-      <VideoModule />
-
-    {:else if assessmentStore.currentStep === 'drawing'}
-      <DrawingModule />
 
     {:else if assessmentStore.currentStep === 'result'}
       <ResultView />

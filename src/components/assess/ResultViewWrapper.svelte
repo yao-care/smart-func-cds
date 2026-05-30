@@ -3,10 +3,10 @@
   import RadarChart from './RadarChart.svelte';
   import EducationMatch from './EducationMatch.svelte';
   import AssessmentPdfReport from './AssessmentPdfReport.svelte';
-  import { deriveCdsaTriggers } from '$lib/education/trigger-derivation';
-  import { ageGroupCDSA } from '$lib/utils/age-groups';
+  import { deriveFuncTriggers } from '$lib/education/trigger-derivation';
+  import { ageGroupAdult } from '$lib/utils/age-groups';
   import TriggerVideoList from '../education/TriggerVideoList.svelte';
-  import type { Child } from '../../lib/db/schema';
+  import type { AssessmentPatient } from '../../lib/db/schema';
 
   // Stand-alone result page entry. Reads ?id= from the URL, loads the
   // stored assessment from IndexedDB, and renders the parent-facing
@@ -15,24 +15,27 @@
   let loading = $state(true);
   let error = $state<'invalid' | 'not_found' | null>(null);
   let assessment = $state<Assessment | null>(null);
-  let child = $state<Child | null>(null);
+  let child = $state<AssessmentPatient | null>(null);
 
   const categoryLabels: Record<string, string> = {
-    normal: '正常',
-    monitor: '追蹤觀察',
-    refer: '建議轉介',
+    normal: '功能良好',
+    observe: '建議觀察',
+    consult: '建議諮詢醫師',
+    incomplete: '評估未完成',
   };
 
   const categoryColors: Record<string, string> = {
-    normal: 'var(--accent)',
-    monitor: 'var(--warn)',
-    refer: 'var(--danger)',
+    normal: 'var(--color-risk-normal, var(--accent))',
+    observe: 'var(--color-risk-advisory, var(--warn))',
+    consult: 'var(--color-risk-warning, var(--danger))',
+    incomplete: 'var(--text)',
   };
 
   const categoryBgColors: Record<string, string> = {
     normal: 'color-mix(in srgb, var(--accent) 12%, var(--bg))',
-    monitor: 'color-mix(in srgb, var(--warn) 12%, var(--bg))',
-    refer: 'color-mix(in srgb, var(--danger) 14%, var(--bg))',
+    observe: 'color-mix(in srgb, var(--warn) 12%, var(--bg))',
+    consult: 'color-mix(in srgb, var(--danger) 14%, var(--bg))',
+    incomplete: 'color-mix(in srgb, var(--text) 6%, var(--bg))',
   };
 
   $effect(() => {
@@ -49,7 +52,7 @@
           return;
         }
         assessment = a;
-        const c = await db.children.get(a.childId);
+        const c = await db.assessmentPatients.get(a.patientId);
         if (c) child = c;
       } finally {
         loading = false;
@@ -59,44 +62,21 @@
 
   const triageResult = $derived(assessment?.triageResult ?? null);
 
-  const domainScores = $derived.by(() => {
-    if (!triageResult?.details) return [];
-    const buckets: Record<string, { zSum: number; zCount: number; hasAnomaly: boolean }> = {};
-    for (const d of triageResult.details) {
-      if (!buckets[d.domain]) buckets[d.domain] = { zSum: 0, zCount: 0, hasAnomaly: false };
-      if (d.directionalZ !== null && d.directionalZ !== undefined) {
-        buckets[d.domain].zSum += d.directionalZ;
-        buckets[d.domain].zCount++;
-      }
-      if (d.isAnomaly) buckets[d.domain].hasAnomaly = true;
-    }
-    return Object.entries(buckets).map(([domain, b]) => {
-      const avgZ = b.zCount > 0 ? b.zSum / b.zCount : 0;
-      const score = Math.max(0, Math.min(100, Math.round(50 + 10 * avgZ)));
-      return { domain, score, hasAnomaly: b.hasAnomaly };
-    });
-  });
-
-  const anomalyDomains = $derived(
-    triageResult?.details?.filter((d) => d.isAnomaly).map((d) => d.domain) ?? [],
+  const domainScores = $derived.by(() =>
+    (triageResult?.domainScores ?? []).map((d) => ({
+      domain: d.domain,
+      score: d.score,
+      band: d.band,
+    })),
   );
 
-  const ageGroup = $derived(child?.birthDate ? ageGroupCDSA(child.birthDate) : null);
+  const flaggedDomains = $derived(triageResult?.flaggedDomains ?? []);
+
+  const ageGroup = $derived(child?.birthDate ? ageGroupAdult(child.birthDate) : null);
 
   const videoTriggers = $derived.by(() => {
-    if (!triageResult || !child?.birthDate) return [];
-    const ageGroup = ageGroupCDSA(child.birthDate);
-    // Synthesise a TriageResult-compatible shape from stored triageResult
-    return deriveCdsaTriggers(
-      {
-        category: triageResult.category,
-        confidence: triageResult.confidence,
-        summary: triageResult.summary,
-        anomalyCount: triageResult.anomalyCount ?? 0,
-        details: triageResult.details ?? [],
-      },
-      ageGroup,
-    );
+    if (!triageResult || !ageGroup) return [];
+    return deriveFuncTriggers(triageResult, ageGroup);
   });
 </script>
 
@@ -115,7 +95,7 @@
 {:else if assessment && triageResult}
   <div class="result-view">
     <div class="disclaimer" role="alert">
-      本評估結果僅供參考，不構成醫療診斷。如有疑慮，請諮詢專業兒科醫師。
+      本評估結果僅供參考，不構成醫療診斷。如有疑慮，請諮詢專業醫療人員。
     </div>
 
     <div
@@ -131,17 +111,17 @@
 
     {#if domainScores.length > 0}
       <section class="radar-section" aria-label="各面向評估結果">
-        <h3>各面向評估</h3>
+        <h3>五大內在能力面向</h3>
         <RadarChart data={domainScores} />
       </section>
     {/if}
 
-    {#if ageGroup && (anomalyDomains.length > 0 || triageResult.category !== 'normal')}
+    {#if ageGroup && (flaggedDomains.length > 0 || triageResult.category !== 'normal')}
       <section class="education-section" aria-label="衛教建議">
         <h3>建議閱讀</h3>
         <EducationMatch
           category={triageResult.category}
-          domains={anomalyDomains.length > 0 ? [...new Set(anomalyDomains)] : ['behavior']}
+          domains={flaggedDomains.length > 0 ? [...new Set(flaggedDomains)] : ['vitality']}
           ageGroup={ageGroup}
         />
       </section>
@@ -156,7 +136,7 @@
 
     <div class="result-actions">
       {#if child}
-        <AssessmentPdfReport {assessment} {child} />
+        <AssessmentPdfReport {assessment} patient={child} />
       {/if}
       <a href="/history/" class="btn-history">查看評估紀錄</a>
       <a href="/assess/" class="btn-home">開始新評估</a>

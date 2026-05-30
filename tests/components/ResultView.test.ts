@@ -2,16 +2,17 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/svelte';
 import ResultView from '../../src/components/assess/ResultView.svelte';
 import { assessmentStore } from '../../src/lib/stores/assessment.svelte';
-import type { Child, Assessment } from '../../src/lib/db/schema';
+import type { AssessmentPatient, Assessment } from '../../src/lib/db/schema';
+import type { DomainScore, IndicatorScore } from '../../src/engine/func/scorer';
 
-/** Build a minimal Child whose age (derived from birthDate) falls in 25-36m. */
-function makeChild(birthOffsetMonths: number): Child {
+/** Build a minimal adult patient (age derived from birthDate falls in 18-39). */
+function makePatient(birthOffsetYears: number): AssessmentPatient {
   const birth = new Date();
-  birth.setMonth(birth.getMonth() - birthOffsetMonths);
+  birth.setFullYear(birth.getFullYear() - birthOffsetYears);
   return {
-    id: 'test-child',
-    birthDate: birth,
-    sex: 'male',
+    id: 'test-patient',
+    birthDate: birth.toISOString().slice(0, 10),
+    gender: 'male',
     createdAt: new Date(),
   };
 }
@@ -19,12 +20,23 @@ function makeChild(birthOffsetMonths: number): Child {
 function makeAssessment(): Assessment {
   return {
     id: 'test-assess',
-    childId: 'test-child',
-    status: 'in-progress',
-    currentStep: 6,
+    patientId: 'test-patient',
+    status: 'started',
+    language: 'zh-TW',
+    currentStep: 2,
     startedAt: new Date(),
     fhirSubmitted: false,
-  };
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  } as Assessment;
+}
+
+function ds(domain: DomainScore['domain'], band: DomainScore['band'], score: number): DomainScore {
+  return { domain, score, band, contributingIndicators: 1, missingIndicators: [] };
+}
+
+function is(domain: IndicatorScore['domain'], score: number): IndicatorScore {
+  return { indicatorId: `${domain}.x`, domain, style: 'capacity', kind: 'likert', score };
 }
 
 describe('ResultView', () => {
@@ -43,61 +55,37 @@ describe('ResultView', () => {
     expect(screen.getByText(/正在產生評估結果/)).toBeInTheDocument();
   });
 
-  it('still shows the computing placeholder while triage is pending', () => {
-    // With store fields set, triage starts but is async; first render is the
-    // placeholder. Async resolve verified separately to keep this fast.
-    assessmentStore.child = makeChild(30); // 30 mo → 25-36m
-    assessmentStore.assessment = makeAssessment();
-    render(ResultView);
-    expect(screen.getByText(/正在產生評估結果/)).toBeInTheDocument();
-  });
-
-  it('renders one of the three category labels once triage resolves', async () => {
-    assessmentStore.child = makeChild(30);
+  it('renders one of the four IC category labels once triage resolves', async () => {
+    assessmentStore.patient = makePatient(30);
     assessmentStore.assessment = makeAssessment();
     assessmentStore.partialAnalysis = {
-      questionnaireScores: { gross_motor: 4, fine_motor: 4 },
-      questionnaireMaxScores: { gross_motor: 4, fine_motor: 4 },
+      indicatorScores: [is('vitality', 90), is('locomotion', 90), is('cognition', 90), is('psychological', 90), is('sensory', 90)],
+      domainScores: [
+        ds('vitality', 'high', 90), ds('locomotion', 'high', 90), ds('cognition', 'high', 90),
+        ds('psychological', 'high', 90), ds('sensory', 'high', 90),
+      ],
+      applicableWeights: {},
     };
 
     render(ResultView);
 
-    // computeTriage is async but resolves quickly (no external IO).
-    // findByText polls until visible.
-    const label = await screen.findByText(/正常|追蹤觀察|建議轉介/);
+    const label = await screen.findByRole('heading', { name: /功能良好|建議觀察|建議諮詢醫師|評估未完成/ });
     expect(label).toBeInTheDocument();
-
-    // The radar / education match / pdf sections are gated by computing
-    // state — finding the category label confirms isComputing flipped false.
     expect(screen.queryByText(/正在產生評估結果/)).not.toBeInTheDocument();
   });
 
   it('renders a summary paragraph from the triage result', async () => {
-    assessmentStore.child = makeChild(30);
+    assessmentStore.patient = makePatient(30);
     assessmentStore.assessment = makeAssessment();
     assessmentStore.partialAnalysis = {
-      questionnaireScores: { gross_motor: 4 },
-      questionnaireMaxScores: { gross_motor: 4 },
+      indicatorScores: [is('vitality', 90), is('locomotion', 90), is('cognition', 90)],
+      domainScores: [ds('vitality', 'high', 90), ds('locomotion', 'high', 90), ds('cognition', 'high', 90)],
+      applicableWeights: {},
     };
 
     const { container } = render(ResultView);
-    await screen.findByText(/正常|追蹤觀察|建議轉介/);
+    await screen.findByRole('heading', { name: /功能良好|建議觀察|建議諮詢醫師|評估未完成/ });
 
-    // After resolution, the result section should contain non-empty text.
-    // The triage summary is a sentence — assert there's substantive content.
-    expect(container.textContent ?? '').toMatch(/評估|建議|追蹤|正常|轉介/);
-  });
-
-  it.skip('renders all 6 questionnaire domains in radar when all provided', () => {
-    // TODO: setup mocking pattern for triageResult emission to ResultView
-    // The radar chart is populated via triageResult.details which is computed
-    // inside ResultView's $effect via computeTriage(). To test the 6-domain
-    // radar we need to either:
-    //   1. inject triageResult directly into assessmentStore (bypassing the effect), or
-    //   2. mock computeTriage to return a controlled TriageResult.
-    // Neither is straightforward with the current architecture where
-    // triageResult is private state inside ResultView. Consider exposing
-    // assessmentStore.triageResult as the single truth source and have
-    // ResultView set it there upon completion.
+    expect(container.textContent ?? '').toMatch(/評估|建議|功能|良好|觀察|諮詢/);
   });
 });

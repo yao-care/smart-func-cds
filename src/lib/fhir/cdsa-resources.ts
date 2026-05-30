@@ -1,61 +1,61 @@
-import type { TriageResult } from '../../engine/cdsa/triage';
-import type { Assessment, Child } from '../db/schema';
+import type { TriageResult } from '../../engine/func/triage';
+import type { Assessment, AssessmentPatient } from '../db/schema';
 
 /** Project-owned coding/identifier systems.
- *  Avoids the prior LOINC mapping which used codes that don't actually
- *  exist in the LOINC code system. CDSA is an in-house instrument; codes
- *  are namespaced under the project domain. */
-export const CODE_SYSTEM = 'https://smart-pedi-cds.yao.care/code';
-export const ID_SYSTEM = 'https://smart-pedi-cds.yao.care/assessment';
-export const CONFIDENCE_EXT_URL = 'https://smart-pedi-cds.yao.care/extension/triage-confidence';
+ *  Func IC is an in-house instrument; codes are namespaced under the project
+ *  domain. (S1 minimal write-back; full FHIR profiling deferred to S2.) */
+export const CODE_SYSTEM = 'https://smart-func-cds.yao.care/code';
+export const ID_SYSTEM = 'https://smart-func-cds.yao.care/assessment';
+export const CONFIDENCE_EXT_URL = 'https://smart-func-cds.yao.care/extension/triage-confidence';
 
 const REPORT_CODE = {
   system: CODE_SYSTEM,
-  code: 'cdsa-assessment',
-  display: 'CDSA 兒童發展智慧評估',
+  code: 'func-assessment',
+  display: '成人功能健康評估（內在能力 IC）',
 };
 
 /**
- * Build a FHIR Patient resource from CDSA Child data.
+ * Build a FHIR Patient resource from assessment-subject data.
  * Note: minimal — only what's needed for the assessment context.
  */
-export function buildChildPatient(child: Child): object {
+export function buildSubjectPatient(patient: AssessmentPatient): object {
   return {
     resourceType: 'Patient',
-    id: child.id,
-    birthDate: child.birthDate,
-    gender: child.gender === 'other' ? 'unknown' : child.gender,
+    id: patient.id,
+    birthDate: patient.birthDate,
+    gender: patient.gender === 'other' ? 'unknown' : patient.gender,
   };
 }
 
-function observationCode(domain: string, metric: string) {
+function observationCode(domain: string) {
   return {
     system: CODE_SYSTEM,
-    code: `cdsa-${domain}-${metric}`,
-    display: `CDSA ${domain}::${metric}`,
+    code: `func-${domain}`,
+    display: `Func IC ${domain}`,
   };
 }
 
 /**
- * Build FHIR Observation resources for each assessment metric.
- * Each detail from triage result becomes a separate Observation, identified
- * by `${assessmentId}::${domain}::${metric}` under the project ID system so
- * the resolver can reverse-map a Bundle back to an Assessment.
+ * Build FHIR Observation resources for each scored IC domain.
+ * Each domain score becomes a separate Observation, identified by
+ * `${assessmentId}::${domain}` under the project ID system so the resolver can
+ * reverse-map a Bundle back to an Assessment.
  */
 export function buildAssessmentObservations(
   assessment: Assessment,
-  childId: string,
+  patientId: string,
   triageResult: TriageResult,
 ): object[] {
   const observations: object[] = [];
 
-  for (const detail of triageResult.details) {
+  for (const d of triageResult.domainScores) {
+    const isLow = d.band !== 'high';
     observations.push({
       resourceType: 'Observation',
       identifier: [
         {
           system: ID_SYSTEM,
-          value: `${assessment.id}::${detail.domain}::${detail.metric}`,
+          value: `${assessment.id}::${d.domain}`,
         },
       ],
       status: 'final',
@@ -71,29 +71,27 @@ export function buildAssessmentObservations(
         },
       ],
       code: {
-        coding: [observationCode(detail.domain, detail.metric)],
-        text: `CDSA ${detail.domain}::${detail.metric}`,
+        coding: [observationCode(d.domain)],
+        text: `Func IC ${d.domain}`,
       },
-      subject: { reference: `Patient/${childId}` },
+      subject: { reference: `Patient/${patientId}` },
       effectiveDateTime: new Date().toISOString(),
       valueQuantity: {
-        value: detail.value,
-        unit: detail.zScore !== null ? 'z-score' : 'score',
+        value: d.score,
+        unit: 'score',
       },
       interpretation: [
         {
           coding: [
             {
               system: 'http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation',
-              code: detail.isAnomaly ? 'A' : 'N',
-              display: detail.isAnomaly ? 'Abnormal' : 'Normal',
+              code: isLow ? 'L' : 'N',
+              display: isLow ? 'Low' : 'Normal',
             },
           ],
         },
       ],
-      note: detail.zScore !== null
-        ? [{ text: `Z-score: ${detail.zScore.toFixed(2)}` }]
-        : undefined,
+      note: [{ text: `band: ${d.band}` }],
     });
   }
 
@@ -107,7 +105,7 @@ export function buildAssessmentObservations(
  */
 export function buildTriageDiagnosticReport(
   assessment: Assessment,
-  childId: string,
+  patientId: string,
   triageResult: TriageResult,
   observationIds: string[],
 ): object {
@@ -131,6 +129,16 @@ export function buildTriageDiagnosticReport(
       }
     : { effectiveDateTime: startedAt.toISOString() };
 
+  // SNOMED mapping for the 4-category IC triage. (Approximate; S2 will refine.)
+  const snomed = (() => {
+    switch (triageResult.category) {
+      case 'normal': return { code: '17621005', display: 'Normal' };
+      case 'observe': return { code: '394848005', display: 'Follow-up' };
+      case 'consult': return { code: '3457005', display: 'Referral' };
+      case 'incomplete': return { code: '385660001', display: 'Not done' };
+    }
+  })();
+
   return {
     resourceType: 'DiagnosticReport',
     identifier: [
@@ -142,14 +150,14 @@ export function buildTriageDiagnosticReport(
         coding: [
           {
             system: 'http://terminology.hl7.org/CodeSystem/v2-0074',
-            code: 'DEV',
-            display: 'Developmental',
+            code: 'OTH',
+            display: 'Other',
           },
         ],
       },
     ],
     code: { coding: [REPORT_CODE] },
-    subject: { reference: `Patient/${childId}` },
+    subject: { reference: `Patient/${patientId}` },
     ...effective,
     issued: new Date().toISOString(),
     result: observationIds.map(id => ({ reference: `Observation/${id}` })),
@@ -165,12 +173,8 @@ export function buildTriageDiagnosticReport(
         coding: [
           {
             system: 'http://snomed.info/sct',
-            code: triageResult.category === 'normal' ? '17621005'
-              : triageResult.category === 'monitor' ? '394848005'
-              : '3457005',
-            display: triageResult.category === 'normal' ? 'Normal'
-              : triageResult.category === 'monitor' ? 'Follow-up'
-              : 'Referral',
+            code: snomed.code,
+            display: snomed.display,
           },
         ],
       },

@@ -6,12 +6,12 @@
     resolveItemDisplay,
   } from '../../lib/db/recommendations';
   import type { RecommendationCategory } from '../../lib/db/schema';
-  import type { AgeGroupCDSA } from '../../lib/utils/age-groups';
+  import type { AgeGroupAdult } from '../../lib/utils/age-groups';
 
   interface Props {
     category: RecommendationCategory;
     domains: string[];
-    ageGroup: AgeGroupCDSA;
+    ageGroup: AgeGroupAdult;
   }
 
   let { category, domains, ageGroup }: Props = $props();
@@ -70,7 +70,7 @@
     {/each}
   </div>
 {:else}
-  <p class="no-recommendations">目前無特別建議。持續關注孩子的發展即可。</p>
+  <p class="no-recommendations">目前無特別建議。維持良好生活習慣即可。</p>
 {/if}
 
 <style>

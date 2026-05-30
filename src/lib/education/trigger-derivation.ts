@@ -1,52 +1,33 @@
-import type { TriageResult } from '../../engine/cdsa/triage';
-import type { AgeGroupCDSA } from '../utils/age-groups';
-import type { IndicatorResult } from '../../engine/workers/rule-engine.worker';
-import { CDSA_DOMAIN_NAMES, CDSS_INDICATOR_NAMES } from './schemas';
+import type { TriageResult } from '../../engine/func/triage';
+import type { AgeGroupAdult } from '../utils/age-groups';
+import { IC_DOMAIN_NAMES } from './schemas';
 
-type AgeGroupCDSS = 'infant' | 'toddler' | 'preschool';
+const KNOWN_DOMAINS = new Set<string>(IC_DOMAIN_NAMES);
 
-const KNOWN_DOMAINS = new Set<string>(CDSA_DOMAIN_NAMES);
-const KNOWN_INDICATORS = new Set<string>(CDSS_INDICATOR_NAMES);
-
-export function deriveCdsaTriggers(
+/**
+ * Derive content-relevance trigger strings from an IC triage result.
+ * - Triage-level: `func.triage.<category>.<ageGroup>` (skip 'normal').
+ * - Domain-level: `func.domain.<domain>.<band>.<ageGroup>` for each flagged
+ *   (non-high) domain, using the domain's band (low | moderate).
+ */
+export function deriveFuncTriggers(
   triage: TriageResult,
-  ageGroup: AgeGroupCDSA,
+  ageGroup: AgeGroupAdult,
 ): string[] {
   const triggers: string[] = [];
   if (triage.category !== 'normal') {
-    triggers.push(`cdsa.triage.${triage.category}.${ageGroup}`);
+    triggers.push(`func.triage.${triage.category}.${ageGroup}`);
   }
-  const anomalyDomains = new Set(
-    triage.details.filter(d => d.isAnomaly).map(d => d.domain),
-  );
-  for (const domain of anomalyDomains) {
-    if (!KNOWN_DOMAINS.has(domain)) {
+  for (const d of triage.domainScores) {
+    if (d.band === 'high') continue;
+    if (!KNOWN_DOMAINS.has(d.domain)) {
       if (import.meta.env.DEV) {
-        throw new Error(`Unknown CDSA domain: ${domain}. Update KNOWN_DOMAINS + yaml.`);
+        throw new Error(`Unknown IC domain: ${d.domain}. Update IC_DOMAIN_NAMES + yaml.`);
       }
-      console.warn(`[trigger-derivation] Unknown domain: ${domain}, skipping`);
+      console.warn(`[trigger-derivation] Unknown domain: ${d.domain}, skipping`);
       continue;
     }
-    triggers.push(`cdsa.domain.${domain}.anomaly.${ageGroup}`);
-  }
-  return triggers;
-}
-
-export function deriveCdssTriggers(
-  indicators: IndicatorResult[],
-  ageGroup: AgeGroupCDSS,
-): string[] {
-  const triggers: string[] = [];
-  for (const ir of indicators) {
-    if (ir.level === 'normal') continue;
-    if (!KNOWN_INDICATORS.has(ir.indicator)) {
-      if (import.meta.env.DEV) {
-        throw new Error(`Unknown CDSS indicator: ${ir.indicator}`);
-      }
-      console.warn(`[trigger-derivation] Unknown indicator: ${ir.indicator}, skipping`);
-      continue;
-    }
-    triggers.push(`cdss.${ir.indicator}.${ir.level}.${ageGroup}`);
+    triggers.push(`func.domain.${d.domain}.${d.band}.${ageGroup}`);
   }
   return triggers;
 }

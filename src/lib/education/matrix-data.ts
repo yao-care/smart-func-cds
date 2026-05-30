@@ -1,13 +1,11 @@
-import { AGE_GROUPS_CDSA } from '$lib/utils/age-groups';
-export { AGE_GROUPS_CDSA } from '$lib/utils/age-groups';
+import { AGE_GROUPS_ADULT } from '$lib/utils/age-groups';
+import { IC_DOMAIN_NAMES } from './schemas';
+export { AGE_GROUPS_ADULT } from '$lib/utils/age-groups';
 
-export const CDSA_DOMAINS = [
-  'behavior', 'gross_motor', 'fine_motor', 'language',
-  'language_comprehension', 'language_expression', 'cognition', 'social_emotional',
-] as const;
-export type CdsaDomain = typeof CDSA_DOMAINS[number];
-export type AgeGroupCDSA = typeof AGE_GROUPS_CDSA[number];
-export type MatrixKey = `${CdsaDomain}:${AgeGroupCDSA}`;
+export const IC_DOMAINS = IC_DOMAIN_NAMES;
+export type IcDomain = typeof IC_DOMAINS[number];
+export type AgeGroupAdult = typeof AGE_GROUPS_ADULT[number];
+export type MatrixKey = `${IcDomain}:${AgeGroupAdult}`;
 
 export type MatrixCellData = {
   inapplicable: boolean;
@@ -24,30 +22,31 @@ export function buildMatrixData(triggers: TriggerMap): MatrixData {
 
   // Initialise all cells as applicable (empty → contributable).
   // Source of truth for inapplicability is src/data/education/content-relevance.yaml,
-  // whose inapplicable section is compiled into cdsa.domain triggers with
+  // whose inapplicable section is compiled into func.domain triggers with
   // inapplicable:true; only those flip a cell back to inapplicable below.
-  for (const domain of CDSA_DOMAINS) {
-    for (const age of AGE_GROUPS_CDSA) {
+  for (const domain of IC_DOMAINS) {
+    for (const age of AGE_GROUPS_ADULT) {
       data[`${domain}:${age}`] = { inapplicable: false, articleSlugs: [], videoIds: [] };
     }
   }
 
-  // Populate from cdsa.domain.* triggers only. Articles (educationSlug) and videos
-  // are independent — a cell may have an article, a video, both, or neither.
+  // Populate from func.domain.<domain>.<band>.<ageGroup> triggers only.
+  // A single cell aggregates across both bands (low | moderate).
   for (const [trigger, entry] of Object.entries(triggers)) {
     const parts = trigger.split('.');
-    if (parts[0] !== 'cdsa' || parts[1] !== 'domain' || parts[3] !== 'anomaly') continue;
+    // func . domain . <domain> . <band> . <ageGroup>
+    if (parts[0] !== 'func' || parts[1] !== 'domain' || parts.length !== 5) continue;
     const cell = data[`${parts[2]}:${parts[4]}`];
     if (!cell) continue;
-    cell.inapplicable = entry.inapplicable;
-    if (!entry.inapplicable) {
-      cell.videoIds = [...entry.videoIds];
-      // 列出該情境所有相關文章（含主文章與補充推薦）；舊資料無 articleSlugs 時退回單篇主文章。
-      if (entry.articleSlugs && entry.articleSlugs.length) {
-        cell.articleSlugs = [...entry.articleSlugs];
-      } else if (entry.educationSlug) {
-        cell.articleSlugs = [entry.educationSlug];
-      }
+    if (entry.inapplicable) {
+      cell.inapplicable = true;
+      continue;
+    }
+    cell.videoIds = [...new Set([...cell.videoIds, ...entry.videoIds])];
+    if (entry.articleSlugs && entry.articleSlugs.length) {
+      cell.articleSlugs = [...new Set([...cell.articleSlugs, ...entry.articleSlugs])];
+    } else if (entry.educationSlug) {
+      cell.articleSlugs = [...new Set([...cell.articleSlugs, entry.educationSlug])];
     }
   }
 

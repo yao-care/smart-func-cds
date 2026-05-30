@@ -1,15 +1,15 @@
 import { z } from 'astro/zod';   // = zod v4
-import { AGE_GROUPS_CDSA } from '../utils/age-groups';
+import { AGE_GROUPS_ADULT } from '../utils/age-groups';
 
-// --- 可重用列舉常數（單一源）---
-export const CDSA_DOMAIN_NAMES = [
-  'behavior', 'gross_motor', 'fine_motor', 'language',
-  'cognition', 'language_comprehension', 'language_expression', 'social_emotional',
+// --- IC domain (smart-func-cds 成人功能健康評估) ---
+export const IC_DOMAIN_NAMES = [
+  'vitality',      // 身體活力
+  'locomotion',    // 行動功能
+  'cognition',     // 認知功能
+  'psychological', // 心理功能
+  'sensory',       // 感官功能
 ] as const;
-export const CDSS_INDICATOR_NAMES = [
-  'heart_rate', 'spo2', 'respiratory_rate', 'temperature',
-  'sleep_quality', 'activity_level', 'sugar_intake',
-] as const;
+export type ICDomain = typeof IC_DOMAIN_NAMES[number];
 
 // --- 影片元資料 ---
 export const videoCatalogItemSchema = z.object({
@@ -32,56 +32,44 @@ export const videoCatalogItemSchema = z.object({
 });
 
 // --- Trigger 映射（discriminatedUnion + cross-field refine）---
-const KNOWN_DOMAIN_ENUM = z.enum(CDSA_DOMAIN_NAMES);
-const CDSS_INDICATOR_ENUM = z.enum(CDSS_INDICATOR_NAMES);
-const CDSS_LEVEL_ENUM = z.enum(['advisory', 'warning', 'critical']);
-const CDSS_AGE_ENUM = z.enum(['infant', 'toddler', 'preschool']);
 const videoIdsField = z.array(z.string().regex(/^[A-Za-z0-9_-]{11}$/)).default([]);
 
-export const cdsaTriageEntrySchema = z.object({
+// --- IC trigger schemas (smart-func-cds) ---
+const IC_DOMAIN_ENUM = z.enum(IC_DOMAIN_NAMES);
+const IC_AGE_GROUP_ENUM = z.enum(AGE_GROUPS_ADULT);
+const IC_BAND_ENUM = z.enum(['low', 'moderate']);
+const IC_TRIAGE_CATEGORY_ENUM = z.enum(['normal', 'observe', 'consult', 'incomplete']);
+
+export const funcTriageEntrySchema = z.object({
   trigger: z.string(),
   category: z.literal('triage'),
-  triageCategory: z.enum(['monitor', 'refer']),
-  ageGroup: z.enum(AGE_GROUPS_CDSA),
+  triageCategory: IC_TRIAGE_CATEGORY_ENUM,
+  ageGroup: IC_AGE_GROUP_ENUM,
   educationSlug: z.string().optional(),
   inapplicable: z.literal(true).optional(),
   videoIds: videoIdsField,
 }).refine(
-  d => d.trigger === `cdsa.triage.${d.triageCategory}.${d.ageGroup}`,
+  d => d.trigger === `func.triage.${d.triageCategory}.${d.ageGroup}`,
   { message: 'trigger 字串與 triageCategory + ageGroup 不一致', path: ['trigger'] },
 );
 
-export const cdsaDomainEntrySchema = z.object({
+export const funcDomainEntrySchema = z.object({
   trigger: z.string(),
   category: z.literal('domain'),
-  domain: KNOWN_DOMAIN_ENUM,
-  ageGroup: z.enum(AGE_GROUPS_CDSA),
+  domain: IC_DOMAIN_ENUM,
+  band: IC_BAND_ENUM,
+  ageGroup: IC_AGE_GROUP_ENUM,
   educationSlug: z.string().optional(),
   inapplicable: z.literal(true).optional(),
   videoIds: videoIdsField,
 }).refine(
-  d => d.trigger === `cdsa.domain.${d.domain}.anomaly.${d.ageGroup}`,
-  { message: 'trigger 字串與 domain + ageGroup 不一致', path: ['trigger'] },
-);
-
-export const cdssVitalSignEntrySchema = z.object({
-  trigger: z.string(),
-  category: z.literal('vital-sign'),
-  indicator: CDSS_INDICATOR_ENUM,
-  level: CDSS_LEVEL_ENUM,
-  ageGroup: CDSS_AGE_ENUM,
-  educationSlug: z.string().optional(),
-  inapplicable: z.literal(true).optional(),
-  videoIds: videoIdsField,
-}).refine(
-  d => d.trigger === `cdss.${d.indicator}.${d.level}.${d.ageGroup}`,
-  { message: 'trigger 字串與 indicator + level + ageGroup 不一致', path: ['trigger'] },
+  d => d.trigger === `func.domain.${d.domain}.${d.band}.${d.ageGroup}`,
+  { message: 'trigger 字串與 domain + band + ageGroup 不一致', path: ['trigger'] },
 );
 
 export const triggerEntrySchema = z.discriminatedUnion('category', [
-  cdsaTriageEntrySchema,
-  cdsaDomainEntrySchema,
-  cdssVitalSignEntrySchema,
+  funcTriageEntrySchema,
+  funcDomainEntrySchema,
 ]);
 
 // --- Runtime slim shape（reproducible JSON）---
@@ -117,13 +105,14 @@ export const runtimeIndexSchema = z.object({
 });
 
 // --- Content-relevance schema（單一源）---
-export const SEVERITY_NAMES = ['normal', 'monitor', 'refer'] as const;
+// func triage severities that may key a content cell (band-level)
+export const FUNC_TRIAGE_SEVERITY = ['observe', 'consult'] as const;
 
 // cell / 情境導向：每個 trigger 列該格內容
 const articleRefSchema = z.object({
   slug: z.string(),
-  // 只有 cdsa.domain 格的文章需要；省略時投影端預設視為 [monitor, refer]
-  severities: z.array(z.enum(SEVERITY_NAMES)).optional(),
+  // 只有 func.domain 格的文章需要；省略時投影端預設視為 [observe, consult]
+  severities: z.array(z.enum(FUNC_TRIAGE_SEVERITY)).optional(),
   browse: z.boolean().optional(),   // true = this is the cell's matrix/browse article (was the old educationSlug)
 });
 
@@ -134,7 +123,7 @@ export const triggerRelevanceSchema = z.object({
 });
 
 export const contentRelevanceSchema = z.object({
-  inapplicable: z.record(z.enum(CDSA_DOMAIN_NAMES), z.array(z.enum(AGE_GROUPS_CDSA))),
+  inapplicable: z.record(z.enum(IC_DOMAIN_NAMES), z.array(z.enum(AGE_GROUPS_ADULT))),
   triggers: z.array(triggerRelevanceSchema),
   clinicalAlertEducation: z.record(z.string(), z.array(z.string())).optional(),
 });

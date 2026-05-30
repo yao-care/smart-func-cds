@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   videoCatalogItemSchema, triggerEntrySchema,
-  cdsaTriageEntrySchema, cdsaDomainEntrySchema, cdssVitalSignEntrySchema,
+  funcTriageEntrySchema, funcDomainEntrySchema,
 } from '../../../src/lib/education/schemas';
 
 const validVideo = {
@@ -49,88 +49,90 @@ describe('videoCatalogItemSchema', () => {
 });
 
 describe('triggerEntrySchema discriminatedUnion', () => {
-  it('accepts valid cdsa.triage entry', () => {
+  it('accepts valid func.triage entry', () => {
     expect(triggerEntrySchema.parse({
-      trigger: 'cdsa.triage.refer.13-24m',
+      trigger: 'func.triage.consult.18-39',
       category: 'triage',
-      triageCategory: 'refer',
-      ageGroup: '13-24m',
+      triageCategory: 'consult',
+      ageGroup: '18-39',
       videoIds: ['abc123XYZ45'],
     })).toBeDefined();
   });
 
   it('rejects cross-field mismatch (trigger ≠ fields)', () => {
-    expect(() => cdsaTriageEntrySchema.parse({
-      trigger: 'cdsa.triage.refer.25-36m',
+    expect(() => funcTriageEntrySchema.parse({
+      trigger: 'func.triage.consult.40-54',
       category: 'triage',
-      triageCategory: 'refer',
-      ageGroup: '13-24m',
+      triageCategory: 'consult',
+      ageGroup: '18-39',
       videoIds: [],
     })).toThrow();
   });
 
-  it('accepts cdsa.domain with inapplicable: true', () => {
+  it('accepts func.domain with inapplicable: true', () => {
     expect(triggerEntrySchema.parse({
-      trigger: 'cdsa.domain.fine_motor.anomaly.2-6m',
+      trigger: 'func.domain.cognition.low.40-54',
       category: 'domain',
-      domain: 'fine_motor',
-      ageGroup: '2-6m',
+      domain: 'cognition',
+      band: 'low',
+      ageGroup: '40-54',
       inapplicable: true,
       videoIds: [],
     })).toBeDefined();
   });
 
-  it('rejects cdsa.domain with unknown domain', () => {
-    expect(() => cdsaDomainEntrySchema.parse({
-      trigger: 'cdsa.domain.unknown.anomaly.13-24m',
+  it('rejects func.domain with unknown domain', () => {
+    expect(() => funcDomainEntrySchema.parse({
+      trigger: 'func.domain.unknown.low.18-39',
       category: 'domain',
       domain: 'unknown',
-      ageGroup: '13-24m',
+      band: 'low',
+      ageGroup: '18-39',
       videoIds: [],
     })).toThrow();
   });
 
-  it('accepts cdss.vital-sign with critical', () => {
+  it('accepts func.domain with moderate band', () => {
     expect(triggerEntrySchema.parse({
-      trigger: 'cdss.spo2.critical.infant',
-      category: 'vital-sign',
-      indicator: 'spo2',
-      level: 'critical',
-      ageGroup: 'infant',
+      trigger: 'func.domain.psychological.moderate.55-64',
+      category: 'domain',
+      domain: 'psychological',
+      band: 'moderate',
+      ageGroup: '55-64',
       videoIds: [],
     })).toBeDefined();
   });
 
-  it('rejects cdss with normal level (not in enum)', () => {
-    expect(() => cdssVitalSignEntrySchema.parse({
-      trigger: 'cdss.spo2.normal.infant',
-      category: 'vital-sign',
-      indicator: 'spo2',
-      level: 'normal',
-      ageGroup: 'infant',
+  it('rejects func.triage with invalid category (not in enum)', () => {
+    expect(() => funcTriageEntrySchema.parse({
+      trigger: 'func.triage.bogus.18-39',
+      category: 'triage',
+      triageCategory: 'bogus',
+      ageGroup: '18-39',
       videoIds: [],
     })).toThrow();
   });
 
   it('rejects videoIds with invalid regex', () => {
-    expect(() => cdsaTriageEntrySchema.parse({
-      trigger: 'cdsa.triage.monitor.13-24m',
+    expect(() => funcTriageEntrySchema.parse({
+      trigger: 'func.triage.observe.18-39',
       category: 'triage',
-      triageCategory: 'monitor',
-      ageGroup: '13-24m',
+      triageCategory: 'observe',
+      ageGroup: '18-39',
       videoIds: ['SHORT'],
     })).toThrow();
   });
 
-  it('strips extra indicator field on category=domain (zod default strip)', () => {
-    const parsed = cdsaDomainEntrySchema.parse({
-      trigger: 'cdsa.domain.behavior.anomaly.13-24m',
+  it('strips extra field on category=domain (zod default strip)', () => {
+    const parsed = funcDomainEntrySchema.parse({
+      trigger: 'func.domain.vitality.low.18-39',
       category: 'domain',
-      domain: 'behavior',
-      ageGroup: '13-24m',
-      indicator: 'spo2',
+      domain: 'vitality',
+      band: 'low',
+      ageGroup: '18-39',
+      bogus: 'x',
       videoIds: [],
     });
-    expect('indicator' in parsed).toBe(false);
+    expect('bogus' in parsed).toBe(false);
   });
 });

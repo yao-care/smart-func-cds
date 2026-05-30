@@ -3,7 +3,7 @@ import { buildAssessmentObservations, buildTriageDiagnosticReport } from './cdsa
 import { markFhirSubmitted } from '../db/assessments';
 import { authStore } from '../stores/auth.svelte';
 import type { Assessment } from '../db/schema';
-import type { TriageResult } from '../../engine/cdsa/triage';
+import type { TriageResult } from '../../engine/func/triage';
 
 export interface SubmitResult {
   success: boolean;
@@ -38,7 +38,7 @@ async function postFhirResource(
  */
 export async function submitAssessmentToFhir(
   assessment: Assessment,
-  childId: string,
+  patientId: string,
   triageResult: TriageResult,
 ): Promise<SubmitResult> {
   if (!isAuthorized() || !authStore.fhirBaseUrl) {
@@ -51,7 +51,7 @@ export async function submitAssessmentToFhir(
 
   try {
     // 1. Create Observations for each metric
-    const observations = buildAssessmentObservations(assessment, childId, triageResult);
+    const observations = buildAssessmentObservations(assessment, patientId, triageResult);
 
     for (const obs of observations) {
       const result = await postFhirResource(baseUrl, 'Observation', obs, token);
@@ -61,7 +61,7 @@ export async function submitAssessmentToFhir(
     }
 
     // 2. Create DiagnosticReport referencing the Observations
-    const report = buildTriageDiagnosticReport(assessment, childId, triageResult, observationIds);
+    const report = buildTriageDiagnosticReport(assessment, patientId, triageResult, observationIds);
     const reportResult = await postFhirResource(baseUrl, 'DiagnosticReport', report, token);
     const diagnosticReportId = reportResult?.id ?? null;
 

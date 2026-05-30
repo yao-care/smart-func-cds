@@ -1,23 +1,24 @@
 <script lang="ts">
-  import type { Assessment, Child } from '../../lib/db/schema';
-  import { ageInMonths } from '../../lib/utils/age-groups';
+  import type { Assessment, AssessmentPatient } from '../../lib/db/schema';
+  import { ageInYears } from '../../lib/utils/age-groups';
   import { loadChineseFontInto } from '../../lib/pdf/font-loader';
 
   interface Props {
     assessment: Assessment;
-    child: Child;
+    patient: AssessmentPatient;
     onGenerated?: () => void;
   }
 
-  let { assessment, child, onGenerated }: Props = $props();
+  let { assessment, patient, onGenerated }: Props = $props();
 
   let generating = $state(false);
   let error = $state<string | null>(null);
 
   const categoryLabelsCn: Record<string, string> = {
-    normal: '正常',
-    monitor: '追蹤觀察',
-    refer: '建議轉介',
+    normal: '功能良好',
+    observe: '建議觀察',
+    consult: '建議諮詢醫師',
+    incomplete: '評估未完成',
   };
 
   const statusLabelsCn: Record<string, string> = {
@@ -79,7 +80,7 @@
       }
 
       // ===== Title =====
-      drawLine('兒童發展智慧評估報告', 16, 'bold', 'center');
+      drawLine('成人功能健康評估報告', 16, 'bold', 'center');
       y += 4;
       drawSeparator();
 
@@ -90,11 +91,11 @@
       const assessDate = assessment.completedAt
         ? formatDate(assessment.completedAt)
         : formatDate(assessment.startedAt);
-      const monthsAtAssess = ageInMonths(child.birthDate);
+      const yearsAtAssess = ageInYears(patient.birthDate);
 
-      drawLine(`兒童識別碼：${abbreviateId(child.id)}`, 10);
+      drawLine(`受測者識別碼：${abbreviateId(patient.id)}`, 10);
       drawLine(`評估日期：${assessDate}`, 10);
-      drawLine(`評估時月齡:${monthsAtAssess} 個月`, 10);
+      drawLine(`評估時年齡:${yearsAtAssess} 歲`, 10);
       drawLine(`狀態：${statusLabelsCn[assessment.status] ?? assessment.status}`, 10);
       y += 4;
       drawSeparator();
@@ -136,9 +137,9 @@
       doc.setFont('NotoSansTC', 'normal');
       doc.setTextColor(150, 150, 150);
       doc.text(`產製時間：${formatTimestamp(new Date())}`, margin, y);
-      doc.text('CDSA 兒童發展智慧評估系統', pageWidth - margin, y, { align: 'right' });
+      doc.text('Smart Func 成人功能健康評估', pageWidth - margin, y, { align: 'right' });
 
-      const filename = `cdsa-report-${abbreviateId(assessment.id)}-${assessDate.replace(/\//g, '')}.pdf`;
+      const filename = `func-report-${abbreviateId(assessment.id)}-${assessDate.replace(/\//g, '')}.pdf`;
       doc.save(filename);
 
       onGenerated?.();

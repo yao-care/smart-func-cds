@@ -1,51 +1,23 @@
 {
-  "13-24m": [
+  "18-39": [
     "cognition",
-    "fine_motor",
-    "gross_motor",
-    "language_comprehension",
-    "language_expression",
-    "social_emotional"
+    "locomotion",
+    "psychological",
+    "sensory",
+    "vitality"
   ],
-  "2-6m": [
-    "gross_motor"
-  ],
-  "25-36m": [
+  "40-54": [
     "cognition",
-    "fine_motor",
-    "gross_motor",
-    "language_comprehension",
-    "language_expression",
-    "social_emotional"
+    "locomotion",
+    "psychological",
+    "sensory",
+    "vitality"
   ],
-  "37-48m": [
+  "55-64": [
     "cognition",
-    "fine_motor",
-    "gross_motor",
-    "language_comprehension",
-    "language_expression",
-    "social_emotional"
-  ],
-  "49-60m": [
-    "cognition",
-    "fine_motor",
-    "gross_motor",
-    "language_comprehension",
-    "language_expression",
-    "social_emotional"
-  ],
-  "61-72m": [
-    "cognition",
-    "fine_motor",
-    "gross_motor",
-    "language_comprehension",
-    "language_expression",
-    "social_emotional"
-  ],
-  "7-12m": [
-    "fine_motor",
-    "gross_motor",
-    "language_comprehension",
-    "social_emotional"
+    "locomotion",
+    "psychological",
+    "sensory",
+    "vitality"
   ]
 }

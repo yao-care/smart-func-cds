@@ -1,4 +1,5 @@
 import type { Assessment } from '../db/schema';
+import type { TriageCategory } from '../../engine/func/triage';
 import { CODE_SYSTEM, ID_SYSTEM, CONFIDENCE_EXT_URL } from './cdsa-resources';
 
 export interface AssessmentSummary {
@@ -8,7 +9,7 @@ export interface AssessmentSummary {
    *  cross-patient workspace list to show which subject each row is for. */
   patientRef: string;
   date: Date;
-  category: 'normal' | 'monitor' | 'refer';
+  category: TriageCategory;
   summary: string;
 }
 
@@ -26,15 +27,16 @@ interface Bundle {
 }
 
 /**
- * Map SNOMED conclusionCode → triage category. Falls back to 'monitor'
+ * Map SNOMED conclusionCode → IC triage category. Falls back to 'observe'
  * when the code is unrecognised so reverse-mapped reports stay usable.
  */
-function snomedToCategory(code: string | undefined): 'normal' | 'monitor' | 'refer' {
+function snomedToCategory(code: string | undefined): TriageCategory {
   switch (code) {
     case '17621005': return 'normal';
-    case '394848005': return 'monitor';
-    case '3457005': return 'refer';
-    default: return 'monitor';
+    case '394848005': return 'observe';
+    case '3457005': return 'consult';
+    case '385660001': return 'incomplete';
+    default: return 'observe';
   }
 }
 
@@ -44,12 +46,11 @@ function stripLegacyConclusionPrefix(conclusion: string): string {
 }
 
 /**
- * Parse Observation.code.text "CDSA gross_motor::reactionLatency" (new format)
- * or "CDSA gross_motor: reactionLatency" (legacy). Returns null on miss.
+ * Parse Observation.code.text "Func IC vitality". Returns null on miss.
  */
-export function parseObservationCode(text: string): { domain: string; metric: string } | null {
-  const m = text.match(/^CDSA\s+(\w+)(?:::|:\s+)(\w+)$/);
-  return m ? { domain: m[1], metric: m[2] } : null;
+export function parseObservationCode(text: string): { domain: string } | null {
+  const m = text.match(/^Func IC\s+(\w+)$/);
+  return m ? { domain: m[1] } : null;
 }
 
 /**
@@ -79,20 +80,33 @@ export function bundleToAssessment(
   const summary = stripLegacyConclusionPrefix(conclusion);
 
   const subjectRef = (report.subject as { reference?: string } | undefined)?.reference ?? '';
-  const childId = subjectRef.replace(/^Patient\//, '');
+  const patientId = subjectRef.replace(/^Patient\//, '');
+
+  const period2 = report.effectivePeriod as { start?: string; end?: string } | undefined;
+  const assessmentDate = (period2?.start ?? report.effectiveDateTime ?? '').slice(0, 10);
 
   return {
     id: idVal,
-    childId,
-    status: report.status === 'final' ? 'completed' : 'in_progress',
+    patientId,
+    status: report.status === 'final' ? 'completed' : 'started',
     language: 'zh-TW',
-    currentStep: 7,
+    currentStep: 2,
     startedAt,
     completedAt,
+    // Minimal reconstructed triage; per-domain detail is not round-tripped from
+    // the summary Bundle in S1 (full FHIR profiling is an S2 concern).
     triageResult: {
       category,
       confidence,
       summary,
+      domainScores: [],
+      flaggedDomains: [],
+      clinicalCutoffs: [],
+      recommendations: [],
+      incomplete: category === 'incomplete',
+      completedDomains: 0,
+      assessmentDate,
+      ageGroup: '18-39',
     },
     fhirSubmitted: true,
     fhirDiagnosticReportId: report.id,
@@ -136,7 +150,7 @@ export async function listAssessmentsFromFhir(
   const subjectClause = patientId ? `subject=Patient/${patientId}&` : '';
   const bundle = (await client.request(
     `DiagnosticReport?${subjectClause}` +
-      `code=${CODE_SYSTEM}|cdsa-assessment` +
+      `code=${CODE_SYSTEM}|func-assessment` +
       `&_sort=-date`,
   )) as Bundle;
   return (bundle.entry ?? []).map((e) => {

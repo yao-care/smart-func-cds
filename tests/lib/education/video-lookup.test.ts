@@ -13,11 +13,14 @@ const mockIndex: RuntimeIndex = {
     v3: mockVideo('v3', 0.5),
   },
   triggers: {
-    'cdsa.triage.refer.13-24m': { videoIds: ['v1', 'v2'], inapplicable: false },
-    'cdsa.domain.fine_motor.anomaly.2-6m': { videoIds: [], inapplicable: true },
-    'cdsa.domain.fine_motor.anomaly.7-12m': { videoIds: ['v3'], inapplicable: false },
-    'cdsa.domain.fine_motor.anomaly.13-24m': { videoIds: [], inapplicable: false },
+    'func.triage.consult.18-39': { videoIds: ['v1', 'v2'], inapplicable: false },
+    'func.domain.cognition.low.40-54': { videoIds: [], inapplicable: true },
+    'func.domain.cognition.low.18-39': { videoIds: ['v3'], inapplicable: false },
+    'func.domain.cognition.low.55-64': { videoIds: [], inapplicable: false },
   },
+  educationSlugToTriggers: {},
+  recommendations: {},
+  clinicalEducation: {},
 };
 
 beforeEach(() => {
@@ -31,31 +34,33 @@ beforeEach(() => {
 describe('video-lookup', () => {
   it('returns sorted videos for matched trigger', async () => {
     const { getVideosForTrigger } = await import('../../../src/lib/education/video-lookup');
-    const videos = await getVideosForTrigger('cdsa.triage.refer.13-24m');
+    const videos = await getVideosForTrigger('func.triage.consult.18-39');
     expect(videos.map(v => v.videoId)).toEqual(['v1', 'v2']);
   });
 
   it('returns empty for inapplicable trigger (custom ignored)', async () => {
     const { getVideosForTrigger } = await import('../../../src/lib/education/video-lookup');
     const custom = [{ ...mockVideo('vCustom', 1.0), triggers: '*' as const }];
-    const videos = await getVideosForTrigger('cdsa.domain.fine_motor.anomaly.2-6m', custom);
+    const videos = await getVideosForTrigger('func.domain.cognition.low.40-54', custom);
     expect(videos).toEqual([]);
   });
 
-  it('ageGroupFallback returns videos from 7-12m when 13-24m empty', async () => {
+  it('ageGroupFallback returns videos from 18-39 when 55-64 empty', async () => {
     const { getVideosForTrigger } = await import('../../../src/lib/education/video-lookup');
-    const videos = await getVideosForTrigger('cdsa.domain.fine_motor.anomaly.13-24m', [], {
+    const videos = await getVideosForTrigger('func.domain.cognition.low.55-64', [], {
       ageGroupFallback: true,
     });
     expect(videos.map(v => v.videoId)).toEqual(['v3']);
   });
 
   it('ageGroupFallback skips inapplicable chain entries', async () => {
+    // 40-54 is inapplicable; chain falls through to 18-39 (has v3).
     const { getVideosForTrigger } = await import('../../../src/lib/education/video-lookup');
-    const videos = await getVideosForTrigger('cdsa.domain.fine_motor.anomaly.7-12m', [], {
+    const videos = await getVideosForTrigger('func.domain.cognition.low.40-54', [], {
       ageGroupFallback: true,
     });
-    expect(videos.map(v => v.videoId)).toEqual(['v3']);
+    // 40-54 itself is inapplicable → returns [] (inapplicable short-circuits).
+    expect(videos).toEqual([]);
   });
 
   it('retries after fetch failure', async () => {
@@ -67,14 +72,14 @@ describe('video-lookup', () => {
     });
 
     const { getVideosForTrigger } = await import('../../../src/lib/education/video-lookup');
-    await expect(getVideosForTrigger('cdsa.triage.refer.13-24m')).rejects.toThrow();
-    const videos = await getVideosForTrigger('cdsa.triage.refer.13-24m');
+    await expect(getVideosForTrigger('func.triage.consult.18-39')).rejects.toThrow();
+    const videos = await getVideosForTrigger('func.triage.consult.18-39');
     expect(videos).toHaveLength(2);
   });
 
-  it('regex correctly parses cdsa.domain.<dom>.anomaly.<age>', async () => {
+  it('regex correctly parses func.domain.<dom>.<band>.<age>', async () => {
     const { tryAgeGroupFallback } = await import('../../../src/lib/education/video-lookup');
-    const ids = tryAgeGroupFallback('cdsa.domain.fine_motor.anomaly.13-24m', mockIndex);
+    const ids = tryAgeGroupFallback('func.domain.cognition.low.55-64', mockIndex);
     expect(ids).toEqual(['v3']);
   });
 });

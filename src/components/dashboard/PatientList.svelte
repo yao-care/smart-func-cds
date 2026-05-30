@@ -3,35 +3,19 @@
   import type { Patient } from '../../lib/db/schema';
   import type { RiskLevel } from '../../lib/utils/risk-levels';
   import { riskSeverity } from '../../lib/utils/risk-levels';
-  import { getOpenAlerts } from '../../lib/db/alerts';
-  import { deriveCdssTriggers } from '$lib/education/trigger-derivation';
   import TriggerVideoList from '../education/TriggerVideoList.svelte';
 
   // Per-card lazy-loaded trigger cache: patientId → string[]
   const cardTriggers = $state<Record<string, string[]>>({});
   const cardExpanded = $state<Record<string, boolean>>({});
 
+  // The pediatric CDSS vital-sign → education trigger path was retired in the
+  // adult IC transition (S1). The monitoring dashboard no longer surfaces
+  // per-alert education videos; this is a no-op pending an S2/S3 redesign of
+  // the alert→content mapping for the adult functional model.
   async function loadCardTriggers(patient: Patient): Promise<void> {
-    if (cardTriggers[patient.id] !== undefined) return; // already loaded
-    try {
-      const alerts = await getOpenAlerts(patient.id);
-      if (alerts.length === 0) {
-        cardTriggers[patient.id] = [];
-        return;
-      }
-      // Use the most recent open alert's indicators + riskLevel to synthesise IndicatorResult[]
-      const latest = alerts[alerts.length - 1];
-      const syntheticIndicators = latest.indicators.map(indicator => ({
-        indicator,
-        value: 0,
-        level: latest.riskLevel,
-        range: null as [number, number] | null,
-        rationale: '',
-      }));
-      cardTriggers[patient.id] = deriveCdssTriggers(syntheticIndicators, patient.ageGroup).slice(0, 3);
-    } catch {
-      cardTriggers[patient.id] = [];
-    }
+    if (cardTriggers[patient.id] !== undefined) return;
+    cardTriggers[patient.id] = [];
   }
 
   function onDetailsToggle(patient: Patient, open: boolean) {

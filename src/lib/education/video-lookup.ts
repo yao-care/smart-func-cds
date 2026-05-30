@@ -1,11 +1,11 @@
 import type { CustomVideo, RuntimeIndex, RuntimeVideo } from './schemas';
-import { AGE_GROUPS_CDSA, type AgeGroupCDSA } from '../utils/age-groups';
+import { AGE_GROUPS_ADULT, type AgeGroupAdult } from '../utils/age-groups';
 import { mergeCustomVideos } from './merge-custom-videos';
-import { CDSA_FALLBACK_CHAIN } from './age-fallback';
+import { FUNC_FALLBACK_CHAIN } from './age-fallback';
 import { loadVideoIndex } from './index-loader';
 
-const CDSA_TRIGGER_REGEX = new RegExp(
-  `^(cdsa\\.(?:triage|domain)\\..+)\\.(${AGE_GROUPS_CDSA.join('|')})$`,
+const FUNC_TRIGGER_REGEX = new RegExp(
+  `^(func\\.(?:triage|domain)\\..+)\\.(${AGE_GROUPS_ADULT.join('|')})$`,
 );
 
 // Re-export for callers that imported loadIndex via video-lookup (none currently, but kept for safety)
@@ -17,10 +17,10 @@ export interface VideoLookupOptions {
 }
 
 export function tryAgeGroupFallback(trigger: string, idx: RuntimeIndex): string[] {
-  const m = trigger.match(CDSA_TRIGGER_REGEX);
+  const m = trigger.match(FUNC_TRIGGER_REGEX);
   if (!m) return [];
   const [, prefix, currentAge] = m;
-  const chain = CDSA_FALLBACK_CHAIN[currentAge as AgeGroupCDSA] ?? [];
+  const chain = FUNC_FALLBACK_CHAIN[currentAge as AgeGroupAdult] ?? [];
   for (const altAge of chain) {
     const altTrigger = `${prefix}.${altAge}`;
     const altEntry = idx.triggers[altTrigger];

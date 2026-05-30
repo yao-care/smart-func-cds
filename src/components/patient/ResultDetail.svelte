@@ -3,37 +3,29 @@
   import { isAuthorized } from '../../lib/fhir/client';
   import type { Assessment } from '../../lib/db/schema';
   import { db } from '../../lib/db/schema';
-  import { deriveCdsaTriggers } from '$lib/education/trigger-derivation';
-  import { ageGroupCDSA } from '$lib/utils/age-groups';
+  import { deriveFuncTriggers } from '$lib/education/trigger-derivation';
+  import { ageGroupAdult } from '$lib/utils/age-groups';
   import TriggerVideoList from '../education/TriggerVideoList.svelte';
 
   const DOMAIN_LABELS: Record<string, string> = {
-    behavior: '行為',
-    gross_motor: '粗動作',
-    fine_motor: '細動作',
-    language: '語言',
-    language_comprehension: '語言理解',
-    language_expression: '語言表達',
-    cognition: '認知',
-    social_emotional: '社交情緒',
-    diet: '飲食',
+    vitality: '身體活力',
+    locomotion: '行動功能',
+    cognition: '認知功能',
+    psychological: '心理功能',
+    sensory: '感官功能',
   };
 
-  const METRIC_LABELS: Record<string, string> = {
-    completionRate: '完成率',
-    operationConsistency: '操作一致性',
-    reactionLatency: '反應延遲 (ms)',
-    interactionRhythm: '互動節奏',
-    drawingScore: '繪圖總分',
-    voiceDuration: '發聲總時長 (秒)',
-    questionnaireScore: '問卷得分',
-    poseClassification: '動作分類信心',
+  const BAND_LABELS: Record<string, string> = {
+    high: '良好',
+    moderate: '待觀察',
+    low: '偏低',
   };
 
   const CATEGORY_LABELS: Record<string, string> = {
-    normal: '正常',
-    monitor: '追蹤觀察',
-    refer: '建議轉介',
+    normal: '功能良好',
+    observe: '建議觀察',
+    consult: '建議諮詢醫師',
+    incomplete: '評估未完成',
   };
 
   // Physician-facing detail view. Loads assessment via the cross-device
@@ -45,7 +37,7 @@
   let assessment = $state<Assessment | null>(null);
   let source = $state<Source | null>(null);
   let returnUrl = $state<string>('');
-  let childBirthDate = $state<string | null>(null);
+  let patientBirthDate = $state<string | null>(null);
 
   $effect(() => {
     (async () => {
@@ -68,9 +60,9 @@
         if (result.ok) {
           assessment = result.assessment;
           source = result.source;
-          // Load child birthDate to derive CDSA age group for video triggers
-          const child = await db.children.get(result.assessment.childId).catch(() => null);
-          if (child?.birthDate) childBirthDate = child.birthDate;
+          // Load patient birthDate to derive adult age group for video triggers
+          const patient = await db.assessmentPatients.get(result.assessment.patientId).catch(() => null);
+          if (patient?.birthDate) patientBirthDate = patient.birthDate;
         } else {
           error = result.error;
         }
@@ -85,18 +77,9 @@
   const triage = $derived(assessment?.triageResult ?? null);
 
   const videoTriggers = $derived.by(() => {
-    if (!triage || !childBirthDate) return [];
-    const ageGroup = ageGroupCDSA(childBirthDate);
-    return deriveCdsaTriggers(
-      {
-        category: triage.category,
-        confidence: triage.confidence,
-        summary: triage.summary,
-        anomalyCount: triage.anomalyCount ?? 0,
-        details: triage.details ?? [],
-      },
-      ageGroup,
-    );
+    if (!triage || !patientBirthDate) return [];
+    const ageGroup = ageGroupAdult(patientBirthDate);
+    return deriveFuncTriggers(triage, ageGroup);
   });
 
   let note = $state('');
@@ -146,8 +129,8 @@
   <article class="detail">
     <header class="summary-bar">
       <div>
-        <span class="label">兒童識別碼</span>
-        <span class="value">{assessment.childId.slice(0, 8)}…</span>
+        <span class="label">受測者識別碼</span>
+        <span class="value">{assessment.patientId.slice(0, 8)}…</span>
       </div>
       <div>
         <span class="label">評估日期</span>
@@ -170,61 +153,58 @@
         <span class="triage-cat triage-{triage.category}">{CATEGORY_LABELS[triage.category]}</span>
         <span class="muted">信心度 {Math.round(triage.confidence * 100)}%</span>
         <span class="muted">·</span>
-        <span class="muted">異常 metric {triage.details?.filter((d) => d.isAnomaly).length ?? 0} 項 / {triage.details?.length ?? 0} 項</span>
+        <span class="muted">已測面向 {triage.completedDomains ?? triage.domainScores?.length ?? 0} / 5</span>
       </div>
       <details class="rule-detail">
         <summary>分流判定規則</summary>
         <ul>
-          <li><strong>refer</strong>：≥ 3 個異常 metric 且 ≥ 2 個 domain 受影響</li>
-          <li><strong>monitor</strong>：≥ 1 個異常 metric（未達轉介門檻）</li>
-          <li><strong>normal</strong>：無任何異常 metric</li>
-          <li>異常 metric 判定：z-score ≤ -1.5（反向 metric 則 ≥ 1.5）；問卷得分 / 上限 &lt; 50%</li>
+          <li><strong>consult（建議諮詢）</strong>：任一面向偏低、或 ≥ 2 個面向待觀察、或臨床切點達 consult 等級</li>
+          <li><strong>observe（建議觀察）</strong>：1 個面向待觀察，或有 advisory 切點</li>
+          <li><strong>normal（功能良好）</strong>：所有已測面向皆良好且無 advisory 切點</li>
+          <li><strong>incomplete（未完成）</strong>：完成面向 &lt; 3</li>
+          <li>面向分級：score ≥ 70 良好；40-69 待觀察；&lt; 40 偏低</li>
         </ul>
       </details>
     </section>
 
-    <section aria-label="完整指標">
-      <h3>完整指標</h3>
-      {#if triage.details && triage.details.length > 0}
+    <section aria-label="各面向分數">
+      <h3>各面向分數</h3>
+      {#if triage.domainScores && triage.domainScores.length > 0}
         <table class="metric-table">
           <thead>
             <tr>
-              <th>領域</th>
-              <th>指標</th>
-              <th>數值</th>
-              <th>常模 / 上限</th>
-              <th>Z-score</th>
-              <th>方向 Z</th>
+              <th>面向</th>
+              <th>功能分數</th>
+              <th>能力分量</th>
+              <th>症狀分量</th>
               <th>狀態</th>
             </tr>
           </thead>
           <tbody>
-            {#each triage.details as d}
-              <tr class:anomaly={d.isAnomaly}>
+            {#each triage.domainScores as d}
+              <tr class:anomaly={d.band === 'low'}>
                 <td>{DOMAIN_LABELS[d.domain] ?? d.domain}</td>
-                <td>{METRIC_LABELS[d.metric] ?? d.metric}</td>
-                <td class="num">{typeof d.value === 'number' ? d.value.toFixed(2) : d.value}</td>
-                <td class="num norm">
-                  {#if d.normMean != null && d.normStd != null}
-                    {d.normMean.toFixed(2)} ± {d.normStd.toFixed(2)}
-                  {:else if d.maxScore != null}
-                    上限 {d.maxScore}
-                  {:else}
-                    —
-                  {/if}
-                </td>
-                <td class="num">{d.zScore !== null ? d.zScore.toFixed(2) : '—'}</td>
-                <td class="num">{d.directionalZ !== null && d.directionalZ !== undefined ? d.directionalZ.toFixed(2) : '—'}</td>
-                <td><span class="status-pill status-{d.isAnomaly ? 'anomaly' : 'normal'}">{d.isAnomaly ? '偏離' : '正常'}</span></td>
+                <td class="num">{d.score}</td>
+                <td class="num norm">{d.capacityScore ?? '—'}</td>
+                <td class="num norm">{d.symptomScore ?? '—'}</td>
+                <td><span class="status-pill status-{d.band === 'high' ? 'normal' : 'anomaly'}">{BAND_LABELS[d.band] ?? d.band}</span></td>
               </tr>
             {/each}
           </tbody>
         </table>
-        <p class="muted small">
-          常模 = 該年齡層該指標的平均值 ± 標準差，目前使用內建預設值。可在「設定 → 常模管理」改為醫院本地常模。
-        </p>
+        {#if triage.clinicalCutoffs && triage.clinicalCutoffs.length > 0}
+          <h4 class="cutoff-head">臨床切點警示</h4>
+          <ul class="cutoff-list">
+            {#each triage.clinicalCutoffs as c}
+              <li>
+                <span class="status-pill status-anomaly">{c.severity === 'consult' ? '建議諮詢' : '注意'}</span>
+                {DOMAIN_LABELS[c.domain] ?? c.domain} · {c.flagLabel}
+              </li>
+            {/each}
+          </ul>
+        {/if}
       {:else}
-        <p class="muted">此評估未保留 metric 細節，可能來自舊版或精簡 FHIR 紀錄。</p>
+        <p class="muted">此評估未保留面向細節，可能來自精簡 FHIR 紀錄。</p>
       {/if}
     </section>
 
@@ -364,8 +344,12 @@
   }
 
   .triage-normal { background: color-mix(in srgb, var(--accent) 12%, var(--bg)); color: var(--accent); }
-  .triage-monitor { background: color-mix(in srgb, var(--warn) 12%, var(--bg)); color: var(--warn); }
-  .triage-refer { background: color-mix(in srgb, var(--danger) 14%, var(--bg)); color: var(--danger); }
+  .triage-observe { background: color-mix(in srgb, var(--warn) 12%, var(--bg)); color: var(--warn); }
+  .triage-consult { background: color-mix(in srgb, var(--danger) 14%, var(--bg)); color: var(--danger); }
+  .triage-incomplete { background: color-mix(in srgb, var(--text) 8%, var(--bg)); color: color-mix(in srgb, var(--text), var(--bg) 20%); }
+
+  .cutoff-head { font-size: var(--text-sm); margin: var(--space-4) 0 var(--space-2); }
+  .cutoff-list { margin: 0; padding-left: var(--space-5); font-size: var(--text-sm); line-height: 1.8; }
 
   .rule-detail {
     margin-top: var(--space-2);
