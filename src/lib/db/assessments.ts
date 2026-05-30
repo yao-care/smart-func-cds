@@ -1,25 +1,25 @@
-import { db, type Assessment, type AssessmentStatus, type Child } from './schema';
+import { db, type Assessment, type AssessmentStatus, type AssessmentPatient } from './schema';
 
-// ---- Child DAO ----
-export async function createChild(child: Child): Promise<string> {
-  await db.children.put(child);
-  return child.id;
+// ---- AssessmentPatient DAO ----
+export async function createPatient(patient: AssessmentPatient): Promise<string> {
+  await db.assessmentPatients.put(patient);
+  return patient.id;
 }
 
-export async function getChild(id: string): Promise<Child | undefined> {
-  return db.children.get(id);
+export async function getPatient(id: string): Promise<AssessmentPatient | undefined> {
+  return db.assessmentPatients.get(id);
 }
 
-export async function getAllChildren(): Promise<Child[]> {
-  return db.children.orderBy('createdAt').reverse().toArray();
+export async function getAllPatients(): Promise<AssessmentPatient[]> {
+  return db.assessmentPatients.orderBy('createdAt').reverse().toArray();
 }
 
 // ---- Assessment DAO ----
-export async function createAssessment(childId: string, language = 'zh-TW'): Promise<Assessment> {
+export async function createAssessment(patientId: string, language = 'zh-TW'): Promise<Assessment> {
   const now = new Date();
   const assessment: Assessment = {
     id: crypto.randomUUID(),
-    childId,
+    patientId,
     status: 'started',
     language,
     currentStep: 0,
@@ -36,8 +36,8 @@ export async function getAssessment(id: string): Promise<Assessment | undefined>
   return db.assessments.get(id);
 }
 
-export async function getAssessmentsForChild(childId: string): Promise<Assessment[]> {
-  return db.assessments.where('childId').equals(childId).reverse().sortBy('createdAt');
+export async function getAssessmentsForPatient(patientId: string): Promise<Assessment[]> {
+  return db.assessments.where('patientId').equals(patientId).reverse().sortBy('createdAt');
 }
 
 export async function updateAssessmentStatus(id: string, status: AssessmentStatus): Promise<void> {

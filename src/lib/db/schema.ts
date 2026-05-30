@@ -1,5 +1,7 @@
 import Dexie, { type Table } from 'dexie';
 import type { RiskLevel } from '../utils/risk-levels';
+import type { TriageResult } from '../../engine/func/triage';
+import type { AgeGroupAdult } from '../utils/age-groups';
 
 export type { RiskLevel };
 export type AlertStatus = 'open' | 'acknowledged' | 'false_positive' | 'resolved';
@@ -100,9 +102,10 @@ export interface WebhookHistoryEntry {
 
 export type AssessmentStatus = 'started' | 'paused' | 'resumed' | 'completed' | 'incomplete';
 
-export type AgeGroupCDSA = '2-6m' | '7-12m' | '13-24m' | '25-36m' | '37-48m' | '49-60m' | '61-72m';
-
-export interface Child {
+/** The adult subject of a functional-health assessment. (Was `Child` in the
+ *  pediatric CDSA; renamed to the neutral `AssessmentPatient` to avoid
+ *  colliding with the FHIR-monitoring `Patient` interface above.) */
+export interface AssessmentPatient {
   id: string;
   birthDate: string;
   gender: 'male' | 'female' | 'other';
@@ -112,34 +115,16 @@ export interface Child {
 
 export interface Assessment {
   id: string;
-  childId: string;
+  patientId: string;
   status: AssessmentStatus;
   language: string;
   currentStep: number;
   startedAt: Date;
   completedAt?: Date;
   pausedAt?: Date;
-  triageResult?: {
-    category: 'normal' | 'monitor' | 'refer';
-    confidence: number;
-    summary: string;
-    /** Optional full per-metric breakdown. Populated by the parent flow so
-     *  the standalone /result/?id= page can render the radar without
-     *  recomputing triage. Older records (saved before this field was
-     *  added) won't have it; UI should fall back to a summary-only view. */
-    details?: Array<{
-      domain: string;
-      metric: string;
-      value: number;
-      zScore: number | null;
-      directionalZ: number | null;
-      normMean?: number | null;
-      normStd?: number | null;
-      maxScore?: number | null;
-      isAnomaly: boolean;
-    }>;
-    anomalyCount?: number;
-  };
+  /** Full IC triage result from src/engine/func/triage. Optional: present once
+   *  the result step has computed it. Older records may omit it. */
+  triageResult?: TriageResult;
   fhirSubmitted: boolean;
   fhirDiagnosticReportId?: string;
   physicianNote?: string | null;
@@ -156,8 +141,8 @@ export interface Assessment {
 export interface AssessmentEvent {
   id: string;
   assessmentId: string;
-  childId: string;
-  moduleType: 'questionnaire' | 'game' | 'voice' | 'video' | 'drawing';
+  patientId: string;
+  moduleType: 'questionnaire' | 'objective';
   eventType: string;
   timestamp: Date;
   data: Record<string, unknown>;
@@ -171,7 +156,7 @@ export interface AssessmentEvent {
 export interface MediaFile {
   id: string;
   assessmentId: string;
-  childId: string;
+  patientId: string;
   fileType: 'voice' | 'video' | 'drawing';
   blob: Blob;
   mimeType: string;
@@ -183,7 +168,7 @@ export interface MediaFile {
 
 export interface NormThreshold {
   id: string;
-  ageGroup: AgeGroupCDSA;
+  ageGroup: AgeGroupAdult;
   metric: string;
   mean: number;
   std: number;
@@ -221,7 +206,7 @@ export interface TenantSettings {
 }
 
 /** Triage category × domain recommendation overlay (one row per cell). */
-export type RecommendationCategory = 'normal' | 'monitor' | 'refer';
+export type RecommendationCategory = 'normal' | 'observe' | 'consult' | 'incomplete';
 export type RecommendationSource = 'internal' | 'custom' | 'external';
 
 export interface RecommendationItem {
@@ -260,7 +245,7 @@ export class CdssDatabase extends Dexie {
   educationInteractions!: Table<EducationInteraction>;
   ruleVersions!: Table<RuleVersion>;
   webhookHistory!: Table<WebhookHistoryEntry>;
-  children!: Table<Child>;
+  assessmentPatients!: Table<AssessmentPatient>;
   assessments!: Table<Assessment>;
   assessmentEvents!: Table<AssessmentEvent>;
   mediaFiles!: Table<MediaFile>;
@@ -270,7 +255,7 @@ export class CdssDatabase extends Dexie {
   recommendationOverlays!: Table<RecommendationOverlay>;
 
   constructor() {
-    super('cdss-pediatric');
+    super('smart-func-cds');
     this.version(1).stores({
       patients: 'id, ageGroup, currentRiskLevel, lastSyncedAt',
       observations: 'id, patientId, indicator, effectiveDateTime, [patientId+indicator]',
@@ -363,6 +348,30 @@ export class CdssDatabase extends Dexie {
       await tx.table('assessments').toCollection().modify(a => {
         a.forceFullAssessment = false;
       });
+    });
+    // v6: pediatric → adult functional-health. Rename children→assessmentPatients
+    // and childId→patientId on assessment-scoped tables. The DB name itself
+    // changed (cdss-pediatric → smart-func-cds), so in practice this is a fresh
+    // store for all users; the migration steps exist only for completeness.
+    this.version(6).stores({
+      patients: 'id, ageGroup, currentRiskLevel, lastSyncedAt',
+      observations: 'id, patientId, indicator, effectiveDateTime, [patientId+indicator]',
+      alerts: 'id, patientId, riskLevel, status, createdAt, [patientId+status]',
+      baselines: '[patientId+indicator], patientId, updatedAt',
+      syncQueue: 'id, createdAt',
+      serverConfigs: 'id, lastUsedAt',
+      educationInteractions: 'id, contentSlug, createdAt',
+      ruleVersions: 'id, createdAt',
+      webhookHistory: 'id, webhookId, alertId, createdAt',
+      children: null,
+      assessmentPatients: 'id, createdAt',
+      assessments: 'id, patientId, status, createdAt, [patientId+status]',
+      assessmentEvents: 'id, assessmentId, patientId, moduleType, timestamp, [assessmentId+moduleType]',
+      mediaFiles: 'id, assessmentId, patientId, fileType, createdAt, [assessmentId+fileType]',
+      normThresholds: 'id, ageGroup, metric, [ageGroup+metric]',
+      customEducation: 'id, tenantId, category, isActive, [tenantId+isActive]',
+      tenantSettings: 'id, tenantId',
+      recommendationOverlays: 'id, tenantId, category, domain, [tenantId+category+domain]',
     });
   }
 }

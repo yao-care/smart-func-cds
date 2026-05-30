@@ -1,12 +1,12 @@
 import { db, type RecommendationOverlay, type RecommendationItem, type RecommendationCategory } from './schema';
 import { getCustomEducation } from './custom-education';
 import { loadVideoIndex } from '../education/index-loader';
-import { CDSA_DOMAIN_NAMES } from '../education/schemas';
-import type { AgeGroupCDSA } from '../utils/age-groups';
+import { IC_DOMAIN_NAMES } from '../education/schemas';
+import type { AgeGroupAdult } from '../utils/age-groups';
 
-export const DOMAINS = CDSA_DOMAIN_NAMES;
+export const DOMAINS = IC_DOMAIN_NAMES;
 
-export const CATEGORIES: RecommendationCategory[] = ['normal', 'monitor', 'refer'];
+export const CATEGORIES: RecommendationCategory[] = ['normal', 'observe', 'consult', 'incomplete'];
 
 export type Domain = typeof DOMAINS[number];
 
@@ -22,7 +22,7 @@ function buildId(tenantId: string, category: RecommendationCategory, domain: str
 export async function getDefaultRecommendations(
   category: RecommendationCategory,
   domain: string,
-  ageGroup: AgeGroupCDSA,
+  ageGroup: AgeGroupAdult,
 ): Promise<RecommendationItem[]> {
   const idx = await loadVideoIndex();
   const key = `${category}::${domain}::${ageGroup}`;
@@ -94,7 +94,7 @@ export async function mergeRecommendations(
   tenantId: string,
   category: RecommendationCategory,
   domain: string,
-  ageGroup: AgeGroupCDSA,
+  ageGroup: AgeGroupAdult,
 ): Promise<RecommendationItem[]> {
   const overlay = await getOverlay(tenantId, category, domain);
   const defaults = await getDefaultRecommendations(category, domain, ageGroup);
@@ -129,7 +129,7 @@ export async function mergeRecommendationsForContext(
   tenantId: string,
   category: RecommendationCategory,
   domains: string[],
-  ageGroup: AgeGroupCDSA,
+  ageGroup: AgeGroupAdult,
 ): Promise<RecommendationItem[]> {
   const seen = new Set<string>();
   const out: RecommendationItem[] = [];
