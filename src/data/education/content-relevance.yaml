@@ -1,5 +1,14 @@
 # src/data/education/content-relevance.yaml
-# S1 Phase 3a minimal IC stub. Real content (videos/articles per cell) is an S3 deliverable.
+# 成人內在能力（IC）衛教內容對照表 — 單一真相源。
+# build 時由 scripts/build-content-index.ts 讀取，產出 public/data/video-index.json
+# 與 src/lib/education/core-articles.ts 的 CORE_ARTICLE_SLUGS（browse:true 的文章）。
+#
+# trigger 格式：
+#   func.domain.<domain>.<band>.<ageGroup>   band ∈ {low, moderate}
+#   func.triage.<category>.<ageGroup>         category ∈ {normal, observe, consult, incomplete}
+# 每篇文章可標：
+#   browse:true       → 進入 /education 核心清單與矩陣主文章
+#   severities:[...]  → 進入 recommendations（observe / consult）；省略則僅瀏覽
 inapplicable:
   vitality: []
   locomotion: []
@@ -7,36 +16,168 @@ inapplicable:
   psychological: []
   sensory: []
 triggers:
-  - { trigger: func.domain.vitality.low.18-39, videoIds: [], articles: [] }
-  - { trigger: func.domain.vitality.low.40-54, videoIds: [], articles: [] }
-  - { trigger: func.domain.vitality.low.55-64, videoIds: [], articles: [] }
-  - { trigger: func.domain.vitality.moderate.18-39, videoIds: [], articles: [] }
-  - { trigger: func.domain.vitality.moderate.40-54, videoIds: [], articles: [] }
-  - { trigger: func.domain.vitality.moderate.55-64, videoIds: [], articles: [] }
-  - { trigger: func.domain.locomotion.low.18-39, videoIds: [], articles: [] }
-  - { trigger: func.domain.locomotion.low.40-54, videoIds: [], articles: [] }
-  - { trigger: func.domain.locomotion.low.55-64, videoIds: [], articles: [] }
-  - { trigger: func.domain.locomotion.moderate.18-39, videoIds: [], articles: [] }
-  - { trigger: func.domain.locomotion.moderate.40-54, videoIds: [], articles: [] }
-  - { trigger: func.domain.locomotion.moderate.55-64, videoIds: [], articles: [] }
-  - { trigger: func.domain.cognition.low.18-39, videoIds: [], articles: [] }
-  - { trigger: func.domain.cognition.low.40-54, videoIds: [], articles: [] }
-  - { trigger: func.domain.cognition.low.55-64, videoIds: [], articles: [] }
-  - { trigger: func.domain.cognition.moderate.18-39, videoIds: [], articles: [] }
-  - { trigger: func.domain.cognition.moderate.40-54, videoIds: [], articles: [] }
-  - { trigger: func.domain.cognition.moderate.55-64, videoIds: [], articles: [] }
-  - { trigger: func.domain.psychological.low.18-39, videoIds: [], articles: [] }
-  - { trigger: func.domain.psychological.low.40-54, videoIds: [], articles: [] }
-  - { trigger: func.domain.psychological.low.55-64, videoIds: [], articles: [] }
-  - { trigger: func.domain.psychological.moderate.18-39, videoIds: [], articles: [] }
-  - { trigger: func.domain.psychological.moderate.40-54, videoIds: [], articles: [] }
-  - { trigger: func.domain.psychological.moderate.55-64, videoIds: [], articles: [] }
-  - { trigger: func.domain.sensory.low.18-39, videoIds: [], articles: [] }
-  - { trigger: func.domain.sensory.low.40-54, videoIds: [], articles: [] }
-  - { trigger: func.domain.sensory.low.55-64, videoIds: [], articles: [] }
-  - { trigger: func.domain.sensory.moderate.18-39, videoIds: [], articles: [] }
-  - { trigger: func.domain.sensory.moderate.40-54, videoIds: [], articles: [] }
-  - { trigger: func.domain.sensory.moderate.55-64, videoIds: [], articles: [] }
+  # ── 身體活力 vitality ──────────────────────────────────────────────
+  - trigger: func.domain.vitality.low.18-39
+    videoIds: []
+    articles:
+      - { slug: adult-sleep-hygiene, browse: true, severities: [observe, consult] }
+      - { slug: fatigue-management, severities: [observe, consult] }
+      - { slug: balanced-nutrition, severities: [consult] }
+  - trigger: func.domain.vitality.low.40-54
+    videoIds: []
+    articles:
+      - { slug: adult-sleep-hygiene, browse: true, severities: [observe, consult] }
+      - { slug: fatigue-management, severities: [observe, consult] }
+      - { slug: balanced-nutrition, severities: [consult] }
+  - trigger: func.domain.vitality.low.55-64
+    videoIds: []
+    articles:
+      - { slug: adult-sleep-hygiene, browse: true, severities: [observe, consult] }
+      - { slug: fatigue-management, severities: [observe, consult] }
+      - { slug: balanced-nutrition, severities: [consult] }
+  - trigger: func.domain.vitality.moderate.18-39
+    videoIds: []
+    articles:
+      - { slug: fatigue-management, browse: true, severities: [observe, consult] }
+      - { slug: balanced-nutrition, browse: true, severities: [observe, consult] }
+  - trigger: func.domain.vitality.moderate.40-54
+    videoIds: []
+    articles:
+      - { slug: fatigue-management, browse: true, severities: [observe, consult] }
+      - { slug: balanced-nutrition, browse: true, severities: [observe, consult] }
+  - trigger: func.domain.vitality.moderate.55-64
+    videoIds: []
+    articles:
+      - { slug: fatigue-management, browse: true, severities: [observe, consult] }
+      - { slug: balanced-nutrition, browse: true, severities: [observe, consult] }
+  # ── 行動功能 locomotion ────────────────────────────────────────────
+  - trigger: func.domain.locomotion.low.18-39
+    videoIds: []
+    articles:
+      - { slug: physical-activity-benefits, browse: true, severities: [observe, consult] }
+      - { slug: sedentary-harms, severities: [observe, consult] }
+  - trigger: func.domain.locomotion.low.40-54
+    videoIds: []
+    articles:
+      - { slug: physical-activity-benefits, browse: true, severities: [observe, consult] }
+      - { slug: sedentary-harms, severities: [observe, consult] }
+  - trigger: func.domain.locomotion.low.55-64
+    videoIds: []
+    articles:
+      - { slug: physical-activity-benefits, browse: true, severities: [observe, consult] }
+      - { slug: sedentary-harms, severities: [observe, consult] }
+  - trigger: func.domain.locomotion.moderate.18-39
+    videoIds: []
+    articles:
+      - { slug: sedentary-harms, browse: true, severities: [observe, consult] }
+  - trigger: func.domain.locomotion.moderate.40-54
+    videoIds: []
+    articles:
+      - { slug: sedentary-harms, browse: true, severities: [observe, consult] }
+  - trigger: func.domain.locomotion.moderate.55-64
+    videoIds: []
+    articles:
+      - { slug: sedentary-harms, browse: true, severities: [observe, consult] }
+  # ── 認知功能 cognition ─────────────────────────────────────────────
+  - trigger: func.domain.cognition.low.18-39
+    videoIds: []
+    articles:
+      - { slug: cognitive-health, browse: true, severities: [observe, consult] }
+      - { slug: attention-memory-care, severities: [observe, consult] }
+  - trigger: func.domain.cognition.low.40-54
+    videoIds: []
+    articles:
+      - { slug: cognitive-health, browse: true, severities: [observe, consult] }
+      - { slug: attention-memory-care, severities: [observe, consult] }
+  - trigger: func.domain.cognition.low.55-64
+    videoIds: []
+    articles:
+      - { slug: cognitive-health, browse: true, severities: [observe, consult] }
+      - { slug: attention-memory-care, severities: [observe, consult] }
+  - trigger: func.domain.cognition.moderate.18-39
+    videoIds: []
+    articles:
+      - { slug: attention-memory-care, browse: true, severities: [observe, consult] }
+  - trigger: func.domain.cognition.moderate.40-54
+    videoIds: []
+    articles:
+      - { slug: attention-memory-care, browse: true, severities: [observe, consult] }
+  - trigger: func.domain.cognition.moderate.55-64
+    videoIds: []
+    articles:
+      - { slug: attention-memory-care, browse: true, severities: [observe, consult] }
+  # ── 心理功能 psychological ─────────────────────────────────────────
+  - trigger: func.domain.psychological.low.18-39
+    videoIds: []
+    articles:
+      - { slug: understanding-burnout, browse: true, severities: [observe, consult] }
+      - { slug: stress-management, severities: [observe, consult] }
+      - { slug: mood-self-awareness, severities: [consult] }
+  - trigger: func.domain.psychological.low.40-54
+    videoIds: []
+    articles:
+      - { slug: understanding-burnout, browse: true, severities: [observe, consult] }
+      - { slug: stress-management, severities: [observe, consult] }
+      - { slug: mood-self-awareness, severities: [consult] }
+  - trigger: func.domain.psychological.low.55-64
+    videoIds: []
+    articles:
+      - { slug: understanding-burnout, browse: true, severities: [observe, consult] }
+      - { slug: stress-management, severities: [observe, consult] }
+      - { slug: mood-self-awareness, severities: [consult] }
+  - trigger: func.domain.psychological.moderate.18-39
+    videoIds: []
+    articles:
+      - { slug: stress-management, browse: true, severities: [observe, consult] }
+      - { slug: mood-self-awareness, browse: true, severities: [observe, consult] }
+      - { slug: psychological-wellbeing, browse: true, severities: [observe, consult] }
+  - trigger: func.domain.psychological.moderate.40-54
+    videoIds: []
+    articles:
+      - { slug: stress-management, browse: true, severities: [observe, consult] }
+      - { slug: mood-self-awareness, browse: true, severities: [observe, consult] }
+      - { slug: psychological-wellbeing, browse: true, severities: [observe, consult] }
+  - trigger: func.domain.psychological.moderate.55-64
+    videoIds: []
+    articles:
+      - { slug: stress-management, browse: true, severities: [observe, consult] }
+      - { slug: mood-self-awareness, browse: true, severities: [observe, consult] }
+      - { slug: psychological-wellbeing, browse: true, severities: [observe, consult] }
+  # ── 感官功能 sensory ───────────────────────────────────────────────
+  - trigger: func.domain.sensory.low.18-39
+    videoIds: []
+    articles:
+      - { slug: vision-care, browse: true, severities: [observe, consult] }
+      - { slug: hearing-care, severities: [observe, consult] }
+      - { slug: screen-eye-strain, severities: [consult] }
+  - trigger: func.domain.sensory.low.40-54
+    videoIds: []
+    articles:
+      - { slug: vision-care, browse: true, severities: [observe, consult] }
+      - { slug: hearing-care, severities: [observe, consult] }
+      - { slug: screen-eye-strain, severities: [consult] }
+  - trigger: func.domain.sensory.low.55-64
+    videoIds: []
+    articles:
+      - { slug: vision-care, browse: true, severities: [observe, consult] }
+      - { slug: hearing-care, severities: [observe, consult] }
+      - { slug: screen-eye-strain, severities: [consult] }
+  - trigger: func.domain.sensory.moderate.18-39
+    videoIds: []
+    articles:
+      - { slug: hearing-care, browse: true, severities: [observe, consult] }
+      - { slug: screen-eye-strain, browse: true, severities: [observe, consult] }
+  - trigger: func.domain.sensory.moderate.40-54
+    videoIds: []
+    articles:
+      - { slug: hearing-care, browse: true, severities: [observe, consult] }
+      - { slug: screen-eye-strain, browse: true, severities: [observe, consult] }
+  - trigger: func.domain.sensory.moderate.55-64
+    videoIds: []
+    articles:
+      - { slug: hearing-care, browse: true, severities: [observe, consult] }
+      - { slug: screen-eye-strain, browse: true, severities: [observe, consult] }
+  # ── 分流 triage ────────────────────────────────────────────────────
   - { trigger: func.triage.normal.18-39, videoIds: [], articles: [] }
   - { trigger: func.triage.normal.40-54, videoIds: [], articles: [] }
   - { trigger: func.triage.normal.55-64, videoIds: [], articles: [] }
