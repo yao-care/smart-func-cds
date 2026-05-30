@@ -1,0 +1,337 @@
+# src/data/questionnaire/indicators.yaml
+# Layer 2 indicators per S1 spec §2.4
+
+vitality:
+  - id: vitality.sleep_quality
+    kind: likert
+    domain: vitality
+    label: 睡眠品質
+    style: capacity
+    direction: higher_is_better
+    maxScore: 3
+    weight: 1.0
+    license: public-domain
+    questions:
+      - { id: vitality.sleep_quality.q1, text: "過去 1 週，您整體睡得好嗎？", options: [{label: "非常差", score: 0}, {label: "差", score: 1}, {label: "好", score: 2}, {label: "非常好", score: 3}] }
+  - id: vitality.appetite
+    kind: likert
+    domain: vitality
+    label: 食慾狀態
+    style: capacity
+    direction: higher_is_better
+    maxScore: 3
+    weight: 1.0
+    license: public-domain
+    questions:
+      - { id: vitality.appetite.q1, text: "過去 1 週，您的食慾如何？", options: [{label: "非常差", score: 0}, {label: "差", score: 1}, {label: "好", score: 2}, {label: "非常好", score: 3}] }
+  - id: vitality.weight_stability
+    kind: likert
+    domain: vitality
+    label: 體重穩定度
+    style: capacity
+    direction: higher_is_better
+    maxScore: 3
+    weight: 1.0
+    license: public-domain
+    questions:
+      - { id: vitality.weight_stability.q1, text: "過去 3 個月，您的體重變化？", options: [{label: "顯著變化", score: 0}, {label: "中度變化", score: 1}, {label: "輕微變化", score: 2}, {label: "穩定", score: 3}] }
+  - id: vitality.fatigue
+    kind: likert
+    domain: vitality
+    label: 疲勞程度
+    style: symptom
+    direction: higher_is_worse
+    maxScore: 4
+    weight: 1.0
+    license: cc-by-nc-sa
+    loincCode: "76342-5"
+    minCompletionPolicy: 1.0
+    questions:
+      - { id: vitality.fatigue.q1, text: "過去 7 天，我感到疲勞", options: [{label: "從不", score: 0}, {label: "很少", score: 1}, {label: "有時", score: 2}, {label: "經常", score: 3}, {label: "總是", score: 4}] }
+      - { id: vitality.fatigue.q2, text: "過去 7 天，疲勞讓我無法做想做的事", options: [{label: "從不", score: 0}, {label: "很少", score: 1}, {label: "有時", score: 2}, {label: "經常", score: 3}, {label: "總是", score: 4}] }
+      - { id: vitality.fatigue.q3, text: "過去 7 天，我感到體力被耗盡", options: [{label: "從不", score: 0}, {label: "很少", score: 1}, {label: "有時", score: 2}, {label: "經常", score: 3}, {label: "總是", score: 4}] }
+      - { id: vitality.fatigue.q4, text: "過去 7 天，疲勞影響我做事的效率", options: [{label: "從不", score: 0}, {label: "很少", score: 1}, {label: "有時", score: 2}, {label: "經常", score: 3}, {label: "總是", score: 4}] }
+
+locomotion:
+  - id: locomotion.activity_level
+    kind: likert
+    domain: locomotion
+    label: 身體活動量
+    style: capacity
+    direction: higher_is_better
+    maxScore: 3
+    weight: 1.0
+    license: public-domain
+    questions:
+      - { id: locomotion.activity_level.q1, text: "過去 1 週，您有多少天進行至少 30 分鐘的中等強度運動？", options: [{label: "0 天", score: 0}, {label: "1-2 天", score: 1}, {label: "3-4 天", score: 2}, {label: "5+ 天", score: 3}] }
+  - id: locomotion.sedentary_time
+    kind: likert
+    domain: locomotion
+    label: 久坐時間
+    style: symptom
+    direction: higher_is_worse
+    maxScore: 3
+    weight: 1.0
+    license: public-domain
+    questions:
+      - { id: locomotion.sedentary_time.q1, text: "工作日，您每天坐著的時間？", options: [{label: "< 4 小時", score: 0}, {label: "4-6 小時", score: 1}, {label: "6-8 小時", score: 2}, {label: "> 8 小時", score: 3}] }
+  - id: locomotion.walking_ability
+    kind: likert
+    domain: locomotion
+    label: 步行能力
+    style: capacity
+    direction: higher_is_better
+    maxScore: 3
+    weight: 1.0
+    license: public-domain
+    questions:
+      - { id: locomotion.walking_ability.q1, text: "您能否連續步行 30 分鐘不感到困難？", options: [{label: "完全不能", score: 0}, {label: "勉強可以", score: 1}, {label: "輕鬆可以", score: 2}, {label: "非常輕鬆", score: 3}] }
+
+cognition:
+  - id: cognition.attention_self_report
+    kind: likert
+    domain: cognition
+    label: 注意力自評
+    style: capacity
+    direction: higher_is_better
+    maxScore: 3
+    weight: 1.0
+    license: public-domain
+    questions:
+      - { id: cognition.attention_self_report.q1, text: "您能維持專注工作 30 分鐘不分心嗎？", options: [{label: "完全不能", score: 0}, {label: "勉強可以", score: 1}, {label: "輕鬆可以", score: 2}, {label: "非常輕鬆", score: 3}] }
+  - id: cognition.memory_self_report
+    kind: likert
+    domain: cognition
+    label: 記憶自評
+    style: capacity
+    direction: higher_is_better
+    maxScore: 3
+    weight: 1.0
+    license: public-domain
+    questions:
+      - { id: cognition.memory_self_report.q1, text: "您最近的記憶力如何？", options: [{label: "很差", score: 0}, {label: "差", score: 1}, {label: "好", score: 2}, {label: "很好", score: 3}] }
+  - id: cognition.processing_speed
+    kind: objective
+    domain: cognition
+    label: 處理速度（反應時間）
+    style: capacity
+    direction: higher_is_worse
+    weight: 1.0
+    license: research-open-noncommercial
+    test:
+      type: reaction-time
+      paradigm: simple-visual
+      trials: 20
+      warmupTrials: 5
+      validRangeMs: { min: 100, max: 2000 }
+      norms:
+        "18-39": null  # TODO: NIH Toolbox simple RT
+        "40-54": null
+        "55-64": null
+  - id: cognition.executive_function
+    kind: objective
+    domain: cognition
+    label: 執行功能（TMT-A）
+    style: capacity
+    direction: higher_is_worse
+    weight: 1.0
+    license: research-open-noncommercial
+    test:
+      type: tmt-a
+      targetCount: 25
+      administration: browser-mouse
+      norms:
+        "18-39": null  # TODO: Tombaugh 2004
+        "40-54": null
+        "55-64": null
+
+psychological:
+  - id: psychological.wellbeing
+    kind: likert
+    domain: psychological
+    label: 心理福祉 (WHO-5)
+    style: capacity
+    direction: higher_is_better
+    maxScore: 5
+    weight: 1.0
+    license: cc-by-nc-sa
+    minCompletionPolicy: 1.0
+    questions:
+      - { id: psychological.wellbeing.q1, text: "過去 2 週，我感到開心並心情好", options: [{label: "從不", score: 0}, {label: "偶爾", score: 1}, {label: "不到一半時間", score: 2}, {label: "一半以上時間", score: 3}, {label: "大部分時間", score: 4}, {label: "總是", score: 5}] }
+      - { id: psychological.wellbeing.q2, text: "過去 2 週，我感到平靜且放鬆", options: [{label: "從不", score: 0}, {label: "偶爾", score: 1}, {label: "不到一半時間", score: 2}, {label: "一半以上時間", score: 3}, {label: "大部分時間", score: 4}, {label: "總是", score: 5}] }
+      - { id: psychological.wellbeing.q3, text: "過去 2 週，我感到精力充沛", options: [{label: "從不", score: 0}, {label: "偶爾", score: 1}, {label: "不到一半時間", score: 2}, {label: "一半以上時間", score: 3}, {label: "大部分時間", score: 4}, {label: "總是", score: 5}] }
+      - { id: psychological.wellbeing.q4, text: "過去 2 週，起床時感到精神飽滿", options: [{label: "從不", score: 0}, {label: "偶爾", score: 1}, {label: "不到一半時間", score: 2}, {label: "一半以上時間", score: 3}, {label: "大部分時間", score: 4}, {label: "總是", score: 5}] }
+      - { id: psychological.wellbeing.q5, text: "過去 2 週，我的日常生活充滿有趣的事", options: [{label: "從不", score: 0}, {label: "偶爾", score: 1}, {label: "不到一半時間", score: 2}, {label: "一半以上時間", score: 3}, {label: "大部分時間", score: 4}, {label: "總是", score: 5}] }
+    clinicalCutoff:
+      threshold: 13
+      comparator: "<="
+      flagLabel: low-wellbeing-screen
+      severity: advisory
+      citation: "Topp 2015 (raw ≤13 ≈ %≤52)"
+  - id: psychological.burnout
+    kind: likert
+    domain: psychological
+    label: 職業倦怠 (BAT-12)
+    style: symptom
+    direction: higher_is_worse
+    maxScore: 5
+    minScore: 1
+    weight: 1.0
+    license: cc-by-nc-sa
+    minCompletionPolicy: 1.0
+    questions:
+      - { id: psychological.burnout.q1, text: "工作上，我感到精疲力竭", options: [{label: "從不", score: 1}, {label: "很少", score: 2}, {label: "有時", score: 3}, {label: "經常", score: 4}, {label: "總是", score: 5}] }
+      - { id: psychological.burnout.q2, text: "經過一天工作，我難以恢復精力", options: [{label: "從不", score: 1}, {label: "很少", score: 2}, {label: "有時", score: 3}, {label: "經常", score: 4}, {label: "總是", score: 5}] }
+      - { id: psychological.burnout.q3, text: "工作中，我感到身體疲憊", options: [{label: "從不", score: 1}, {label: "很少", score: 2}, {label: "有時", score: 3}, {label: "經常", score: 4}, {label: "總是", score: 5}] }
+      - { id: psychological.burnout.q4, text: "我難以對工作投入熱情", options: [{label: "從不", score: 1}, {label: "很少", score: 2}, {label: "有時", score: 3}, {label: "經常", score: 4}, {label: "總是", score: 5}] }
+      - { id: psychological.burnout.q5, text: "工作中我感到強烈的厭惡", options: [{label: "從不", score: 1}, {label: "很少", score: 2}, {label: "有時", score: 3}, {label: "經常", score: 4}, {label: "總是", score: 5}] }
+      - { id: psychological.burnout.q6, text: "我對工作態度漠然", options: [{label: "從不", score: 1}, {label: "很少", score: 2}, {label: "有時", score: 3}, {label: "經常", score: 4}, {label: "總是", score: 5}] }
+      - { id: psychological.burnout.q7, text: "工作時難以集中注意力", options: [{label: "從不", score: 1}, {label: "很少", score: 2}, {label: "有時", score: 3}, {label: "經常", score: 4}, {label: "總是", score: 5}] }
+      - { id: psychological.burnout.q8, text: "工作時思緒紊亂", options: [{label: "從不", score: 1}, {label: "很少", score: 2}, {label: "有時", score: 3}, {label: "經常", score: 4}, {label: "總是", score: 5}] }
+      - { id: psychological.burnout.q9, text: "工作時健忘且容易分心", options: [{label: "從不", score: 1}, {label: "很少", score: 2}, {label: "有時", score: 3}, {label: "經常", score: 4}, {label: "總是", score: 5}] }
+      - { id: psychological.burnout.q10, text: "工作時無法控制情緒", options: [{label: "從不", score: 1}, {label: "很少", score: 2}, {label: "有時", score: 3}, {label: "經常", score: 4}, {label: "總是", score: 5}] }
+      - { id: psychological.burnout.q11, text: "工作時容易煩躁", options: [{label: "從不", score: 1}, {label: "很少", score: 2}, {label: "有時", score: 3}, {label: "經常", score: 4}, {label: "總是", score: 5}] }
+      - { id: psychological.burnout.q12, text: "工作時容易過度反應", options: [{label: "從不", score: 1}, {label: "很少", score: 2}, {label: "有時", score: 3}, {label: "經常", score: 4}, {label: "總是", score: 5}] }
+    subScales:
+      - id: bat12.exhaustion
+        label: 精疲力竭
+        questionIds: [psychological.burnout.q1, psychological.burnout.q2, psychological.burnout.q3]
+        clinicalCutoff:
+          threshold: 2.96
+          comparator: ">="
+          flagLabel: bat12-exhaustion-redzone
+          severity: advisory
+          citation: "Schaufeli 2020 BAT manual"
+      - id: bat12.mental_distance
+        label: 心理疏離
+        questionIds: [psychological.burnout.q4, psychological.burnout.q5, psychological.burnout.q6]
+        clinicalCutoff:
+          threshold: 2.81
+          comparator: ">="
+          flagLabel: bat12-mental-distance-redzone
+          severity: advisory
+          citation: "Schaufeli 2020"
+      - id: bat12.cognitive_impairment
+        label: 認知失能
+        questionIds: [psychological.burnout.q7, psychological.burnout.q8, psychological.burnout.q9]
+        clinicalCutoff:
+          threshold: 2.41
+          comparator: ">="
+          flagLabel: bat12-cognitive-impairment-redzone
+          severity: advisory
+          citation: "Schaufeli 2020"
+      - id: bat12.emotional_impairment
+        label: 情緒失調
+        questionIds: [psychological.burnout.q10, psychological.burnout.q11, psychological.burnout.q12]
+        clinicalCutoff:
+          threshold: 2.61
+          comparator: ">="
+          flagLabel: bat12-emotional-impairment-redzone
+          severity: advisory
+          citation: "Schaufeli 2020"
+  - id: psychological.depression
+    kind: likert
+    domain: psychological
+    label: 憂鬱篩檢 (PHQ-2)
+    style: symptom
+    direction: higher_is_worse
+    maxScore: 3
+    weight: 1.0
+    license: public-domain
+    loincCode: "55757-9"
+    minCompletionPolicy: 1.0
+    questions:
+      - { id: psychological.depression.q1, text: "過去 2 週，您對任何事都提不起興趣", loincCode: "44250-9", options: [{label: "從不", score: 0}, {label: "幾天", score: 1}, {label: "超過一半時間", score: 2}, {label: "幾乎每天", score: 3}] }
+      - { id: psychological.depression.q2, text: "過去 2 週，您感到沮喪、憂鬱或無望", loincCode: "44255-8", options: [{label: "從不", score: 0}, {label: "幾天", score: 1}, {label: "超過一半時間", score: 2}, {label: "幾乎每天", score: 3}] }
+    clinicalCutoff:
+      threshold: 3
+      comparator: ">="
+      flagLabel: positive-depression-screen
+      severity: advisory
+      citation: "Kroenke 2003 (sens 83% / spec 92%)"
+  - id: psychological.anxiety
+    kind: likert
+    domain: psychological
+    label: 焦慮篩檢 (GAD-2)
+    style: symptom
+    direction: higher_is_worse
+    maxScore: 3
+    weight: 1.0
+    license: public-domain
+    minCompletionPolicy: 1.0
+    questions:
+      - { id: psychological.anxiety.q1, text: "過去 2 週，您感到緊張、焦慮或坐立不安", loincCode: "69725-0", options: [{label: "從不", score: 0}, {label: "幾天", score: 1}, {label: "超過一半時間", score: 2}, {label: "幾乎每天", score: 3}] }
+      - { id: psychological.anxiety.q2, text: "過去 2 週，您無法停止或控制擔憂", loincCode: "68509-9", options: [{label: "從不", score: 0}, {label: "幾天", score: 1}, {label: "超過一半時間", score: 2}, {label: "幾乎每天", score: 3}] }
+    clinicalCutoff:
+      threshold: 3
+      comparator: ">="
+      flagLabel: positive-anxiety-screen
+      severity: advisory
+      citation: "Kroenke 2007 (sens 86% / spec 83%)"
+  - id: psychological.stress
+    kind: likert
+    domain: psychological
+    label: 壓力篩檢 (PSS-4)
+    style: symptom
+    direction: higher_is_worse
+    maxScore: 4
+    weight: 1.0
+    license: research-open-noncommercial
+    minCompletionPolicy: 1.0
+    questions:
+      - { id: psychological.stress.q1, text: "過去 1 個月，您多常感到無法掌控生活中的重要事情？", options: [{label: "從不", score: 0}, {label: "幾乎沒有", score: 1}, {label: "有時", score: 2}, {label: "經常", score: 3}, {label: "非常常", score: 4}] }
+      - { id: psychological.stress.q2, text: "過去 1 個月，您多常感到能掌握自己的時間？", reverseScored: true, options: [{label: "從不", score: 0}, {label: "幾乎沒有", score: 1}, {label: "有時", score: 2}, {label: "經常", score: 3}, {label: "非常常", score: 4}] }
+      - { id: psychological.stress.q3, text: "過去 1 個月，您多常感到事情如您所願？", reverseScored: true, options: [{label: "從不", score: 0}, {label: "幾乎沒有", score: 1}, {label: "有時", score: 2}, {label: "經常", score: 3}, {label: "非常常", score: 4}] }
+      - { id: psychological.stress.q4, text: "過去 1 個月，您多常感到困難堆積到無法克服？", options: [{label: "從不", score: 0}, {label: "幾乎沒有", score: 1}, {label: "有時", score: 2}, {label: "經常", score: 3}, {label: "非常常", score: 4}] }
+    clinicalCutoff:
+      threshold: 9
+      comparator: ">="
+      flagLabel: positive-stress-screen
+      severity: advisory
+      citation: "Cohen 1988 (PSS-4 short form) + Warttig 2013 UK norms"
+
+sensory:
+  - id: sensory.functional_acuity
+    kind: likert
+    domain: sensory
+    label: 感官功能自評
+    style: capacity
+    direction: higher_is_better
+    maxScore: 3
+    weight: 1.0
+    license: study-developed
+    questions:
+      - { id: sensory.functional_acuity.q1, text: "過去 1 週，您能清楚看清遠處與聽見對話嗎？", options: [{label: "完全不能", score: 0}, {label: "勉強可以", score: 1}, {label: "輕鬆可以", score: 2}, {label: "非常清楚", score: 3}] }
+  - id: sensory.vision_impact
+    kind: likert
+    domain: sensory
+    label: 視覺影響生活
+    style: symptom
+    direction: higher_is_worse
+    maxScore: 3
+    weight: 1.0
+    license: public-domain
+    questions:
+      - { id: sensory.vision_impact.q1, text: "過去 1 個月，視覺問題影響您日常生活的程度？", options: [{label: "無", score: 0}, {label: "輕微", score: 1}, {label: "中度", score: 2}, {label: "嚴重", score: 3}] }
+  - id: sensory.hearing_impact
+    kind: likert
+    domain: sensory
+    label: 聽覺影響生活
+    style: symptom
+    direction: higher_is_worse
+    maxScore: 3
+    weight: 1.0
+    license: public-domain
+    questions:
+      - { id: sensory.hearing_impact.q1, text: "過去 1 個月，聽覺問題影響您日常生活的程度？", options: [{label: "無", score: 0}, {label: "輕微", score: 1}, {label: "中度", score: 2}, {label: "嚴重", score: 3}] }
+  - id: sensory.screen_fatigue
+    kind: likert
+    domain: sensory
+    label: 螢幕疲勞
+    style: symptom
+    direction: higher_is_worse
+    maxScore: 3
+    weight: 1.0
+    license: public-domain
+    questions:
+      - { id: sensory.screen_fatigue.q1, text: "過去 1 週，使用螢幕後您多常感到眼睛疲勞？", options: [{label: "從不", score: 0}, {label: "偶爾", score: 1}, {label: "經常", score: 2}, {label: "總是", score: 3}] }
