@@ -5,8 +5,9 @@ import { resolve } from 'path';
 const root = process.cwd(); // vitest 由 repo root 執行
 const read = (p: string) => readFileSync(resolve(root, p), 'utf-8');
 
-const BANNED_URL = [/yaocare/, /yao\.care\/smart-pedi-cds/];
-const BANNED_POSITION = [/臨床決策/, /生命徵象/, /SMART on FHIR/];
+const BANNED_URL = [/yaocare/, /yao\.care\/smart-pedi-cds/, /smart-pedi-cds/];
+// 舊兒科主定位字串（成人 IC 改版後門面層不可再出現）
+const BANNED_POSITION = [/臨床決策/, /生命徵象/, /SMART on FHIR/, /兒童發展/, /Smart Pedi/, /里程碑/];
 
 describe('網址一致性', () => {
   const files = [
@@ -23,8 +24,8 @@ describe('網址一致性', () => {
       for (const re of BANNED_URL) expect(c).not.toMatch(re);
     });
   }
-  it('site.ts repo 指向 yao-care', () => {
-    expect(read('src/lib/seo/site.ts')).toMatch(/github\.com\/yao-care\/smart-pedi-cds/);
+  it('site.ts repo 指向 yao-care/smart-func-cds', () => {
+    expect(read('src/lib/seo/site.ts')).toMatch(/github\.com\/yao-care\/smart-func-cds/);
   });
 });
 

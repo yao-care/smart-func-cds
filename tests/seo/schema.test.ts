@@ -8,8 +8,9 @@ import {
   breadcrumbSchema,
   faqPageSchema,
 } from '../../src/lib/seo/schema';
+import { SITE } from '../../src/lib/seo/site';
 
-const site = new URL('https://smart-pedi-cds.yao.care/');
+const site = new URL('https://smart-func-cds.yao.care/');
 
 describe('organizationSchema', () => {
   it('帶 @type Organization 與機構名', () => {
@@ -29,7 +30,7 @@ describe('webSiteSchema', () => {
   it('含 SearchAction，target 指向 /search', () => {
     const s = webSiteSchema(site);
     expect(s['@type']).toBe('WebSite');
-    expect(s.name).toBe('Smart Pedi 兒童發展智慧評估');
+    expect(s.name).toBe(SITE.name);
     expect(s.potentialAction['@type']).toBe('SearchAction');
     expect(s.potentialAction.target).toContain('/search?q=');
   });
@@ -50,7 +51,7 @@ describe('medicalWebPageSchema', () => {
     title: '語言發展',
     summary: '摘要',
     ageGroups: ['toddler'],
-    url: 'https://smart-pedi-cds.yao.care/education/lang/',
+    url: 'https://smart-func-cds.yao.care/education/lang/',
     publishedAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-02-01'),
   });
@@ -90,7 +91,7 @@ describe('breadcrumbSchema', () => {
       { label: '當前' },
     ]);
     expect(s['@type']).toBe('BreadcrumbList');
-    expect(s.itemListElement[0].item).toBe('https://smart-pedi-cds.yao.care/');
+    expect(s.itemListElement[0].item).toBe('https://smart-func-cds.yao.care/');
     expect('item' in s.itemListElement[1]).toBe(false);
   });
 });
