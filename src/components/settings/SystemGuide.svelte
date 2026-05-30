@@ -13,9 +13,9 @@
   <section>
     <h3>系統定位</h3>
     <p>
-      CDSA 兒童發展智慧評估系統採用 <strong>Astro 5 SSG + Svelte 5 + IndexedDB</strong>，
+      成人功能健康評估系統採用 <strong>Astro 5 SSG + Svelte 5 + IndexedDB</strong>，
       所有頁面在 build 時靜態產出，部署在 GitHub Pages 上、零後端。
-      家長端評估過程的事件、繪圖筆跡、分流結果都儲存在
+      受測者端評估過程的事件、互動紀錄、分流結果都儲存在
       <strong>使用者瀏覽器的 IndexedDB</strong>，不會送到任何第三方。
     </p>
     <p>
