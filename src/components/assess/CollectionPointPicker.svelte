@@ -1,8 +1,17 @@
 <script lang="ts">
   import { startGcmUpload } from '$lib/fhir/gcm-submit';
+  import { setTriageResult } from '$lib/db/assessments';
+  import type { TriageResult } from '../../engine/func/triage';
   import StandaloneLaunch from '../fhir/StandaloneLaunch.svelte';
 
-  let { assessmentId }: { assessmentId: string } = $props();
+  let { assessmentId, triageResult }: { assessmentId: string; triageResult: TriageResult } = $props();
+
+  // 上傳路徑靠返回頁從 IndexedDB 重建資源，因此發起任一上傳前先保證 triageResult
+  // 已落庫（結果頁的 $effect 持久化可能因競態未完成）。
+  async function ensurePersisted() {
+    // $state.snapshot 解包 proxy → 純物件，否則 IndexedDB 結構化複製會 DataCloneError
+    await setTriageResult(assessmentId, $state.snapshot(triageResult));
+  }
 
   let choice = $state<'none' | 'hospital' | 'gcm'>('none');
   let nickname = $state('');
@@ -11,8 +20,9 @@
   let error = $state<string | null>(null);
   let busy = $state(false);
 
-  function chooseHospital() {
+  async function chooseHospital() {
     // 醫院流程：StandaloneLaunch redirect 前先記 assessmentId 供返回頁重建
+    await ensurePersisted();
     sessionStorage.setItem('fhir.flow', JSON.stringify({ assessmentId }));
     choice = 'hospital';
   }
@@ -25,6 +35,7 @@
     }
     busy = true;
     try {
+      await ensurePersisted();
       await startGcmUpload(`${location.origin}/launch/`, {
         assessmentId,
         nickname,

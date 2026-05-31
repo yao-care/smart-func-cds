@@ -124,8 +124,8 @@
   {/if}
 
   <div class="result-actions">
-    {#if assessmentStore.assessment}
-      <CollectionPointPicker assessmentId={assessmentStore.assessment.id} />
+    {#if assessmentStore.assessment && triageResult}
+      <CollectionPointPicker assessmentId={assessmentStore.assessment.id} {triageResult} />
     {/if}
 
     {#if assessmentStore.assessment && assessmentStore.patient}
