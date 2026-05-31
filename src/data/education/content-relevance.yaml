@@ -52,17 +52,17 @@ triggers:
       - { slug: balanced-nutrition, browse: true, severities: [observe, consult] }
   # ── 行動功能 locomotion ────────────────────────────────────────────
   - trigger: func.domain.locomotion.low.18-39
-    videoIds: []
+    videoIds: [sVQyMtAlXC4]
     articles:
       - { slug: physical-activity-benefits, browse: true, severities: [observe, consult] }
       - { slug: sedentary-harms, severities: [observe, consult] }
   - trigger: func.domain.locomotion.low.40-54
-    videoIds: []
+    videoIds: [sVQyMtAlXC4]
     articles:
       - { slug: physical-activity-benefits, browse: true, severities: [observe, consult] }
       - { slug: sedentary-harms, severities: [observe, consult] }
   - trigger: func.domain.locomotion.low.55-64
-    videoIds: []
+    videoIds: [sVQyMtAlXC4]
     articles:
       - { slug: physical-activity-benefits, browse: true, severities: [observe, consult] }
       - { slug: sedentary-harms, severities: [observe, consult] }
@@ -80,17 +80,17 @@ triggers:
       - { slug: sedentary-harms, browse: true, severities: [observe, consult] }
   # ── 認知功能 cognition ─────────────────────────────────────────────
   - trigger: func.domain.cognition.low.18-39
-    videoIds: []
+    videoIds: [D-i_2Fr493s]
     articles:
       - { slug: cognitive-health, browse: true, severities: [observe, consult] }
       - { slug: attention-memory-care, severities: [observe, consult] }
   - trigger: func.domain.cognition.low.40-54
-    videoIds: []
+    videoIds: [D-i_2Fr493s]
     articles:
       - { slug: cognitive-health, browse: true, severities: [observe, consult] }
       - { slug: attention-memory-care, severities: [observe, consult] }
   - trigger: func.domain.cognition.low.55-64
-    videoIds: []
+    videoIds: [D-i_2Fr493s]
     articles:
       - { slug: cognitive-health, browse: true, severities: [observe, consult] }
       - { slug: attention-memory-care, severities: [observe, consult] }
@@ -108,19 +108,19 @@ triggers:
       - { slug: attention-memory-care, browse: true, severities: [observe, consult] }
   # ── 心理功能 psychological ─────────────────────────────────────────
   - trigger: func.domain.psychological.low.18-39
-    videoIds: []
+    videoIds: [lTPf6eUnmC0]
     articles:
       - { slug: understanding-burnout, browse: true, severities: [observe, consult] }
       - { slug: stress-management, severities: [observe, consult] }
       - { slug: mood-self-awareness, severities: [consult] }
   - trigger: func.domain.psychological.low.40-54
-    videoIds: []
+    videoIds: [lTPf6eUnmC0]
     articles:
       - { slug: understanding-burnout, browse: true, severities: [observe, consult] }
       - { slug: stress-management, severities: [observe, consult] }
       - { slug: mood-self-awareness, severities: [consult] }
   - trigger: func.domain.psychological.low.55-64
-    videoIds: []
+    videoIds: [lTPf6eUnmC0]
     articles:
       - { slug: understanding-burnout, browse: true, severities: [observe, consult] }
       - { slug: stress-management, severities: [observe, consult] }
@@ -145,35 +145,35 @@ triggers:
       - { slug: psychological-wellbeing, browse: true, severities: [observe, consult] }
   # ── 感官功能 sensory ───────────────────────────────────────────────
   - trigger: func.domain.sensory.low.18-39
-    videoIds: []
+    videoIds: [spdYQ-FjHE0]
     articles:
       - { slug: vision-care, browse: true, severities: [observe, consult] }
       - { slug: hearing-care, severities: [observe, consult] }
       - { slug: screen-eye-strain, severities: [consult] }
   - trigger: func.domain.sensory.low.40-54
-    videoIds: []
+    videoIds: [spdYQ-FjHE0]
     articles:
       - { slug: vision-care, browse: true, severities: [observe, consult] }
       - { slug: hearing-care, severities: [observe, consult] }
       - { slug: screen-eye-strain, severities: [consult] }
   - trigger: func.domain.sensory.low.55-64
-    videoIds: []
+    videoIds: [spdYQ-FjHE0]
     articles:
       - { slug: vision-care, browse: true, severities: [observe, consult] }
       - { slug: hearing-care, severities: [observe, consult] }
       - { slug: screen-eye-strain, severities: [consult] }
   - trigger: func.domain.sensory.moderate.18-39
-    videoIds: []
+    videoIds: [rN-2iDdxuGo]
     articles:
       - { slug: hearing-care, browse: true, severities: [observe, consult] }
       - { slug: screen-eye-strain, browse: true, severities: [observe, consult] }
   - trigger: func.domain.sensory.moderate.40-54
-    videoIds: []
+    videoIds: [rN-2iDdxuGo]
     articles:
       - { slug: hearing-care, browse: true, severities: [observe, consult] }
       - { slug: screen-eye-strain, browse: true, severities: [observe, consult] }
   - trigger: func.domain.sensory.moderate.55-64
-    videoIds: []
+    videoIds: [rN-2iDdxuGo]
     articles:
       - { slug: hearing-care, browse: true, severities: [observe, consult] }
       - { slug: screen-eye-strain, browse: true, severities: [observe, consult] }

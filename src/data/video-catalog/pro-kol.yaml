@@ -1,4 +1,83 @@
-# Tier 3: 醫療專業 KOL（個人可驗證身分的醫師頻道）
+# Tier 3: 醫療專業 KOL / 可信衛教媒體（可驗證身分）
 # 影片在此檔以 array 頂層展開，每筆需通過 videoCatalogItemSchema
-# 成人 IC 影片待策展（原兒科影片已於成人化時清除）
-[]
+# 2026-05-31 經 pnpm curate:videos + Claude Code 複審核可的成人 IC 影片
+- videoId: sVQyMtAlXC4
+  title: 走路有益健康嗎？每天走多少步才有效？Is walking beneficial for health and how many steps per day will be effective?
+  channel: 邱正宏 談健康 Grand Health
+  channelId: UCnREuXSxxlh9fiORs2GfMbQ
+  duration: 343
+  publishedAt: '2022-11-19'
+  subtitleType: human
+  viewCount: 101398
+  score: 0.63
+  notes: 邱正宏醫師親述，引 WHO 每週150分鐘中強度身體活動建議，實證導向；對應成人規律運動衛教。
+  language: zh-Hant
+  sourceTier: pro-kol
+  curatedAt: '2026-05-31'
+  lastValidatedAt: '2026-05-31'
+  verifiedBy: claude-code
+  verificationStatus: verified
+- videoId: D-i_2Fr493s
+  title: 【麥得飲食】讓你大腦年輕七歲半!|預防失智症就跟著營養師這樣吃!|減緩認知功能下降|5大要點一起做|還有哪些地雷食物要避免呢?|降低失智症風險|Mind Diet
+  channel: 安德健康醫學
+  channelId: UCaM45CHY2zHdqE9QNLIixSA
+  duration: 476
+  publishedAt: '2023-08-04'
+  subtitleType: none
+  viewCount: 27374
+  score: 0.49
+  notes: 營養師說明 MIND 麥得飲食法降低失智與認知退化風險（實證飲食型態）；對應認知健康衛教。無字幕，依標題與 description 判讀。
+  language: zh-Hant
+  sourceTier: pro-kol
+  curatedAt: '2026-05-31'
+  lastValidatedAt: '2026-05-31'
+  verifiedBy: claude-code
+  verificationStatus: verified
+- videoId: spdYQ-FjHE0
+  title: 眼睛保健17 護眼保健品有必要補充嗎？by 聯合 翁林仲醫師
+  channel: 看健大健康影音知識庫
+  channelId: UCRwFANKz6MUKhkaRW0xCx_g
+  duration: 163
+  publishedAt: '2016-06-07'
+  subtitleType: none
+  viewCount: 1115
+  score: 0.46
+  notes: 聯合／翁林仲眼科醫師談護眼保健（飲食、作息、保健品），內容乾淨無推銷；觀看數低但來源可信。
+  language: zh-Hant
+  sourceTier: pro-kol
+  curatedAt: '2026-05-31'
+  lastValidatedAt: '2026-05-31'
+  verifiedBy: claude-code
+  verificationStatus: verified
+- videoId: rN-2iDdxuGo
+  title: 長期戴耳機、擤鼻涕太用力小心聽力受損！4種傷耳行為要留意｜健康圖解動起來
+  channel: Heho
+  channelId: UCFo2ocxRNZodXSRePresa_Q
+  duration: 110
+  publishedAt: '2021-12-14'
+  subtitleType: human
+  viewCount: 9533
+  score: 0.59
+  notes: Heho 衛教媒體，引研究說明長時間戴耳機等4種傷耳行為與聽力保護；對應感官（聽力）衛教。
+  language: zh-Hant
+  sourceTier: pro-kol
+  curatedAt: '2026-05-31'
+  lastValidatedAt: '2026-05-31'
+  verifiedBy: claude-code
+  verificationStatus: verified
+- videoId: lTPf6eUnmC0
+  title: 【 志祺七七 】「職業倦怠」也是一種病？帶你認識台灣法律中的「心理過勞」！《 從🌍反觀🍠 》EP 009
+  channel: 志祺七七
+  channelId: UCiWXd0nmBjlKROwzMyPV-Nw
+  duration: 479
+  publishedAt: '2019-07-18'
+  subtitleType: human
+  viewCount: 69880
+  score: 0.53
+  notes: 志祺七七／圖文不符，正確說明 WHO 於 2019 將職業倦怠 burnout 列入 ICD；對應職業倦怠衛教。
+  language: zh-Hant
+  sourceTier: pro-kol
+  curatedAt: '2026-05-31'
+  lastValidatedAt: '2026-05-31'
+  verifiedBy: claude-code
+  verificationStatus: verified
