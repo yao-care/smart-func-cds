@@ -32,4 +32,6 @@ jobs:
         with: { node-version: 22, cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+        env:
+          PUBLIC_CONTRIBUTION_WORKER_URL: ${{ vars.PUBLIC_CONTRIBUTION_WORKER_URL }}
       - run: npx @lhci/cli autorun
