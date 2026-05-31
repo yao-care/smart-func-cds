@@ -57,3 +57,69 @@ export async function getClientId(redirectUri: string): Promise<string> {
   localStorage.setItem('gcm.clientId', j.client_id);
   return j.client_id;
 }
+
+/** 跨 redirect 持久化於 sessionStorage['gcm.flow']。 */
+export interface GcmFlowState {
+  verifier: string; // PKCE，/token 需要
+  state: string; // CSRF
+  clientId: string;
+  redirectUri: string; // 與 /register、/authorize 逐字一致
+  assessmentId: string; // 返回頁據此從 IndexedDB 重建資源
+  nickname: string; // 必填非空
+  email?: string;
+  phone?: string;
+}
+
+export interface GcmUploadInput {
+  assessmentId: string;
+  nickname: string;
+  email?: string;
+  phone?: string;
+}
+
+/** 預設導向器；測試可注入 spy。 */
+type Navigate = (url: string) => void;
+const defaultNavigate: Navigate = (url) => location.assign(url);
+
+/**
+ * Step 1：使用者選 GCM、填暱稱/email/電話後呼叫，導向授權。
+ * 空暱稱直接 throw —— 否則 server /authorize 會退回 HTML 同意表單，打斷 SPA。
+ */
+export async function startGcmUpload(
+  redirectUri: string,
+  input: GcmUploadInput,
+  navigate: Navigate = defaultNavigate,
+): Promise<void> {
+  const nickname = input.nickname.trim();
+  if (!nickname) throw new Error('請先輸入暱稱再上傳');
+
+  const clientId = await getClientId(redirectUri);
+  const { verifier, challenge } = await makePkce();
+  const state = crypto.randomUUID();
+
+  const flow: GcmFlowState = {
+    verifier,
+    state,
+    clientId,
+    redirectUri,
+    assessmentId: input.assessmentId,
+    nickname,
+    email: input.email?.trim() || undefined,
+    phone: input.phone?.trim() || undefined,
+  };
+  sessionStorage.setItem('gcm.flow', JSON.stringify(flow));
+
+  const q = new URLSearchParams({
+    response_type: 'code',
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    scope: GCM.scopes,
+    state,
+    aud: GCM.base,
+    code_challenge: challenge,
+    code_challenge_method: 'S256',
+    login_hint: browserCode(),
+    nickname,
+  });
+  navigate(`${GCM.base}/authorize?${q.toString()}`);
+}
