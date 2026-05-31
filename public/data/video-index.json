@@ -15,9 +15,81 @@
     "understanding-burnout",
     "vision-care"
   ],
-  "catalog": {},
+  "catalog": {
+    "D-i_2Fr493s": {
+      "channel": "安德健康醫學",
+      "duration": 476,
+      "language": "zh-Hant",
+      "score": 0.49,
+      "sourceTier": "pro-kol",
+      "title": "【麥得飲食】讓你大腦年輕七歲半!|預防失智症就跟著營養師這樣吃!|減緩認知功能下降|5大要點一起做|還有哪些地雷食物要避免呢?|降低失智症風險|Mind Diet",
+      "videoId": "D-i_2Fr493s"
+    },
+    "lTPf6eUnmC0": {
+      "channel": "志祺七七",
+      "duration": 479,
+      "language": "zh-Hant",
+      "score": 0.53,
+      "sourceTier": "pro-kol",
+      "title": "【 志祺七七 】「職業倦怠」也是一種病？帶你認識台灣法律中的「心理過勞」！《 從🌍反觀🍠 》EP 009",
+      "videoId": "lTPf6eUnmC0"
+    },
+    "rN-2iDdxuGo": {
+      "channel": "Heho",
+      "duration": 110,
+      "language": "zh-Hant",
+      "score": 0.59,
+      "sourceTier": "pro-kol",
+      "title": "長期戴耳機、擤鼻涕太用力小心聽力受損！4種傷耳行為要留意｜健康圖解動起來",
+      "videoId": "rN-2iDdxuGo"
+    },
+    "sVQyMtAlXC4": {
+      "channel": "邱正宏 談健康 Grand Health",
+      "duration": 343,
+      "language": "zh-Hant",
+      "score": 0.63,
+      "sourceTier": "pro-kol",
+      "title": "走路有益健康嗎？每天走多少步才有效？Is walking beneficial for health and how many steps per day will be effective?",
+      "videoId": "sVQyMtAlXC4"
+    },
+    "spdYQ-FjHE0": {
+      "channel": "看健大健康影音知識庫",
+      "duration": 163,
+      "language": "zh-Hant",
+      "score": 0.46,
+      "sourceTier": "pro-kol",
+      "title": "眼睛保健17 護眼保健品有必要補充嗎？by 聯合 翁林仲醫師",
+      "videoId": "spdYQ-FjHE0"
+    }
+  },
   "clinicalEducation": {},
-  "educationSlugToTriggers": {},
+  "educationSlugToTriggers": {
+    "cognitive-health": [
+      "func.domain.cognition.low.18-39",
+      "func.domain.cognition.low.40-54",
+      "func.domain.cognition.low.55-64"
+    ],
+    "hearing-care": [
+      "func.domain.sensory.moderate.18-39",
+      "func.domain.sensory.moderate.40-54",
+      "func.domain.sensory.moderate.55-64"
+    ],
+    "physical-activity-benefits": [
+      "func.domain.locomotion.low.18-39",
+      "func.domain.locomotion.low.40-54",
+      "func.domain.locomotion.low.55-64"
+    ],
+    "understanding-burnout": [
+      "func.domain.psychological.low.18-39",
+      "func.domain.psychological.low.40-54",
+      "func.domain.psychological.low.55-64"
+    ],
+    "vision-care": [
+      "func.domain.sensory.low.18-39",
+      "func.domain.sensory.low.40-54",
+      "func.domain.sensory.low.55-64"
+    ]
+  },
   "recommendations": {
     "consult::cognition::18-39": [
       {
@@ -592,7 +664,9 @@
       ],
       "educationSlug": "cognitive-health",
       "inapplicable": false,
-      "videoIds": []
+      "videoIds": [
+        "D-i_2Fr493s"
+      ]
     },
     "func.domain.cognition.low.40-54": {
       "articleSlugs": [
@@ -601,7 +675,9 @@
       ],
       "educationSlug": "cognitive-health",
       "inapplicable": false,
-      "videoIds": []
+      "videoIds": [
+        "D-i_2Fr493s"
+      ]
     },
     "func.domain.cognition.low.55-64": {
       "articleSlugs": [
@@ -610,7 +686,9 @@
       ],
       "educationSlug": "cognitive-health",
       "inapplicable": false,
-      "videoIds": []
+      "videoIds": [
+        "D-i_2Fr493s"
+      ]
     },
     "func.domain.cognition.moderate.18-39": {
       "articleSlugs": [
@@ -643,7 +721,9 @@
       ],
       "educationSlug": "physical-activity-benefits",
       "inapplicable": false,
-      "videoIds": []
+      "videoIds": [
+        "sVQyMtAlXC4"
+      ]
     },
     "func.domain.locomotion.low.40-54": {
       "articleSlugs": [
@@ -652,7 +732,9 @@
       ],
       "educationSlug": "physical-activity-benefits",
       "inapplicable": false,
-      "videoIds": []
+      "videoIds": [
+        "sVQyMtAlXC4"
+      ]
     },
     "func.domain.locomotion.low.55-64": {
       "articleSlugs": [
@@ -661,7 +743,9 @@
       ],
       "educationSlug": "physical-activity-benefits",
       "inapplicable": false,
-      "videoIds": []
+      "videoIds": [
+        "sVQyMtAlXC4"
+      ]
     },
     "func.domain.locomotion.moderate.18-39": {
       "articleSlugs": [
@@ -695,7 +779,9 @@
       ],
       "educationSlug": "understanding-burnout",
       "inapplicable": false,
-      "videoIds": []
+      "videoIds": [
+        "lTPf6eUnmC0"
+      ]
     },
     "func.domain.psychological.low.40-54": {
       "articleSlugs": [
@@ -705,7 +791,9 @@
       ],
       "educationSlug": "understanding-burnout",
       "inapplicable": false,
-      "videoIds": []
+      "videoIds": [
+        "lTPf6eUnmC0"
+      ]
     },
     "func.domain.psychological.low.55-64": {
       "articleSlugs": [
@@ -715,7 +803,9 @@
       ],
       "educationSlug": "understanding-burnout",
       "inapplicable": false,
-      "videoIds": []
+      "videoIds": [
+        "lTPf6eUnmC0"
+      ]
     },
     "func.domain.psychological.moderate.18-39": {
       "articleSlugs": [
@@ -755,7 +845,9 @@
       ],
       "educationSlug": "vision-care",
       "inapplicable": false,
-      "videoIds": []
+      "videoIds": [
+        "spdYQ-FjHE0"
+      ]
     },
     "func.domain.sensory.low.40-54": {
       "articleSlugs": [
@@ -765,7 +857,9 @@
       ],
       "educationSlug": "vision-care",
       "inapplicable": false,
-      "videoIds": []
+      "videoIds": [
+        "spdYQ-FjHE0"
+      ]
     },
     "func.domain.sensory.low.55-64": {
       "articleSlugs": [
@@ -775,7 +869,9 @@
       ],
       "educationSlug": "vision-care",
       "inapplicable": false,
-      "videoIds": []
+      "videoIds": [
+        "spdYQ-FjHE0"
+      ]
     },
     "func.domain.sensory.moderate.18-39": {
       "articleSlugs": [
@@ -784,7 +880,9 @@
       ],
       "educationSlug": "hearing-care",
       "inapplicable": false,
-      "videoIds": []
+      "videoIds": [
+        "rN-2iDdxuGo"
+      ]
     },
     "func.domain.sensory.moderate.40-54": {
       "articleSlugs": [
@@ -793,7 +891,9 @@
       ],
       "educationSlug": "hearing-care",
       "inapplicable": false,
-      "videoIds": []
+      "videoIds": [
+        "rN-2iDdxuGo"
+      ]
     },
     "func.domain.sensory.moderate.55-64": {
       "articleSlugs": [
@@ -802,7 +902,9 @@
       ],
       "educationSlug": "hearing-care",
       "inapplicable": false,
-      "videoIds": []
+      "videoIds": [
+        "rN-2iDdxuGo"
+      ]
     },
     "func.domain.vitality.low.18-39": {
       "articleSlugs": [
