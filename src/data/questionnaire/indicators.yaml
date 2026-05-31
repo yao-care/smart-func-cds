@@ -124,8 +124,14 @@ cognition:
       trials: 20
       warmupTrials: 5
       validRangeMs: { min: 100, max: 2000 }
+      # 常模刻意留 null（安全 no-op）。填值需「瀏覽器施測」相符的年齡分層 mean/SD（毫秒）。
+      # 候選來源：MindCrowd web-based simple visual RT（npj Aging 2021, n=75,666，
+      #   約 18-39≈250 / 40-54≈285 / 55-64≈315ms、~7ms/年；SD 待補充表格確認）。
+      # 不採實驗室儀器 RT 常模（施測方式不符）。確切數值需臨床/資料 sign-off 後再填。
+      # 影響：null 時此指標 no-op；cognition 域仍由 attention/memory self-report 評分。
+      # 部署不受阻（deploy 未設 NODE_ENV=production；prod 才會 fail-fast）。
       norms:
-        "18-39": null  # TODO: NIH Toolbox simple RT
+        "18-39": null
         "40-54": null
         "55-64": null
   - id: cognition.executive_function
@@ -140,8 +146,13 @@ cognition:
       type: tmt-a
       targetCount: 25
       administration: browser-mouse
+      # 常模刻意留 null（安全 no-op）。填值需 TMT-A 完成時間（秒）年齡分層 mean/SD。
+      # 候選來源：Tombaugh 2004（Arch Clin Neuropsychol 19:203-214，n=911，依年齡×教育分層）。
+      # ⚠️ 施測方式 caveat：Tombaugh 為「紙筆」，本系統為 browser-mouse，時間有系統性差異——
+      #   直接套紙筆常模並標 verified 會誤導；需 browser-mouse 校正或自建常模。
+      # 確切數值需臨床 sign-off 後再填。影響同上：null 時 no-op，cognition 仍由主觀指標評分。
       norms:
-        "18-39": null  # TODO: Tombaugh 2004
+        "18-39": null
         "40-54": null
         "55-64": null
 
