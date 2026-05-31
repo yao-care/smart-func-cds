@@ -9,16 +9,32 @@
    * No re-fetching — pure DOM operations on the static grid.
    */
 
-  type CategoryFilter = 'all' | 'diet' | 'sleep' | 'respiratory' | 'exercise' | 'milestone' | 'general';
+  // 成人 IC 衛教分類，對齊 src/content.config.ts 的 category enum
+  type CategoryFilter =
+    | 'all'
+    | 'sleep' | 'fatigue' | 'nutrition'
+    | 'activity' | 'sedentary'
+    | 'cognition'
+    | 'burnout' | 'stress' | 'mood' | 'wellbeing'
+    | 'vision' | 'hearing' | 'screen'
+    | 'general';
   type FormatFilter = 'all' | 'article' | 'video';
 
   const CATEGORY_LABELS: Record<CategoryFilter, string> = {
     all: '全部',
-    diet: '飲食',
     sleep: '睡眠',
-    respiratory: '呼吸',
-    exercise: '運動',
-    milestone: '發展里程碑',
+    fatigue: '疲勞',
+    nutrition: '營養',
+    activity: '身體活動',
+    sedentary: '久坐',
+    cognition: '認知',
+    burnout: '過勞',
+    stress: '壓力',
+    mood: '情緒',
+    wellbeing: '心理健康',
+    vision: '視力',
+    hearing: '聽力',
+    screen: '螢幕用眼',
     general: '一般',
   };
 

@@ -7,17 +7,18 @@
   import Accordion from '../ui/Accordion.svelte';
 
   // Default YAML structure expected by the rule engine
-  const DEFAULT_YAML = `# Pediatric CDSS Rules v1.0
+  const DEFAULT_YAML = `# Adult CDSS Rules v1.0
+# 範例閾值採成人常見值，部署前請依機構臨床指引覆核
 rules:
   - id: high_hr
     description: Elevated heart rate
     indicator: 8867-4
-    threshold: 160
+    threshold: 100
     level: warning
   - id: low_spo2
     description: Low oxygen saturation
     indicator: 59408-5
-    threshold: 94
+    threshold: 92
     operator: lt
     level: critical
 `;

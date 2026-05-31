@@ -56,9 +56,9 @@
   };
 
   const ageGroupLabel: Record<string, string> = {
-    infant: '嬰兒',
-    toddler: '幼兒',
-    preschool: '學齡前',
+    '18-39': '18-39 歲',
+    '40-54': '40-54 歲',
+    '55-64': '55-64 歲',
   };
 
   function selectPatient(id: string) {
