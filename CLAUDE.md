@@ -4,16 +4,14 @@
 
 開源**成人功能健康自評／臨床決策輔助系統（CDSS）**，聚焦世界衛生組織提出的
 **內在能力（Intrinsic Capacity, IC）** 框架，以 SMART on FHIR 標準運行於瀏覽器端。
-給 18–64 歲成人使用，部署於 GitHub Pages，零後端，所有邏輯在瀏覽器執行。
+對象為 18–64 歲成人，部署於 GitHub Pages，零後端，所有邏輯在瀏覽器執行。
 線上站：https://smart-func-cds.yao.care/（品牌名 **Smart Func**）。
-
-本 repo 程式碼源自兒科 `smart-pedi-cds`，已全面成人化，並於 2026-05-31 重建為**獨立 repo（非 fork）**。**禁止再出現任何兒童／兒科／家長相關字眼**（嬰兒、幼兒、學齡前、兒童、小孩、家長、pediatric…）；對外角色一律稱「受測者」。
 
 ## 系統組成（兩個子系統）
 
 1. **成人 IC 功能評估**（核心）— 引導式問卷 + 客觀測驗 → 五大功能域分級 + 分流 + 衛教建議。
    引擎在 `src/engine/func/`，評估流程在 `/assess/`，衛教在 `/education/`。
-2. **FHIR 臨床監測／閉環**（保留自原架構）— 生命徵象規則引擎、基線、ML 風險分析、閉環通知。
+2. **FHIR 臨床監測／閉環** — 生命徵象規則引擎、基線、ML 風險分析、閉環通知。
    引擎在 `src/engine/`（`risk-analyzer`、`closed-loop`、`workers/`），臨床工作台在 `src/components/workspace/`、`dashboard/`。
 
 ## 技術棧
@@ -57,9 +55,12 @@
 
 ### 內容
 
-- 衛教內容放 `src/data/education/`（Content Collections，`src/content.config.ts` 定 schema）
+- 對象為 18–64 歲成人；衛教／問卷／文案一律成人 IC 主題，對外角色稱「受測者」（不引入兒科、親職、育兒內容）
+- 衛教文章放 `src/data/education/`（Content Collections，schema 定於 `src/content.config.ts`）
 - IC 指標／問卷放 `src/data/questionnaire/`（`indicators.yaml`，prebuild 經 `validate-indicators` 守門）
-- 衛教影片策展放 `src/data/video-catalog/`（YAML）
+- 衛教影片策展放 `src/data/video-catalog/`（YAML，schema 定於 `src/lib/education/schemas.ts`）
+- 影片策展用 `pnpm curate:videos`（yt-dlp 取真實 metadata → 報告供複審 → 寫入 catalog；channel-seeds/keywords 在 `scripts/curate/`）
+- 衛教內容對照（trigger ↔ 文章/影片）的單一真相源：`src/data/education/content-relevance.yaml`
 - 監測規則 YAML 由臨床端在「設定 → 規則編輯器」維護並存進 IndexedDB（不是檔案）
 - 基線／ML 模型：`public/models/*.onnx`；音效：`public/sounds/`
 
@@ -72,6 +73,7 @@ pnpm check        # Astro check + svelte-check
 pnpm lint         # ESLint
 pnpm test         # Vitest
 pnpm test:e2e     # Playwright
+pnpm curate:videos # 影片策展（需 yt-dlp + Chrome）
 ```
 
 ## 成人年齡分組
@@ -87,7 +89,7 @@ pnpm test:e2e     # Playwright
 ## 五大功能域（IC domains）
 
 `vitality`（身體活力）、`locomotion`（行動）、`cognition`（認知）、`psychological`（心理）、`sensory`（感官）。
-定義於 `IC_DOMAIN_NAMES`。
+定義於 `IC_DOMAIN_NAMES`（`src/lib/education/schemas.ts`）。
 
 ## IC 分級與分流
 
@@ -113,9 +115,7 @@ pnpm test:e2e     # Playwright
 - `src/data/` — Content Layer 資料（`education/`, `questionnaire/`, `video-catalog/`）
 - `src/pages/` — Astro 頁面路由（`/assess/`, `/education/`…）
 - `src/layouts/` — 頁面佈局
-- `public/models/` — ONNX 模型
-- `public/sounds/` — 音效檔案
-- `public/data/` — 建置產出的索引（`video-index.json`）
+- `public/models/` — ONNX 模型；`public/sounds/` — 音效；`public/data/` — 建置產出索引（`video-index.json`）
 
 ## Island 水合策略
 
@@ -124,8 +124,10 @@ pnpm test:e2e     # Playwright
 - 低優先: `client:idle`
 - 純展示: 零 JS（Astro 元件）
 
-## 部署注意
+## 部署
 
-- fork 的 push event 不自動觸發 Actions，每次發版需 `gh workflow run deploy.yml --ref main` 手動 dispatch
-- 本機 proxy 會把網域解析成 198.18.x.x 假 IP，驗站一律
-  `curl --resolve smart-func-cds.yao.care:443:185.199.108.153 …` 或 DoH
+- GitHub Pages（`build_type=workflow`），自訂網域 `smart-func-cds.yao.care`、強制 HTTPS
+- **push 到 `main` 自動觸發 `deploy.yml`**；需要時可 `gh workflow run deploy.yml --ref main` 手動觸發
+- CI（`ci.yml`）：測試 + content-index 一致性 + Lighthouse（`.lighthouserc.json`，staticDistDir、門檻全 warn、不上傳報告）
+- 驗站：本機 proxy 會把網域解析成 198.18.x.x 假 IP，一律用
+  `curl --resolve smart-func-cds.yao.care:443:185.199.108.153 …` 或 DoH，別信本機 dig/curl
