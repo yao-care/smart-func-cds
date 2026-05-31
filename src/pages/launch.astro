@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import LaunchReturn from '../components/fhir/LaunchReturn.svelte';
+---
+
+<Base title="處理上傳" description="收案點授權返回處理" noindex={true}>
+  <main class="launch-main">
+    <LaunchReturn client:load />
+  </main>
+</Base>
+
+<style>
+  .launch-main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: var(--space-7) var(--space-4);
+  }
+</style>
