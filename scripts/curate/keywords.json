@@ -1,426 +1,422 @@
 {
-  "cdsa.triage.refer.2-6m": {
-    "primary": ["新生兒 嬰兒 發展評估 何時就醫", "0-6個月 寶寶 發展遲緩", "嬰兒 早療 早期療育"],
-    "secondary": ["infant developmental screening when to refer"],
-    "educationSlug": "when-to-seek-help",
-    "minDuration": 60,
-    "maxDuration": 1500,
-    "timeSensitive": false
-  },
-  "cdsa.triage.refer.7-12m": {
-    "primary": ["嬰兒 發展遲緩 何時就醫 衛教", "7-12個月 寶寶 發展里程碑", "嬰兒 早療 評估"],
-    "secondary": ["infant developmental delay early intervention"],
-    "educationSlug": "when-to-seek-help",
-    "minDuration": 60,
-    "maxDuration": 1500,
-    "timeSensitive": false
-  },
-  "cdsa.triage.refer.13-24m": {
-    "primary": ["幼兒 發展遲緩 何時就醫 黃瑽寧", "1歲 2歲 發展評估 早期療育", "幼兒 發展里程碑 異常"],
-    "secondary": ["toddler developmental delay early intervention"],
-    "educationSlug": "when-to-seek-help",
-    "minDuration": 60,
-    "maxDuration": 1500,
-    "timeSensitive": false
-  },
-  "cdsa.triage.refer.25-36m": {
-    "primary": ["2歲 3歲 發展遲緩 早療", "幼兒 早期療育 黃瑽寧", "兒童 發展評估 就醫"],
-    "secondary": ["preschool developmental delay early intervention"],
-    "educationSlug": "when-to-seek-help",
-    "minDuration": 60,
-    "maxDuration": 1500,
-    "timeSensitive": false
-  },
-  "cdsa.triage.refer.37-48m": {
-    "primary": ["3歲 4歲 發展評估 早療", "學齡前 兒童 發展遲緩", "兒童 早期療育 衛教"],
-    "secondary": ["preschool age developmental delay"],
-    "educationSlug": "when-to-seek-help",
-    "minDuration": 60,
-    "maxDuration": 1500,
-    "timeSensitive": false
-  },
-  "cdsa.triage.refer.49-60m": {
-    "primary": ["4歲 5歲 發展遲緩 早療", "兒童 早期療育 黃瑽寧", "學齡前 發展評估"],
-    "secondary": ["preschool developmental screening"],
-    "educationSlug": "when-to-seek-help",
-    "minDuration": 60,
-    "maxDuration": 1500,
-    "timeSensitive": false
-  },
-  "cdsa.triage.refer.61-72m": {
-    "primary": ["5歲 6歲 發展遲緩 早療", "學齡前 兒童 發展評估", "入學前 兒童 早期療育"],
-    "secondary": ["school-age developmental delay"],
-    "educationSlug": "when-to-seek-help",
-    "minDuration": 60,
-    "maxDuration": 1500,
-    "timeSensitive": false
-  },
-  "cdsa.domain.language.anomaly.13-24m": {
-    "primary": ["幼兒 語言發展遲緩 黃瑽寧", "1歲 2歲 不會說話 怎麼辦", "幼兒 語言刺激 衛教"],
-    "secondary": [],
-    "educationSlug": "language-stimulation",
-    "minDuration": 60,
-    "maxDuration": 1500,
-    "timeSensitive": false
-  },
-  "cdsa.domain.gross_motor.anomaly.2-6m": {
-    "primary": ["嬰兒 粗動作 大動作 發展 0-6個月", "寶寶 趴趴 頭部控制 翻身 衛教", "嬰兒 動作發展 遲緩 早療"],
-    "secondary": ["infant gross motor development 0-6 months"],
-    "educationSlug": "gross-motor-activities",
-    "minDuration": 120,
+  "func.domain.vitality.low.18-39": {
+    "primary": [
+      "成人 睡眠 衛教 失眠 改善",
+      "睡眠品質 提升 醫師",
+      "睡眠衛生 作息 健康"
+    ],
+    "secondary": [
+      "adult sleep hygiene insomnia"
+    ],
+    "educationSlug": "adult-sleep-hygiene",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.gross_motor.anomaly.7-12m": {
-    "primary": ["嬰兒 大動作 爬行 站立 7-12個月 發展", "寶寶 爬爬 站立 扶走 發展遲緩", "嬰兒 粗動作 發展 衛教"],
-    "secondary": ["infant crawling standing gross motor 7-12 months"],
-    "educationSlug": "gross-motor-activities",
-    "minDuration": 120,
+  "func.domain.vitality.low.40-54": {
+    "primary": [
+      "成人 睡眠 衛教 失眠 改善",
+      "睡眠品質 提升 醫師",
+      "睡眠衛生 作息 健康"
+    ],
+    "secondary": [
+      "adult sleep hygiene insomnia"
+    ],
+    "educationSlug": "adult-sleep-hygiene",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.gross_motor.anomaly.13-24m": {
-    "primary": ["幼兒 學走路 大動作 發展遲緩 衛教", "1歲 2歲 走路 平衡 動作發展", "幼兒 粗動作 運動 發展 黃瑽寧"],
-    "secondary": ["toddler walking gross motor development delay"],
-    "educationSlug": "gross-motor-activities",
-    "minDuration": 120,
+  "func.domain.vitality.low.55-64": {
+    "primary": [
+      "成人 睡眠 衛教 失眠 改善",
+      "睡眠品質 提升 醫師",
+      "睡眠衛生 作息 健康"
+    ],
+    "secondary": [
+      "adult sleep hygiene insomnia"
+    ],
+    "educationSlug": "adult-sleep-hygiene",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.gross_motor.anomaly.25-36m": {
-    "primary": ["幼兒 跑步 跳躍 動作發展 2歲 3歲", "學齡前 粗動作 平衡 體能遊戲 衛教", "幼兒 大動作 發展遲緩 早療"],
-    "secondary": ["toddler preschool running jumping gross motor"],
-    "educationSlug": "gross-motor-activities",
-    "minDuration": 120,
+  "func.domain.vitality.moderate.18-39": {
+    "primary": [
+      "成人 慢性疲勞 倦怠 改善",
+      "疲勞 恢復 體力 衛教",
+      "均衡飲食 營養 成人 健康"
+    ],
+    "secondary": [
+      "adult fatigue management nutrition"
+    ],
+    "educationSlug": "fatigue-management",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.gross_motor.anomaly.37-48m": {
-    "primary": ["學齡前 動作發展 3歲 4歲 體能活動", "兒童 平衡感 協調能力 大動作 衛教", "學齡前 粗動作 發展遲緩 早療 黃瑽寧"],
-    "secondary": ["preschool gross motor coordination balance activities"],
-    "educationSlug": "gross-motor-activities",
-    "minDuration": 120,
+  "func.domain.vitality.moderate.40-54": {
+    "primary": [
+      "成人 慢性疲勞 倦怠 改善",
+      "疲勞 恢復 體力 衛教",
+      "均衡飲食 營養 成人 健康"
+    ],
+    "secondary": [
+      "adult fatigue management nutrition"
+    ],
+    "educationSlug": "fatigue-management",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.gross_motor.anomaly.49-60m": {
-    "primary": ["4歲 5歲 體能遊戲 動作發展 衛教", "學齡前 粗動作 跑跳 協調 發展", "兒童 大動作 運動 發展遲緩 早療"],
-    "secondary": ["preschool gross motor activities 4-5 years"],
-    "educationSlug": "gross-motor-activities",
-    "minDuration": 120,
+  "func.domain.vitality.moderate.55-64": {
+    "primary": [
+      "成人 慢性疲勞 倦怠 改善",
+      "疲勞 恢復 體力 衛教",
+      "均衡飲食 營養 成人 健康"
+    ],
+    "secondary": [
+      "adult fatigue management nutrition"
+    ],
+    "educationSlug": "fatigue-management",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.gross_motor.anomaly.61-72m": {
-    "primary": ["5歲 6歲 動作發展 體能 學齡前 衛教", "入學前 大動作 運動 協調能力 兒童", "學齡前 粗動作 發展遲緩 早療"],
-    "secondary": ["school-ready gross motor coordination preschool"],
-    "educationSlug": "gross-motor-activities",
-    "minDuration": 120,
+  "func.domain.locomotion.low.18-39": {
+    "primary": [
+      "成人 規律運動 健康益處",
+      "運動 衛教 醫師 建議",
+      "身體活動 健康促進"
+    ],
+    "secondary": [
+      "adult physical activity benefits"
+    ],
+    "educationSlug": "physical-activity-benefits",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.fine_motor.anomaly.7-12m": {
-    "primary": ["嬰兒 手部發展 抓握 精細動作 7-12個月", "寶寶 手眼協調 玩具 抓取 衛教", "嬰兒 精細動作 發展 遲緩"],
-    "secondary": ["infant fine motor grasping hand development"],
-    "educationSlug": "fine-motor-activities",
-    "minDuration": 120,
+  "func.domain.locomotion.low.40-54": {
+    "primary": [
+      "成人 規律運動 健康益處",
+      "運動 衛教 醫師 建議",
+      "身體活動 健康促進"
+    ],
+    "secondary": [
+      "adult physical activity benefits"
+    ],
+    "educationSlug": "physical-activity-benefits",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.fine_motor.anomaly.13-24m": {
-    "primary": ["幼兒 精細動作 手眼協調 1歲 2歲 衛教", "寶寶 堆疊積木 塗鴉 手部發展", "幼兒 精細動作 發展遲緩 早療"],
-    "secondary": ["toddler fine motor hand-eye coordination stacking"],
-    "educationSlug": "fine-motor-activities",
-    "minDuration": 120,
+  "func.domain.locomotion.low.55-64": {
+    "primary": [
+      "成人 規律運動 健康益處",
+      "運動 衛教 醫師 建議",
+      "身體活動 健康促進"
+    ],
+    "secondary": [
+      "adult physical activity benefits"
+    ],
+    "educationSlug": "physical-activity-benefits",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.fine_motor.anomaly.25-36m": {
-    "primary": ["幼兒 精細動作 剪刀 畫畫 2歲 3歲 衛教", "學齡前 手眼協調 精細動作 發展", "幼兒 塗鴉 串珠 精細動作 遲緩"],
-    "secondary": ["toddler fine motor scissors drawing activity"],
-    "educationSlug": "fine-motor-activities",
-    "minDuration": 120,
+  "func.domain.locomotion.moderate.18-39": {
+    "primary": [
+      "久坐 危害 健康 上班族",
+      "久坐 不動 風險 衛教",
+      "減少久坐 活動 建議"
+    ],
+    "secondary": [
+      "sedentary behavior health risk"
+    ],
+    "educationSlug": "sedentary-harms",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.fine_motor.anomaly.37-48m": {
-    "primary": ["學齡前 精細動作 剪貼 繪畫 3歲 4歲", "兒童 手眼協調 精細動作 發展 衛教", "學齡前 精細動作 發展遲緩 早療"],
-    "secondary": ["preschool fine motor cutting drawing crafts"],
-    "educationSlug": "fine-motor-activities",
-    "minDuration": 120,
+  "func.domain.locomotion.moderate.40-54": {
+    "primary": [
+      "久坐 危害 健康 上班族",
+      "久坐 不動 風險 衛教",
+      "減少久坐 活動 建議"
+    ],
+    "secondary": [
+      "sedentary behavior health risk"
+    ],
+    "educationSlug": "sedentary-harms",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.fine_motor.anomaly.49-60m": {
-    "primary": ["4歲 5歲 精細動作 書寫準備 剪貼 手部", "學齡前 手眼協調 書前技巧 精細動作", "兒童 精細動作 發展遲緩 早療 衛教"],
-    "secondary": ["preschool fine motor pre-writing skills 4-5 years"],
-    "educationSlug": "fine-motor-activities",
-    "minDuration": 120,
+  "func.domain.locomotion.moderate.55-64": {
+    "primary": [
+      "久坐 危害 健康 上班族",
+      "久坐 不動 風險 衛教",
+      "減少久坐 活動 建議"
+    ],
+    "secondary": [
+      "sedentary behavior health risk"
+    ],
+    "educationSlug": "sedentary-harms",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.fine_motor.anomaly.61-72m": {
-    "primary": ["5歲 6歲 精細動作 書寫 剪貼 學齡前 衛教", "入學前 手眼協調 精細動作 發展 兒童", "學齡前 精細動作 發展遲緩 入學準備"],
-    "secondary": ["school-ready fine motor writing skills preschool"],
-    "educationSlug": "fine-motor-activities",
-    "minDuration": 120,
+  "func.domain.cognition.low.18-39": {
+    "primary": [
+      "大腦健康 認知 預防失智 成人",
+      "認知功能 維護 生活型態",
+      "腦力 保健 衛教"
+    ],
+    "secondary": [
+      "brain health cognition prevention"
+    ],
+    "educationSlug": "cognitive-health",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.cognition.anomaly.13-24m": {
-    "primary": ["幼兒 認知發展 1歲 2歲 玩具 遊戲 衛教", "寶寶 認知遊戲 配對 因果 發展 黃瑽寧", "幼兒 認知 發展遲緩 早療 衛教"],
-    "secondary": ["toddler cognitive development play 12-24 months"],
-    "educationSlug": "cognitive-play",
-    "minDuration": 120,
+  "func.domain.cognition.low.40-54": {
+    "primary": [
+      "大腦健康 認知 預防失智 成人",
+      "認知功能 維護 生活型態",
+      "腦力 保健 衛教"
+    ],
+    "secondary": [
+      "brain health cognition prevention"
+    ],
+    "educationSlug": "cognitive-health",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.cognition.anomaly.25-36m": {
-    "primary": ["幼兒 認知發展 2歲 3歲 配對 分類 遊戲", "學齡前 認知 專注力 記憶力 發展 衛教", "幼兒 認知 發展遲緩 早療"],
-    "secondary": ["toddler cognitive development matching sorting 2-3 years"],
-    "educationSlug": "cognitive-play",
-    "minDuration": 120,
+  "func.domain.cognition.low.55-64": {
+    "primary": [
+      "大腦健康 認知 預防失智 成人",
+      "認知功能 維護 生活型態",
+      "腦力 保健 衛教"
+    ],
+    "secondary": [
+      "brain health cognition prevention"
+    ],
+    "educationSlug": "cognitive-health",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.cognition.anomaly.37-48m": {
-    "primary": ["學齡前 認知遊戲 專注力 3歲 4歲 衛教", "兒童 認知發展 分類 思考 問題解決 遊戲", "學齡前 認知 發展遲緩 早療 黃瑽寧"],
-    "secondary": ["preschool cognitive development attention problem-solving"],
-    "educationSlug": "cognitive-play",
-    "minDuration": 120,
+  "func.domain.cognition.moderate.18-39": {
+    "primary": [
+      "專注力 記憶力 改善 成人",
+      "記憶 注意力 保健",
+      "認知 健康 訓練"
+    ],
+    "secondary": [
+      "attention memory care adult"
+    ],
+    "educationSlug": "attention-memory-care",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.cognition.anomaly.49-60m": {
-    "primary": ["4歲 5歲 認知遊戲 記憶 推理 學齡前 衛教", "兒童 認知發展 專注力 學前準備 遊戲", "學齡前 認知 發展遲緩 入學準備 早療"],
-    "secondary": ["preschool cognitive development memory reasoning 4-5 years"],
-    "educationSlug": "cognitive-play",
-    "minDuration": 120,
+  "func.domain.cognition.moderate.40-54": {
+    "primary": [
+      "專注力 記憶力 改善 成人",
+      "記憶 注意力 保健",
+      "認知 健康 訓練"
+    ],
+    "secondary": [
+      "attention memory care adult"
+    ],
+    "educationSlug": "attention-memory-care",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.cognition.anomaly.61-72m": {
-    "primary": ["5歲 6歲 認知發展 入學準備 邏輯 衛教", "學齡前 認知遊戲 專注力 問題解決 入學", "兒童 認知 發展遲緩 早療 衛教"],
-    "secondary": ["school-ready cognitive development logic preschool"],
-    "educationSlug": "cognitive-play",
-    "minDuration": 120,
+  "func.domain.cognition.moderate.55-64": {
+    "primary": [
+      "專注力 記憶力 改善 成人",
+      "記憶 注意力 保健",
+      "認知 健康 訓練"
+    ],
+    "secondary": [
+      "attention memory care adult"
+    ],
+    "educationSlug": "attention-memory-care",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.social_emotional.anomaly.7-12m": {
-    "primary": ["嬰兒 社交發展 依附 情緒 7-12個月 衛教", "寶寶 陌生人焦慮 社交 互動 發展", "嬰兒 情緒發展 親子互動 依附關係"],
-    "secondary": ["infant social emotional development attachment 7-12 months"],
-    "educationSlug": "social-emotional-guide",
-    "minDuration": 120,
+  "func.domain.psychological.low.18-39": {
+    "primary": [
+      "職業倦怠 過勞 心理健康",
+      "工作 過勞 burnout 調適",
+      "身心 倦怠 紓解"
+    ],
+    "secondary": [
+      "job burnout mental health"
+    ],
+    "educationSlug": "understanding-burnout",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.social_emotional.anomaly.13-24m": {
-    "primary": ["幼兒 情緒發展 社交 1歲 2歲 衛教 黃瑽寧", "寶寶 情緒管理 發脾氣 分離焦慮 衛教", "幼兒 社交 情緒 發展遲緩 早療"],
-    "secondary": ["toddler social emotional development tantrums"],
-    "educationSlug": "social-emotional-guide",
-    "minDuration": 120,
+  "func.domain.psychological.low.40-54": {
+    "primary": [
+      "職業倦怠 過勞 心理健康",
+      "工作 過勞 burnout 調適",
+      "身心 倦怠 紓解"
+    ],
+    "secondary": [
+      "job burnout mental health"
+    ],
+    "educationSlug": "understanding-burnout",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.social_emotional.anomaly.25-36m": {
-    "primary": ["幼兒 情緒管理 分享 同伴 2歲 3歲 衛教", "學齡前 社交發展 情緒 自我調節 遊戲", "幼兒 社交 情緒 發展遲緩 早療 黃瑽寧"],
-    "secondary": ["toddler preschool social sharing emotional regulation"],
-    "educationSlug": "social-emotional-guide",
-    "minDuration": 120,
+  "func.domain.psychological.low.55-64": {
+    "primary": [
+      "職業倦怠 過勞 心理健康",
+      "工作 過勞 burnout 調適",
+      "身心 倦怠 紓解"
+    ],
+    "secondary": [
+      "job burnout mental health"
+    ],
+    "educationSlug": "understanding-burnout",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.social_emotional.anomaly.37-48m": {
-    "primary": ["學齡前 情緒管理 同理心 3歲 4歲 衛教", "兒童 情緒辨識 社交技巧 朋友 遊戲", "學齡前 社交 情緒 發展遲緩 早療"],
-    "secondary": ["preschool emotional regulation empathy social skills"],
-    "educationSlug": "social-emotional-guide",
-    "minDuration": 120,
+  "func.domain.psychological.moderate.18-39": {
+    "primary": [
+      "壓力管理 紓壓 成人",
+      "壓力 調適 放鬆 醫師",
+      "情緒 心理健康 自我照顧"
+    ],
+    "secondary": [
+      "stress management mental wellbeing"
+    ],
+    "educationSlug": "stress-management",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.social_emotional.anomaly.49-60m": {
-    "primary": ["4歲 5歲 情緒管理 社交技巧 同理心 衛教", "學齡前 兒童 情緒 朋友 合作 遊戲 發展", "學齡前 社交 情緒 發展遲緩 早療 衛教"],
-    "secondary": ["preschool social skills empathy cooperation 4-5 years"],
-    "educationSlug": "social-emotional-guide",
-    "minDuration": 120,
+  "func.domain.psychological.moderate.40-54": {
+    "primary": [
+      "壓力管理 紓壓 成人",
+      "壓力 調適 放鬆 醫師",
+      "情緒 心理健康 自我照顧"
+    ],
+    "secondary": [
+      "stress management mental wellbeing"
+    ],
+    "educationSlug": "stress-management",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdsa.domain.social_emotional.anomaly.61-72m": {
-    "primary": ["5歲 6歲 情緒管理 社交 入學準備 衛教", "學齡前 兒童 情緒辨識 同理心 合作 發展", "入學前 社交 情緒 發展遲緩 早療 衛教"],
-    "secondary": ["school-ready social emotional development preschool"],
-    "educationSlug": "social-emotional-guide",
-    "minDuration": 120,
+  "func.domain.psychological.moderate.55-64": {
+    "primary": [
+      "壓力管理 紓壓 成人",
+      "壓力 調適 放鬆 醫師",
+      "情緒 心理健康 自我照顧"
+    ],
+    "secondary": [
+      "stress management mental wellbeing"
+    ],
+    "educationSlug": "stress-management",
+    "minDuration": 90,
     "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdss.heart_rate.critical.infant": {
-    "primary": ["嬰兒 心跳異常 急救", "新生兒 心跳過快 過慢 處置", "嬰兒 心律不整 衛教"],
-    "secondary": ["infant heart rate emergency"],
-    "educationSlug": "when-to-seek-help",
-    "minDuration": 60,
-    "maxDuration": 900,
+  "func.domain.sensory.low.18-39": {
+    "primary": [
+      "成人 視力保健 護眼",
+      "眼睛 保健 衛教 醫師",
+      "視力 保護 健康"
+    ],
+    "secondary": [
+      "adult vision eye care"
+    ],
+    "educationSlug": "vision-care",
+    "minDuration": 90,
+    "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdss.heart_rate.critical.toddler": {
-    "primary": ["幼兒 心跳異常 急救", "1歲 2歲 心律不整 就醫", "幼兒 心跳過快 衛教"],
-    "secondary": ["toddler heart rate emergency"],
-    "educationSlug": "when-to-seek-help",
-    "minDuration": 60,
-    "maxDuration": 900,
+  "func.domain.sensory.low.40-54": {
+    "primary": [
+      "成人 視力保健 護眼",
+      "眼睛 保健 衛教 醫師",
+      "視力 保護 健康"
+    ],
+    "secondary": [
+      "adult vision eye care"
+    ],
+    "educationSlug": "vision-care",
+    "minDuration": 90,
+    "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdss.heart_rate.critical.preschool": {
-    "primary": ["兒童 心跳異常 急救", "學齡前 心律不整 就醫", "兒童 心臟問題 衛教"],
-    "secondary": ["preschool heart rate emergency"],
-    "educationSlug": "when-to-seek-help",
-    "minDuration": 60,
-    "maxDuration": 900,
+  "func.domain.sensory.low.55-64": {
+    "primary": [
+      "成人 視力保健 護眼",
+      "眼睛 保健 衛教 醫師",
+      "視力 保護 健康"
+    ],
+    "secondary": [
+      "adult vision eye care"
+    ],
+    "educationSlug": "vision-care",
+    "minDuration": 90,
+    "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdss.spo2.critical.infant": {
-    "primary": ["嬰兒 嘴唇發紫 急救", "新生兒 缺氧 處置 衛教", "寶寶 血氧低 怎麼辦"],
-    "secondary": ["infant cyanosis emergency parent guide"],
-    "educationSlug": "respiratory-care",
-    "minDuration": 60,
-    "maxDuration": 900,
+  "func.domain.sensory.moderate.18-39": {
+    "primary": [
+      "成人 聽力保健 聽力保護",
+      "聽力 衛教 噪音 保護",
+      "螢幕 藍光 護眼 用眼"
+    ],
+    "secondary": [
+      "hearing care screen eye strain"
+    ],
+    "educationSlug": "hearing-care",
+    "minDuration": 90,
+    "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdss.spo2.critical.toddler": {
-    "primary": ["幼兒 嘴唇發紫 急救", "1歲 2歲 缺氧 處置", "幼兒 血氧低 衛教"],
-    "secondary": ["toddler cyanosis emergency"],
-    "educationSlug": "respiratory-care",
-    "minDuration": 60,
-    "maxDuration": 900,
+  "func.domain.sensory.moderate.40-54": {
+    "primary": [
+      "成人 聽力保健 聽力保護",
+      "聽力 衛教 噪音 保護",
+      "螢幕 藍光 護眼 用眼"
+    ],
+    "secondary": [
+      "hearing care screen eye strain"
+    ],
+    "educationSlug": "hearing-care",
+    "minDuration": 90,
+    "maxDuration": 1800,
     "timeSensitive": false
   },
-  "cdss.spo2.critical.preschool": {
-    "primary": ["兒童 嘴唇發紫 急救", "學齡前 缺氧 處置", "兒童 呼吸困難 衛教"],
-    "secondary": ["preschool cyanosis hypoxia"],
-    "educationSlug": "respiratory-care",
-    "minDuration": 60,
-    "maxDuration": 900,
+  "func.domain.sensory.moderate.55-64": {
+    "primary": [
+      "成人 聽力保健 聽力保護",
+      "聽力 衛教 噪音 保護",
+      "螢幕 藍光 護眼 用眼"
+    ],
+    "secondary": [
+      "hearing care screen eye strain"
+    ],
+    "educationSlug": "hearing-care",
+    "minDuration": 90,
+    "maxDuration": 1800,
     "timeSensitive": false
-  },
-  "cdss.respiratory_rate.critical.infant": {
-    "primary": ["嬰兒 呼吸急促 處置 衛教", "新生兒 呼吸困難 就醫", "寶寶 呼吸喘 急救"],
-    "secondary": ["infant tachypnea breathing problem"],
-    "educationSlug": "respiratory-care",
-    "minDuration": 60,
-    "maxDuration": 900,
-    "timeSensitive": true
-  },
-  "cdss.respiratory_rate.critical.toddler": {
-    "primary": ["幼兒 呼吸急促 衛教", "1歲 2歲 呼吸喘 就醫", "幼兒 呼吸困難 處置"],
-    "secondary": ["toddler tachypnea breathing"],
-    "educationSlug": "respiratory-care",
-    "minDuration": 60,
-    "maxDuration": 900,
-    "timeSensitive": true
-  },
-  "cdss.respiratory_rate.critical.preschool": {
-    "primary": ["兒童 呼吸急促 衛教", "學齡前 呼吸喘 就醫", "兒童 呼吸困難 急救"],
-    "secondary": ["preschool tachypnea breathing"],
-    "educationSlug": "respiratory-care",
-    "minDuration": 60,
-    "maxDuration": 900,
-    "timeSensitive": true
-  },
-  "cdss.temperature.critical.infant": {
-    "primary": ["嬰兒 高燒 急救 衛教", "新生兒 發燒 處置", "寶寶 體溫過高 就醫"],
-    "secondary": ["infant high fever emergency"],
-    "educationSlug": "when-to-seek-help",
-    "minDuration": 60,
-    "maxDuration": 900,
-    "timeSensitive": true
-  },
-  "cdss.temperature.critical.toddler": {
-    "primary": ["幼兒 高燒 急救 衛教", "1歲 2歲 發燒 處置", "幼兒 體溫過高 就醫"],
-    "secondary": ["toddler high fever"],
-    "educationSlug": "when-to-seek-help",
-    "minDuration": 60,
-    "maxDuration": 900,
-    "timeSensitive": true
-  },
-  "cdss.temperature.critical.preschool": {
-    "primary": ["兒童 高燒 急救 衛教", "學齡前 發燒 處置", "兒童 體溫過高 就醫"],
-    "secondary": ["preschool high fever"],
-    "educationSlug": "when-to-seek-help",
-    "minDuration": 60,
-    "maxDuration": 900,
-    "timeSensitive": true
-  },
-  "cdss.sleep_quality.critical.infant": {
-    "primary": ["嬰兒 睡眠 異常 衛教", "新生兒 睡眠 障礙", "寶寶 睡眠 問題 就醫"],
-    "secondary": ["infant sleep disorder"],
-    "educationSlug": "sleep-hygiene",
-    "minDuration": 60,
-    "maxDuration": 1200,
-    "timeSensitive": false
-  },
-  "cdss.sleep_quality.critical.toddler": {
-    "primary": ["幼兒 睡眠 異常 衛教", "1歲 2歲 睡眠 障礙", "幼兒 睡眠 問題"],
-    "secondary": ["toddler sleep disorder"],
-    "educationSlug": "sleep-hygiene",
-    "minDuration": 60,
-    "maxDuration": 1200,
-    "timeSensitive": false
-  },
-  "cdss.sleep_quality.critical.preschool": {
-    "primary": ["兒童 睡眠 異常 衛教", "學齡前 睡眠 障礙", "兒童 睡眠 問題 就醫"],
-    "secondary": ["preschool sleep disorder"],
-    "educationSlug": "sleep-hygiene",
-    "minDuration": 60,
-    "maxDuration": 1200,
-    "timeSensitive": false
-  },
-  "cdss.activity_level.critical.infant": {
-    "primary": ["嬰兒 活動力 下降 嗜睡 急救", "新生兒 活動力差 就醫", "寶寶 不活潑 警訊"],
-    "secondary": ["infant lethargy warning"],
-    "educationSlug": "when-to-seek-help",
-    "minDuration": 60,
-    "maxDuration": 900,
-    "timeSensitive": false
-  },
-  "cdss.activity_level.critical.toddler": {
-    "primary": ["幼兒 活動力 下降 嗜睡", "1歲 2歲 活動力差 就醫", "幼兒 精神不佳 警訊"],
-    "secondary": ["toddler lethargy"],
-    "educationSlug": "when-to-seek-help",
-    "minDuration": 60,
-    "maxDuration": 900,
-    "timeSensitive": false
-  },
-  "cdss.activity_level.critical.preschool": {
-    "primary": ["兒童 活動力 下降 嗜睡", "學齡前 活動力差", "兒童 精神不佳 警訊"],
-    "secondary": ["preschool lethargy"],
-    "educationSlug": "when-to-seek-help",
-    "minDuration": 60,
-    "maxDuration": 900,
-    "timeSensitive": false
-  },
-  "cdss.sugar_intake.critical.infant": {
-    "primary": ["嬰兒 飲食 含糖 健康", "新生兒 飲食 衛教", "寶寶 副食品 糖分 衛教"],
-    "secondary": ["infant sugar intake guideline"],
-    "educationSlug": "diet-control",
-    "minDuration": 60,
-    "maxDuration": 1200,
-    "timeSensitive": true
-  },
-  "cdss.sugar_intake.critical.toddler": {
-    "primary": ["幼兒 含糖飲料 健康危害", "1歲 2歲 糖分攝取 衛教", "幼兒 飲食 糖 衛教"],
-    "secondary": ["toddler sugar intake"],
-    "educationSlug": "diet-control",
-    "minDuration": 60,
-    "maxDuration": 1200,
-    "timeSensitive": true
-  },
-  "cdss.sugar_intake.critical.preschool": {
-    "primary": ["兒童 含糖飲料 健康危害", "學齡前 糖分攝取 衛教", "兒童 飲食 糖 衛教"],
-    "secondary": ["preschool sugar intake"],
-    "educationSlug": "diet-control",
-    "minDuration": 60,
-    "maxDuration": 1200,
-    "timeSensitive": true
   }
 }

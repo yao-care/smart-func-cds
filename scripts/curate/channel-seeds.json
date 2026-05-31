@@ -1,11 +1,8 @@
 {
-  "_comment": "Real channel IDs verified via yt-dlp 2026-05-20. Phase 4 operator may add more.",
+  "_comment": "成人 IC 衛教頻道白名單。channelId 為 null 者由 yt-dlp resolveChannelId(tag) 即時解析；白名單僅影響 tier 分級，非白名單頻道仍以 pro-kol tier 進候選由人工審核。原兒科 KOL 已於成人化時移除。",
   "official-tw": [
     { "tag": "@HPATaiwan", "channelId": "UChBzG9Gk6MmTZ6RAkdPozow", "name": "衛生福利部國民健康署" }
   ],
   "international": [],
-  "pro-kol": [
-    { "tag": "@DrTNHuang", "channelId": "UCkha3wg7As4t9duOzre5HcQ", "name": "黃瑽寧醫師健康講堂" },
-    { "tag": "@GoodMD", "channelId": "UCVc43o4svP9fCsfIj9oML1A", "name": "黃瑽寧愛+好醫生 (GOOD TV)" }
-  ]
+  "pro-kol": []
 }
