@@ -3,11 +3,27 @@ import {
   bundleToAssessment,
   fetchAssessmentFromFhir,
   listAssessmentsFromFhir,
+  observationsToDomainScores,
   parseObservationCode,
 } from '../../../src/lib/fhir/assessment-fetch';
 import { ID_SYSTEM, CODE_SYSTEM, CONFIDENCE_EXT_URL } from '../../../src/lib/fhir/cdsa-resources';
 
 const ASSESSMENT_ID = 'aaaaaaaa-bbbb-4ccc-dddd-eeeeeeeeeeee';
+
+/** Mirrors buildAssessmentObservations output for one IC domain. */
+function makeObservation(domain: string, score: number, band: 'high' | 'moderate' | 'low'): Record<string, any> {
+  const isLow = band !== 'high';
+  return {
+    resourceType: 'Observation',
+    identifier: [{ system: ID_SYSTEM, value: `${ASSESSMENT_ID}::${domain}` }],
+    status: 'final',
+    code: { coding: [{ system: CODE_SYSTEM, code: `func-${domain}` }], text: `Func IC ${domain}` },
+    subject: { reference: 'Patient/patient-123' },
+    valueQuantity: { value: score, unit: 'score' },
+    interpretation: [{ coding: [{ code: isLow ? 'L' : 'N' }] }],
+    note: [{ text: `band: ${band}` }],
+  };
+}
 
 function makeReport(overrides: Record<string, any> = {}): Record<string, any> {
   return {
@@ -37,7 +53,49 @@ describe('parseObservationCode', () => {
   });
 });
 
+describe('observationsToDomainScores', () => {
+  it('round-trips domain / score / band from Observations', () => {
+    const scores = observationsToDomainScores([
+      makeObservation('vitality', 82, 'high'),
+      makeObservation('cognition', 45, 'moderate'),
+      makeObservation('sensory', 30, 'low'),
+    ]);
+    expect(scores).toEqual([
+      { domain: 'vitality', score: 82, band: 'high', contributingIndicators: 0, missingIndicators: [] },
+      { domain: 'cognition', score: 45, band: 'moderate', contributingIndicators: 0, missingIndicators: [] },
+      { domain: 'sensory', score: 30, band: 'low', contributingIndicators: 0, missingIndicators: [] },
+    ]);
+  });
+
+  it('falls back to code.text when identifier is missing, and to interpretation when note is absent', () => {
+    const obs = makeObservation('locomotion', 50, 'moderate');
+    delete obs.identifier; // force code.text path
+    delete obs.note;       // force interpretation fallback (L → low)
+    const scores = observationsToDomainScores([obs]);
+    expect(scores).toEqual([
+      { domain: 'locomotion', score: 50, band: 'low', contributingIndicators: 0, missingIndicators: [] },
+    ]);
+  });
+
+  it('skips unknown domains and non-numeric values', () => {
+    expect(observationsToDomainScores([makeObservation('not_a_domain', 10, 'low')])).toEqual([]);
+    const bad = makeObservation('vitality', 0, 'high');
+    delete bad.valueQuantity;
+    expect(observationsToDomainScores([bad])).toEqual([]);
+  });
+});
+
 describe('bundleToAssessment', () => {
+  it('round-trips per-domain scores + flaggedDomains from Observations', () => {
+    const a = bundleToAssessment(makeReport(), [
+      makeObservation('vitality', 82, 'high'),
+      makeObservation('psychological', 38, 'low'),
+    ]);
+    expect(a.triageResult?.domainScores).toHaveLength(2);
+    expect(a.triageResult?.flaggedDomains).toEqual(['psychological']); // band !== high
+    expect(a.triageResult?.completedDomains).toBe(2);
+  });
+
   it('reconstructs an Assessment from DiagnosticReport extension + period', () => {
     const a = bundleToAssessment(makeReport(), []);
     expect(a.id).toBe(ASSESSMENT_ID);

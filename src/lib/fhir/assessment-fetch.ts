@@ -1,6 +1,10 @@
 import type { Assessment } from '../db/schema';
 import type { TriageCategory } from '../../engine/func/triage';
+import type { DomainScore } from '../../engine/func/scorer';
+import { IC_DOMAIN_NAMES, type ICDomain } from '../education/schemas';
 import { CODE_SYSTEM, ID_SYSTEM, CONFIDENCE_EXT_URL } from './cdsa-resources';
+
+const IC_DOMAINS = new Set<string>(IC_DOMAIN_NAMES);
 
 export interface AssessmentSummary {
   id: string;
@@ -54,13 +58,63 @@ export function parseObservationCode(text: string): { domain: string } | null {
 }
 
 /**
+ * Reconstruct per-domain scores from the assessment's Observation resources.
+ *
+ * The minimal write (buildAssessmentObservations) persists one Observation per
+ * scored IC domain carrying: identifier "<assessmentId>::<domain>", score
+ * (valueQuantity.value), band (note "band: <band>") and an L/N interpretation.
+ * Indicator-level detail (contributingIndicators / missingIndicators) is NOT
+ * persisted in this minimal write, so it defaults to 0 / [] on read-back.
+ */
+export function observationsToDomainScores(
+  observations: Record<string, any>[],
+): DomainScore[] {
+  const scores: DomainScore[] = [];
+  for (const obs of observations) {
+    // domain: prefer the project identifier "<assessmentId>::<domain>";
+    // fall back to parsing code.text "Func IC <domain>".
+    const idVal = (obs.identifier as Array<{ system?: string; value?: string }> | undefined)
+      ?.find((i) => i.system === ID_SYSTEM)?.value;
+    let domain = idVal?.includes('::') ? idVal.split('::')[1] : undefined;
+    if (!domain) domain = parseObservationCode((obs.code?.text as string) ?? '')?.domain;
+    if (!domain || !IC_DOMAINS.has(domain)) continue;
+
+    const value = (obs.valueQuantity as { value?: number } | undefined)?.value;
+    if (typeof value !== 'number') continue;
+
+    // band: authoritative from note "band: <band>"; fall back to L/N interpretation
+    // (N → high; L is moderate-or-low, degrade to 'low' when the note is absent).
+    const noteText = (obs.note as Array<{ text?: string }> | undefined)?.[0]?.text ?? '';
+    const bandMatch = noteText.match(/band:\s*(high|moderate|low)/);
+    let band: DomainScore['band'];
+    if (bandMatch) {
+      band = bandMatch[1] as DomainScore['band'];
+    } else {
+      const interp = (obs.interpretation as Array<{ coding?: Array<{ code?: string }> }> | undefined)
+        ?.[0]?.coding?.[0]?.code;
+      band = interp === 'N' ? 'high' : 'low';
+    }
+
+    scores.push({
+      domain: domain as ICDomain,
+      score: value,
+      band,
+      contributingIndicators: 0, // not persisted in minimal FHIR write
+      missingIndicators: [],
+    });
+  }
+  return scores;
+}
+
+/**
  * Reconstruct a local-shape Assessment from a FHIR DiagnosticReport plus
  * its Observation resources. Used by the physician detail view when the
- * record is not in IndexedDB.
+ * record is not in IndexedDB. Per-domain scores are round-tripped from the
+ * Observations (domain/score/band); indicator-level detail is not persisted.
  */
 export function bundleToAssessment(
   report: Record<string, any>,
-  _observations: Record<string, any>[],
+  observations: Record<string, any>[],
 ): Assessment {
   const identifiers = (report.identifier as Array<{ system?: string; value?: string }>) ?? [];
   const idVal = identifiers.find((i) => i.system === ID_SYSTEM)?.value ?? report.id;
@@ -85,6 +139,11 @@ export function bundleToAssessment(
   const period2 = report.effectivePeriod as { start?: string; end?: string } | undefined;
   const assessmentDate = (period2?.start ?? report.effectiveDateTime ?? '').slice(0, 10);
 
+  // Per-domain round-trip from the Observation resources (S2). Indicator-level
+  // detail isn't persisted in the minimal write, so it defaults to 0 / [].
+  const domainScores = observationsToDomainScores(observations);
+  const flaggedDomains = domainScores.filter((d) => d.band !== 'high').map((d) => d.domain);
+
   return {
     id: idVal,
     patientId,
@@ -93,18 +152,19 @@ export function bundleToAssessment(
     currentStep: 2,
     startedAt,
     completedAt,
-    // Minimal reconstructed triage; per-domain detail is not round-tripped from
-    // the summary Bundle in S1 (full FHIR profiling is an S2 concern).
+    // Triage reconstructed from the report + per-domain Observations. Indicator
+    // cutoffs / recommendations and ageGroup are not persisted in the minimal
+    // FHIR write, so they stay empty / defaulted on read-back.
     triageResult: {
       category,
       confidence,
       summary,
-      domainScores: [],
-      flaggedDomains: [],
+      domainScores,
+      flaggedDomains,
       clinicalCutoffs: [],
       recommendations: [],
       incomplete: category === 'incomplete',
-      completedDomains: 0,
+      completedDomains: domainScores.length,
       assessmentDate,
       ageGroup: '18-39',
     },
