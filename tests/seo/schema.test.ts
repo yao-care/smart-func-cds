@@ -48,24 +48,24 @@ describe('softwareApplicationSchema', () => {
 
 describe('medicalWebPageSchema', () => {
   const s = medicalWebPageSchema(site, {
-    title: '語言發展',
+    title: '睡眠保健',
     summary: '摘要',
-    ageGroups: ['toddler'],
-    url: 'https://smart-func-cds.yao.care/education/lang/',
+    ageGroups: ['18-39'],
+    url: 'https://smart-func-cds.yao.care/education/sleep/',
     publishedAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-02-01'),
   });
-  it('MedicalWebPage + 兒科 specialty + 家長 audience', () => {
+  it('MedicalWebPage + 公共衛生 specialty + 病人 audience', () => {
     expect(s['@type']).toBe('MedicalWebPage');
-    expect(s.specialty).toBe('Pediatrics');
+    expect(s.specialty).toBe('PublicHealth');
     expect(s.audience['@type']).toBe('MedicalAudience');
-    expect(s.audience.audienceType).toBe('Parent');
+    expect(s.audience.audienceType).toBe('Patient');
   });
   it('日期：dateModified 用 updatedAt，缺則用 publishedAt', () => {
     expect(s.datePublished).toBe('2026-01-01T00:00:00.000Z');
     expect(s.dateModified).toBe('2026-02-01T00:00:00.000Z');
     const s2 = medicalWebPageSchema(site, {
-      title: 't', summary: 's', ageGroups: ['infant'],
+      title: 't', summary: 's', ageGroups: ['40-54'],
       url: 'https://x/', publishedAt: new Date('2026-01-01'),
     });
     expect(s2.dateModified).toBe('2026-01-01T00:00:00.000Z');

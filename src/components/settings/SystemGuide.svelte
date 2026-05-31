@@ -19,7 +19,7 @@
       <strong>使用者瀏覽器的 IndexedDB</strong>，不會送到任何第三方。
     </p>
     <p>
-      跨裝置共享靠 <strong>SMART on FHIR</strong>：家長完成評估後可選擇將結果以
+      跨裝置共享靠 <strong>SMART on FHIR</strong>：受測者完成評估後可選擇將結果以
       <code>Observation + DiagnosticReport</code> 推送到醫院的 FHIR Server，
       醫師端工作台再從 Server 拉回展示。
     </p>
@@ -93,7 +93,7 @@
       <dd>醫院自上傳的衛教內容（文章 / 影片），會出現在 <code>/education/</code> 列表與評估後推薦。</dd>
 
       <dt>評估推薦</dt>
-      <dd>per category × domain 自訂評估後給家長看的衛教清單。可選「合併系統預設」或「完全取代」。</dd>
+      <dd>per category × domain 自訂評估後給受測者看的衛教清單。可選「合併系統預設」或「完全取代」。</dd>
 
       <dt>常模管理</dt>
       <dd>per ageGroup × metric 編輯 mean / std，分流引擎優先採用，缺值回退到系統預設。建議部署時逐項評估後填入。</dd>
@@ -106,10 +106,10 @@
   <section>
     <h3>PHI 與資料治理</h3>
     <ul>
-      <li><strong>家長端 IndexedDB</strong>：包含兒童基本資料、評估事件、PII。屬於該裝置的本地資料，<strong>不會自動上傳任何位置</strong>。家長清除瀏覽器資料即刪除。</li>
-      <li><strong>FHIR 上傳</strong>：只有家長明確按下「傳送結果至醫院」才會推送，且僅傳 Observation + DiagnosticReport（分數、結論），不傳原始事件 timeline。</li>
+      <li><strong>受測者端 IndexedDB</strong>：包含受測者基本資料、評估事件、PII。屬於該裝置的本地資料，<strong>不會自動上傳任何位置</strong>。受測者清除瀏覽器資料即刪除。</li>
+      <li><strong>FHIR 上傳</strong>：只有受測者明確按下「傳送結果至醫院」才會推送，且僅傳 Observation + DiagnosticReport（分數、結論），不傳原始事件 timeline。</li>
       <li><strong>URL 安全</strong>：所有 assessment id 都是隨機 UUID v4，不含 PII；結果頁加 <code>referrer no-referrer</code> 避免外洩。</li>
-      <li><strong>多 child 設備</strong>：本系統假設「一台裝置一個 child」（家用情境）。診所共用裝置請確保每次評估前清空本機。</li>
+      <li><strong>多受測者設備</strong>：本系統假設「一台裝置一位受測者」（個人使用情境）。診所共用裝置請確保每次評估前清空本機。</li>
     </ul>
   </section>
 
@@ -128,7 +128,7 @@
     <h3>已知限制 / 未來工作</h3>
     <ul>
       <li>常模沒有 UI 匯入 CSV / JSON，目前只能逐項手動填。</li>
-      <li>多 child 切換、家庭模式尚未實作。</li>
+      <li>多受測者切換、多人模式尚未實作。</li>
       <li>FHIR 端的 DiagnosticReport 反查不含原始事件 timeline。</li>
       <li>i18n 目前只支援 zh-TW。</li>
     </ul>
@@ -137,7 +137,7 @@
   <section class="footer-note">
     <p>
       原始碼：
-      <a href="https://github.com/yao-care/smart-pedi-cds" target="_blank" rel="noopener noreferrer">github.com/yao-care/smart-pedi-cds</a>。
+      <a href="https://github.com/yao-care/smart-func-cds" target="_blank" rel="noopener noreferrer">github.com/yao-care/smart-func-cds</a>。
       授權：MIT。
     </p>
   </section>

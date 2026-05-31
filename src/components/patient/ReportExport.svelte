@@ -44,11 +44,11 @@
       // Title
       doc.setFontSize(18);
       doc.setFont('NotoSansTC', 'bold');
-      doc.text('CDSS 兒科臨床決策輔助系統', pageWidth / 2, y, { align: 'center' });
+      doc.text('Smart Func 成人功能健康評估', pageWidth / 2, y, { align: 'center' });
       y += 10;
       doc.setFontSize(12);
       doc.setFont('NotoSansTC', 'normal');
-      doc.text('兒童健康趨勢報告', pageWidth / 2, y, { align: 'center' });
+      doc.text('成人功能健康趨勢報告', pageWidth / 2, y, { align: 'center' });
       y += 14;
 
       // Separator line
@@ -105,14 +105,14 @@
       doc.setFontSize(8);
       doc.setTextColor(160, 160, 160);
       doc.text(
-        '由 CDSS 兒科臨床決策輔助系統產製',
+        '由 Smart Func 成人功能健康評估產製',
         pageWidth / 2,
         footerY,
         { align: 'center' },
       );
 
       // Save
-      doc.save(`cdss-report-${patientId}-${dateFrom}-${dateTo}.pdf`);
+      doc.save(`smart-func-report-${patientId}-${dateFrom}-${dateTo}.pdf`);
     } finally {
       isGenerating = false;
     }

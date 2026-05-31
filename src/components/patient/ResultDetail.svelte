@@ -230,8 +230,8 @@
     </section>
 
     {#if videoTriggers.length > 0}
-      <section class="recommended-videos" aria-label="建議分享給家長的衛教影片">
-        <h2>建議分享給家長的衛教影片</h2>
+      <section class="recommended-videos" aria-label="建議分享給受測者的衛教影片">
+        <h2>建議分享給受測者的衛教影片</h2>
         <TriggerVideoList triggers={videoTriggers} />
       </section>
     {/if}

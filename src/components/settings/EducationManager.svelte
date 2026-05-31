@@ -19,7 +19,7 @@
   let formTitle = $state('');
   let formSummary = $state('');
   let formCategory = $state('general');
-  let formAgeGroups = $state<string[]>(['infant', 'toddler', 'preschool']);
+  let formAgeGroups = $state<string[]>(['18-39', '40-54', '55-64']);
   let formFormat = $state<'article' | 'video'>('article');
   let formContent = $state('');
   let formVideoUrl = $state('');
@@ -29,19 +29,28 @@
   const tenantName = $derived(getTenantDisplayName(authStore.fhirBaseUrl));
   const isConnected = $derived(authStore.isAuthenticated);
 
+  // 對齊 src/content.config.ts 的成人 IC 衛教分類（依五大功能域）
   const categories = [
-    { value: 'diet', label: '飲食營養' },
     { value: 'sleep', label: '睡眠' },
-    { value: 'respiratory', label: '呼吸照護' },
-    { value: 'exercise', label: '運動發展' },
-    { value: 'milestone', label: '發展里程碑' },
+    { value: 'fatigue', label: '疲勞' },
+    { value: 'nutrition', label: '營養' },
+    { value: 'activity', label: '身體活動' },
+    { value: 'sedentary', label: '久坐' },
+    { value: 'cognition', label: '認知' },
+    { value: 'burnout', label: '過勞' },
+    { value: 'stress', label: '壓力' },
+    { value: 'mood', label: '情緒' },
+    { value: 'wellbeing', label: '心理健康' },
+    { value: 'vision', label: '視力' },
+    { value: 'hearing', label: '聽力' },
+    { value: 'screen', label: '螢幕用眼' },
     { value: 'general', label: '一般衛教' },
   ];
 
   const ageGroupOptions = [
-    { value: 'infant', label: '嬰兒 (0-1歲)' },
-    { value: 'toddler', label: '幼兒 (1-3歲)' },
-    { value: 'preschool', label: '學齡前 (3-6歲)' },
+    { value: '18-39', label: '18-39 歲' },
+    { value: '40-54', label: '40-54 歲' },
+    { value: '55-64', label: '55-64 歲' },
   ];
 
   $effect(() => {
@@ -61,7 +70,7 @@
     formTitle = '';
     formSummary = '';
     formCategory = 'general';
-    formAgeGroups = ['infant', 'toddler', 'preschool'];
+    formAgeGroups = ['18-39', '40-54', '55-64'];
     formFormat = 'article';
     formContent = '';
     formVideoUrl = '';
