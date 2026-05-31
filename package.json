@@ -23,7 +23,8 @@
     "generate:og": "node scripts/generate-og-image.mjs",
     "postbuild": "pagefind --site dist && node scripts/build-sw.mjs && node scripts/build-manifest.mjs && node scripts/verify-seo.mjs",
     "curate:videos": "tsx scripts/curate-videos.ts",
-    "curate:clean": "tsx scripts/curate-videos.ts --clean"
+    "curate:clean": "tsx scripts/curate-videos.ts --clean",
+    "conformance": "node scripts/gcm-conformance.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.18",
