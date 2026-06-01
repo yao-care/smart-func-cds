@@ -310,14 +310,10 @@
   }
 
   .tmt-line {
-    stroke: #3d6b54;
+    stroke: var(--accent);
     stroke-width: 2.5;
     stroke-linecap: round;
     opacity: 0.55;
-  }
-
-  @supports (color: oklch(0 0 0)) {
-    .tmt-line { stroke: oklch(0.48 0.08 155); }
   }
 
   /* ── Nodes ── */
@@ -332,7 +328,7 @@
     min-height: 44px;
     border-radius: var(--radius-full);
 
-    font-size: 18px; /* minimum per spec */
+    font-size: var(--text-xs);
     font-weight: var(--font-bold);
     line-height: 1;
     text-align: center;

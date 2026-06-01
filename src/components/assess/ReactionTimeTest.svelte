@@ -321,16 +321,8 @@
     width: 160px;
     height: 160px;
     border-radius: var(--radius-full);
-    /* Hex fallback, then OKLCH */
-    background: #2d9e52;
-    box-shadow: 0 0 32px 8px rgba(45, 158, 82, 0.45);
-  }
-
-  @supports (color: oklch(0 0 0)) {
-    .rt-go-circle {
-      background: oklch(0.58 0.18 145);
-      box-shadow: 0 0 32px 8px oklch(0.58 0.18 145 / 0.45);
-    }
+    background: var(--accent);
+    box-shadow: 0 0 32px 8px color-mix(in srgb, var(--accent) 45%, transparent);
   }
 
   /* Feedback number */
