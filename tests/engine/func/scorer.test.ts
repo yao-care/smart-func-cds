@@ -306,4 +306,30 @@ describe('isDetailRevealed', () => {
   it('無 revealDetailWhen → 不揭露', () => {
     expect(isDetailRevealed({ ...fatigueLike, revealDetailWhen: undefined }, { 'vitality.fatigue.q1': 4 })).toBe(false);
   });
+
+  it('comparator <=：分數低於門檻 → 揭露；高於門檻 → 不揭露', () => {
+    const leLike: LikertIndicator = {
+      ...fatigueLike,
+      revealDetailWhen: { screenerQuestionIds: ['vitality.fatigue.q1'], threshold: 1, comparator: '<=' },
+    };
+    expect(isDetailRevealed(leLike, { 'vitality.fatigue.q1': 0 })).toBe(true);  // 0 <= 1
+    expect(isDetailRevealed(leLike, { 'vitality.fatigue.q1': 2 })).toBe(false); // 2 > 1
+  });
+
+  it('reverseScored 螢檢題：使用 reverse 校正後的分數比對門檻', () => {
+    const revLike: LikertIndicator = {
+      kind: 'likert', id: 'vitality.fatigue', domain: 'vitality', label: '疲勞',
+      tier: 'screener', style: 'symptom', direction: 'higher_is_worse',
+      maxScore: 4, weight: 1.0, license: 'cc-by-nc-sa',
+      revealDetailWhen: { screenerQuestionIds: ['vitality.fatigue.q1'], threshold: 3, comparator: '>=' },
+      questions: [
+        { id: 'vitality.fatigue.q1', text: 'x', reverseScored: true, options: [{ label: 'a', score: 0 }, { label: 'b', score: 4 }] },
+        { id: 'vitality.fatigue.q2', text: 'y', tier: 'detail', options: [{ label: 'a', score: 0 }, { label: 'b', score: 4 }] },
+      ],
+    };
+    // raw 0 → reverseScoreOf(0, 4, 0) = 4 ≥ 3 → 揭露
+    expect(isDetailRevealed(revLike, { 'vitality.fatigue.q1': 0 })).toBe(true);
+    // raw 4 → reverseScoreOf(4, 4, 0) = 0 < 3 → 不揭露
+    expect(isDetailRevealed(revLike, { 'vitality.fatigue.q1': 4 })).toBe(false);
+  });
 });
