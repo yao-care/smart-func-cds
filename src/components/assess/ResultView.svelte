@@ -9,6 +9,11 @@
   import CollectionPointPicker from './CollectionPointPicker.svelte';
   import { deriveFuncTriggers } from '$lib/education/trigger-derivation';
   import TriggerVideoList from '../education/TriggerVideoList.svelte';
+  import CrisisResources from './CrisisResources.svelte';
+
+  const selfHarmFlagged = $derived(
+    (assessmentStore.partialAnalysis.answers?.['psychological.self_harm.q1'] ?? 0) > 0
+  );
 
   let triageResult = $state<TriageResult | null>(null);
   let isComputing = $state(true);
@@ -86,6 +91,10 @@
   <div class="disclaimer" role="alert">
     本評估結果僅供參考，不構成醫療診斷。如有疑慮，請諮詢專業醫療人員。
   </div>
+
+  {#if selfHarmFlagged}
+    <CrisisResources visible={true} />
+  {/if}
 
   <div
     class="triage-card"
