@@ -158,7 +158,7 @@ psychological:
   - id: psychological.depression
     kind: likert
     domain: psychological
-    label: 憂鬱篩檢 (PHQ-2 → PHQ-9)
+    label: 憂鬱篩檢 (PHQ-2 → PHQ-8)
     style: symptom
     direction: higher_is_worse
     maxScore: 3
@@ -182,7 +182,25 @@ psychological:
       - { id: psychological.depression.q6, text: "過去 2 週，您覺得自己很糟、是個失敗者，或讓自己/家人失望", tier: detail, loincCode: "44254-1", options: [{label: "從不", score: 0}, {label: "幾天", score: 1}, {label: "超過一半時間", score: 2}, {label: "幾乎每天", score: 3}] }
       - { id: psychological.depression.q7, text: "過去 2 週，您對事情專注有困難，例如閱讀報紙或看電視時", tier: detail, loincCode: "44256-6", options: [{label: "從不", score: 0}, {label: "幾天", score: 1}, {label: "超過一半時間", score: 2}, {label: "幾乎每天", score: 3}] }
       - { id: psychological.depression.q8, text: "過去 2 週，您動作或說話緩慢到他人已察覺，或正好相反——煩躁、坐立不安，動來動去比平常多", tier: detail, loincCode: "44258-2", options: [{label: "從不", score: 0}, {label: "幾天", score: 1}, {label: "超過一半時間", score: 2}, {label: "幾乎每天", score: 3}] }
-      - { id: psychological.depression.q9, text: "過去 2 週，您有不如死掉，或用某種方式傷害自己的念頭", tier: detail, loincCode: "44260-8", options: [{label: "從不", score: 0}, {label: "幾天", score: 1}, {label: "超過一半時間", score: 2}, {label: "幾乎每天", score: 3}] }
+  - id: psychological.self_harm
+    kind: likert
+    domain: psychological
+    label: 自我傷害意念篩檢
+    style: symptom
+    direction: higher_is_worse
+    maxScore: 3
+    weight: 1.0
+    license: public-domain
+    loincCode: "44260-8"
+    minCompletionPolicy: 1.0
+    clinicalCutoff:
+      threshold: 1
+      comparator: ">="
+      flagLabel: self-harm-ideation
+      severity: consult
+      citation: "PHQ-9 item 9 (Kroenke 2001)"
+    questions:
+      - { id: psychological.self_harm.q1, text: "過去 2 週，您有不如死掉，或用某種方式傷害自己的念頭", loincCode: "44260-8", options: [{label: "從不", score: 0}, {label: "幾天", score: 1}, {label: "超過一半時間", score: 2}, {label: "幾乎每天", score: 3}] }
   - id: psychological.anxiety
     kind: likert
     domain: psychological
@@ -221,7 +239,7 @@ psychological:
     minCompletionPolicy: 1.0
     questions:
       - { id: psychological.stress.q1, text: "過去 1 個月，您多常感到無法掌控生活中的重要事情？", options: [{label: "從不", score: 0}, {label: "幾乎沒有", score: 1}, {label: "有時", score: 2}, {label: "經常", score: 3}, {label: "非常常", score: 4}] }
-      - { id: psychological.stress.q2, text: "過去 1 個月，您多常感到能掌握自己的時間？", reverseScored: true, options: [{label: "從不", score: 0}, {label: "幾乎沒有", score: 1}, {label: "有時", score: 2}, {label: "經常", score: 3}, {label: "非常常", score: 4}] }
+      - { id: psychological.stress.q2, text: "過去 1 個月，您多常覺得自己有能力處理個人問題？", reverseScored: true, options: [{label: "從不", score: 0}, {label: "幾乎沒有", score: 1}, {label: "有時", score: 2}, {label: "經常", score: 3}, {label: "非常常", score: 4}] }
       - { id: psychological.stress.q3, text: "過去 1 個月，您多常感到事情如您所願？", reverseScored: true, options: [{label: "從不", score: 0}, {label: "幾乎沒有", score: 1}, {label: "有時", score: 2}, {label: "經常", score: 3}, {label: "非常常", score: 4}] }
       - { id: psychological.stress.q4, text: "過去 1 個月，您多常感到困難堆積到無法克服？", options: [{label: "從不", score: 0}, {label: "幾乎沒有", score: 1}, {label: "有時", score: 2}, {label: "經常", score: 3}, {label: "非常常", score: 4}] }
     clinicalCutoff:
@@ -245,7 +263,7 @@ psychological:
       - { id: psychological.wellbeing.q1, text: "過去 2 週，我感到開心並心情好", options: [{label: "從不", score: 0}, {label: "偶爾", score: 1}, {label: "不到一半時間", score: 2}, {label: "一半以上時間", score: 3}, {label: "大部分時間", score: 4}, {label: "總是", score: 5}] }
       - { id: psychological.wellbeing.q2, text: "過去 2 週，我感到平靜且放鬆", options: [{label: "從不", score: 0}, {label: "偶爾", score: 1}, {label: "不到一半時間", score: 2}, {label: "一半以上時間", score: 3}, {label: "大部分時間", score: 4}, {label: "總是", score: 5}] }
       - { id: psychological.wellbeing.q3, text: "過去 2 週，我感到精力充沛", options: [{label: "從不", score: 0}, {label: "偶爾", score: 1}, {label: "不到一半時間", score: 2}, {label: "一半以上時間", score: 3}, {label: "大部分時間", score: 4}, {label: "總是", score: 5}] }
-      - { id: psychological.wellbeing.q4, text: "過去 2 週，起床時感到精神飽滿", options: [{label: "從不", score: 0}, {label: "偶爾", score: 1}, {label: "不到一半時間", score: 2}, {label: "一半以上時間", score: 3}, {label: "大部分時間", score: 4}, {label: "總是", score: 5}] }
+      - { id: psychological.wellbeing.q4, text: "過去 2 週，我起床時感到精神飽滿", options: [{label: "從不", score: 0}, {label: "偶爾", score: 1}, {label: "不到一半時間", score: 2}, {label: "一半以上時間", score: 3}, {label: "大部分時間", score: 4}, {label: "總是", score: 5}] }
       - { id: psychological.wellbeing.q5, text: "過去 2 週，我的日常生活充滿有趣的事", options: [{label: "從不", score: 0}, {label: "偶爾", score: 1}, {label: "不到一半時間", score: 2}, {label: "一半以上時間", score: 3}, {label: "大部分時間", score: 4}, {label: "總是", score: 5}] }
     clinicalCutoff:
       threshold: 13
