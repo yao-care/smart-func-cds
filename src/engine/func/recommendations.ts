@@ -17,6 +17,13 @@ export function recommendationsFor(
     if (r) recs.push(r);
   }
 
+  // 完整量表嚴重度（consult）已涵蓋的指標——其螢檢 advisory 建議重複且較弱，去重。
+  const fullCutoffIndicators = new Set(
+    cutoffs
+      .filter(c => c.flagLabel === 'phq8-moderate-depression' || c.flagLabel === 'gad7-moderate-anxiety')
+      .map(c => c.indicatorId)
+  );
+
   for (const c of cutoffs) {
     // 安全：任何 self_harm 旗標（不論 severity）都升級為緊急建議，故在 advisory 判斷前攔截
     if (c.indicatorId === 'psychological.self_harm') {
@@ -33,6 +40,7 @@ export function recommendationsFor(
     const fr = fullCutoffRec(c.flagLabel);
     if (fr) { recs.push(fr); continue; }
     if (c.severity === 'advisory') {
+      if (fullCutoffIndicators.has(c.indicatorId)) continue; // 完整量表已給更強建議，去重
       const r = advisoryCutoffRec(c.indicatorId);
       if (r) recs.push(r);
     }

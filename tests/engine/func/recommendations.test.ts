@@ -78,4 +78,14 @@ describe('recommendations 自適應後', () => {
     expect(r!.type).toBe('consult-medical');
     expect(r!.message).toContain('GAD-7');
   });
+
+  it('depression 同時有 PHQ-2 advisory + PHQ-8 consult → 只留 consult-medical（去重）', () => {
+    const recs = recommendationsFor('consult', [], [], [
+      { indicatorId: 'psychological.depression', domain: 'psychological', severity: 'advisory', flagLabel: 'positive-depression-screen' },
+      { indicatorId: 'psychological.depression', domain: 'psychological', severity: 'consult', flagLabel: 'phq8-moderate-depression' },
+    ]);
+    const depRecs = recs.filter(x => x.triggerIndicators?.includes('psychological.depression'));
+    expect(depRecs).toHaveLength(1);
+    expect(depRecs[0].type).toBe('consult-medical');
+  });
 });
