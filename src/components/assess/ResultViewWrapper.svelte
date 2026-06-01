@@ -6,6 +6,7 @@
   import { deriveFuncTriggers } from '$lib/education/trigger-derivation';
   import { ageGroupAdult } from '$lib/utils/age-groups';
   import TriggerVideoList from '../education/TriggerVideoList.svelte';
+  import CollectionPointPicker from './CollectionPointPicker.svelte';
   import type { AssessmentPatient } from '../../lib/db/schema';
 
   // Stand-alone result page entry. Reads ?id= from the URL, loads the
@@ -135,6 +136,10 @@
     {/if}
 
     <div class="result-actions">
+      {#if triageResult}
+        <CollectionPointPicker assessmentId={assessment.id} {triageResult} />
+      {/if}
+
       {#if child}
         <AssessmentPdfReport {assessment} patient={child} />
       {/if}
