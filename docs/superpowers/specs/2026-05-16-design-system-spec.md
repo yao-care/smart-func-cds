@@ -1,4 +1,4 @@
-# Smart Pedi CDSS — Design System Spec
+# Smart Func — Design System Spec
 
 **Date**: 2026-05-16
 **Status**: Approved for implementation (5 rounds of independent Opus review)
@@ -964,7 +964,7 @@ After implementation:
 
 ```css
 /* ==========================================================================
-   Design Tokens — Smart Pedi CDSS
+   Design Tokens — Smart Func
    7 source-of-truth color tokens. Derived values via color-mix() at site.
    See: docs/superpowers/specs/2026-05-16-design-system-spec.md
    ========================================================================== */

@@ -1,4 +1,4 @@
-# Smart Pedi CDSS — Design System
+# Smart Func — Design System
 
 > **Spec:** `docs/superpowers/specs/2026-05-16-design-system-spec.md` (full reference)
 
