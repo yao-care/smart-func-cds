@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import yaml from 'js-yaml';
-import { indicatorSchema, type Indicator, type LikertIndicator } from '../src/engine/func/questionnaire';
+import { indicatorSchema, type Indicator } from '../src/engine/func/questionnaire';
 import { IC_DOMAIN_NAMES, type ICDomain } from '../src/lib/education/schemas';
 
 /** 純函式：檢查 tier 完整性，回傳錯誤訊息陣列（空陣列=通過）。 */
@@ -24,8 +24,9 @@ export function validateTierIntegrity(indicators: Indicator[]): string[] {
   }
   // 2. 題層 detail 的指標必須有 revealDetailWhen，且其 screenerQuestionIds 必須存在且非 detail
   for (const ind of indicators) {
+    // objective 指標層 detail 由 domain-driven UI 揭露，無題層 detail / 不需 revealDetailWhen
     if (ind.kind !== 'likert') continue;
-    const likert = ind as LikertIndicator;
+    const likert = ind;
     const detailQs = likert.questions.filter(q => q.tier === 'detail');
     if (detailQs.length === 0) continue;
     if (!likert.revealDetailWhen) {
