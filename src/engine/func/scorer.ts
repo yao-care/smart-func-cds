@@ -29,6 +29,7 @@ export interface IndicatorScore {
   style: 'capacity' | 'symptom';
   kind: 'likert' | 'objective';
   score: number;
+  /** Effective-score sum over the ACTIVE question set (matches questionsTotal): screener-only until detail revealed, then full. */
   rawSum?: number;
   cutoffFlag?: boolean;
   cutoffSeverity?: 'consult' | 'advisory';
@@ -78,11 +79,10 @@ export function scoreLikertIndicator(
   }
 
   // ---- 自適應：決定本次計分的 active 題集 ----
-  const hasDetail = indicator.questions.some(q => q.tier === 'detail');
+  const screenerQs = indicator.questions.filter(q => q.tier !== 'detail');
+  const hasDetail = screenerQs.length < indicator.questions.length;
   const detailRevealed = hasDetail && isDetailRevealed(indicator, answers);
-  const activeQuestions = hasDetail && !detailRevealed
-    ? indicator.questions.filter(q => q.tier !== 'detail')
-    : indicator.questions;
+  const activeQuestions = hasDetail && !detailRevealed ? screenerQs : indicator.questions;
   const N = activeQuestions.length;
 
   const validAnswerEntries = activeQuestions.map(q => ({
@@ -114,7 +114,6 @@ export function scoreLikertIndicator(
   let cutoffSeverity: 'consult' | 'advisory' | undefined;
   let cutoffFlagLabel: string | undefined;
   if (indicator.clinicalCutoff) {
-    const screenerQs = indicator.questions.filter(q => q.tier !== 'detail');
     const screenerVals = screenerQs.map(q => ({
       raw: answers[q.id],
       rev: q.reverseScored ?? false,

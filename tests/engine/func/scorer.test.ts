@@ -334,8 +334,8 @@ describe('isDetailRevealed', () => {
   });
 });
 
-const phq9Like: LikertIndicator = {
-  kind: 'likert', id: 'psychological.depression', domain: 'psychological', label: 'PHQ-9',
+const phq2AdaptiveLike: LikertIndicator = {
+  kind: 'likert', id: 'psychological.depression', domain: 'psychological', label: 'PHQ-2 adaptive',
   tier: 'screener', style: 'symptom', direction: 'higher_is_worse',
   maxScore: 3, weight: 1.0, license: 'public-domain', minCompletionPolicy: 1.0,
   clinicalCutoff: { threshold: 3, comparator: '>=', flagLabel: 'positive-depression-screen', severity: 'advisory', citation: 'Kroenke 2003' },
@@ -349,7 +349,7 @@ const phq9Like: LikertIndicator = {
 
 describe('scoreLikertIndicator 自適應完成度', () => {
   it('detail 未觸發：只用螢檢題計分，不因 detail 未答而回 null', () => {
-    const s = scoreLikertIndicator(phq9Like, {
+    const s = scoreLikertIndicator(phq2AdaptiveLike, {
       'psychological.depression.q1': 0, 'psychological.depression.q2': 0,
     });
     expect(s).not.toBeNull();
@@ -359,7 +359,7 @@ describe('scoreLikertIndicator 自適應完成度', () => {
 
   it('clinicalCutoff 在螢檢題（PHQ-2）上評估：q1+q2>=3 即 flag（detail 已觸發需補答 q3）', () => {
     // q1+q2=3 觸發 detail→需答 q3；cutoff 仍由螢檢題 sum=3≥3 決定
-    const s = scoreLikertIndicator(phq9Like, {
+    const s = scoreLikertIndicator(phq2AdaptiveLike, {
       'psychological.depression.q1': 2, 'psychological.depression.q2': 1, 'psychological.depression.q3': 0,
     });
     expect(s!.cutoffFlag).toBe(true);
@@ -367,14 +367,14 @@ describe('scoreLikertIndicator 自適應完成度', () => {
   });
 
   it('detail 觸發但未答完：要求全 9 題（policy 1.0）→ 回 null', () => {
-    const s = scoreLikertIndicator(phq9Like, {
+    const s = scoreLikertIndicator(phq2AdaptiveLike, {
       'psychological.depression.q1': 2, 'psychological.depression.q2': 2,
     });
     expect(s).toBeNull();
   });
 
   it('detail 觸發且答完：用全部題計分', () => {
-    const s = scoreLikertIndicator(phq9Like, {
+    const s = scoreLikertIndicator(phq2AdaptiveLike, {
       'psychological.depression.q1': 2, 'psychological.depression.q2': 2, 'psychological.depression.q3': 3,
     });
     expect(s).not.toBeNull();
