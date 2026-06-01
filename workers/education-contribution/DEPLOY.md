@@ -115,8 +115,8 @@ curl -X POST https://education-contribution.<account>.workers.dev/education-cont
   -H "Origin: https://smart-func-cds.yao.care" \
   -d '{
     "type": "youtube",
-    "domain": "language",
-    "ageGroup": "13-24m",
+    "domain": "locomotion",
+    "ageGroup": "40-54",
     "url": "https://www.youtube.com/watch?v=TEST_VIDEO_ID",
     "title": "測試影片"
   }'
@@ -137,9 +137,9 @@ curl -X POST https://education-contribution.<account>.workers.dev/education-cont
 - **無效 payload**: 檢查 `type`、`domain`、`ageGroup` 是否在有效值清單中
 
 有效值清單：
-- **type**: `youtube`, `article`, `external-link`
-- **domain**: `behavior`, `gross_motor`, `fine_motor`, `language`, `language_comprehension`, `language_expression`, `cognition`, `social_emotional`
-- **ageGroup**: `2-6m`, `7-12m`, `13-24m`, `25-36m`, `37-48m`, `49-60m`, `61-72m`
+- **type**: `youtube`, `article`, `external-link`, `edit-article`, `delete-article`, `delete-video`
+- **domain**（成人 IC 五大功能域）: `vitality`, `locomotion`, `cognition`, `psychological`, `sensory`
+- **ageGroup**（成人年齡組）: `18-39`, `40-54`, `55-64`
 
 ## 持續部署
 

@@ -14,14 +14,12 @@ export type ContributionPayload = {
 };
 
 const DOMAIN_ZH: Record<string, string> = {
-  behavior: '行為', gross_motor: '粗動作', fine_motor: '細動作',
-  language: '語言', language_comprehension: '語言理解',
-  language_expression: '語言表達', cognition: '認知', social_emotional: '社交情緒',
+  vitality: '身體活力', locomotion: '行動', cognition: '認知',
+  psychological: '心理', sensory: '感官',
 };
 
 const AGE_ZH: Record<string, string> = {
-  '2-6m': '2-6 個月', '7-12m': '7-12 個月', '13-24m': '1-2 歲',
-  '25-36m': '2-3 歲', '37-48m': '3-4 歲', '49-60m': '4-5 歲', '61-72m': '5-6 歲',
+  '18-39': '18-39 歲', '40-54': '40-54 歲', '55-64': '55-64 歲',
 };
 
 const TYPE_ZH: Record<string, string> = {
@@ -67,7 +65,7 @@ export function formatIssueBody(p: ContributionPayload): string {
 
 **目標文章 slug**: \`${p.targetSlug ?? '（未填）'}\`
 **年齡段**: ${age} (${p.ageGroup})
-**發展領域**: ${domain} (${p.domain})
+**功能域**: ${domain} (${p.domain})
 
 ### 建議修改內容
 
@@ -94,7 +92,7 @@ export function formatIssueBody(p: ContributionPayload): string {
 
 **目標文章 slug**: \`${p.targetSlug ?? '（未填）'}\`
 **年齡段**: ${age} (${p.ageGroup})
-**發展領域**: ${domain} (${p.domain})
+**功能域**: ${domain} (${p.domain})
 
 ### 刪除原因
 
@@ -119,7 +117,7 @@ export function formatIssueBody(p: ContributionPayload): string {
 
 **目標影片 ID**: \`${videoLabel}\`
 **年齡段**: ${age} (${p.ageGroup})
-**發展領域**: ${domain} (${p.domain})
+**功能域**: ${domain} (${p.domain})
 
 ### 刪除原因
 
@@ -151,14 +149,14 @@ export function formatIssueBody(p: ContributionPayload): string {
   }
 
   const yamlHint = p.type === 'youtube'
-    ? `\`\`\`yaml\n# src/data/education-videos/cdsa-domains.yaml\n# 找到對應 trigger，將 videoId 加入 videoIds 清單：\n# - trigger: cdsa.domain.${p.domain}.anomaly.${p.ageGroup}\n#   videoIds:\n#     - ${extractVideoId(p.url ?? '')}   # 11 碼\n\`\`\``
-    : `（文章/連結請依 README 建立對應的 .md 或 YAML entry）`;
+    ? `\`\`\`yaml\n# src/data/education/content-relevance.yaml\n# 找到對應 trigger（功能域 ${p.domain} × ${p.ageGroup}），將 videoId 加入其 videoIds 清單：\n#   videoIds:\n#     - ${extractVideoId(p.url ?? '')}   # 11 碼\n\`\`\``
+    : `（文章/連結請依 README 建立對應的 .md 或 content-relevance.yaml entry）`;
 
   return `## 衛教貢獻申請
 
 **類型**: ${type}
 **年齡段**: ${age} (${p.ageGroup})
-**發展領域**: ${domain} (${p.domain})
+**功能域**: ${domain} (${p.domain})
 
 ### 資源資訊
 

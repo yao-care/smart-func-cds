@@ -12,12 +12,13 @@ interface Env {
 }
 
 const VALID_TYPES = new Set(['youtube', 'article', 'external-link', 'edit-article', 'delete-article', 'delete-video']);
+// 成人 IC 五大功能域（對齊 IC_DOMAIN_NAMES）
 const VALID_DOMAINS = new Set([
-  'behavior', 'gross_motor', 'fine_motor', 'language',
-  'language_comprehension', 'language_expression', 'cognition', 'social_emotional',
+  'vitality', 'locomotion', 'cognition', 'psychological', 'sensory',
 ]);
+// 成人年齡組（對齊 AGE_GROUPS_ADULT）
 const VALID_AGES = new Set([
-  '2-6m', '7-12m', '13-24m', '25-36m', '37-48m', '49-60m', '61-72m',
+  '18-39', '40-54', '55-64',
 ]);
 
 function validate(body: unknown): string | ContributionPayload {
