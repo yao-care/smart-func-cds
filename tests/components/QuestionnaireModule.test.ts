@@ -249,4 +249,50 @@ describe('QuestionnaireModule', () => {
       ).toBeInTheDocument();
     },
   );
+
+  it(
+    'detail 解鎖時進度條單調不倒退（aria-valuenow 不減）',
+    { timeout: 30000 },
+    async () => {
+      assessmentStore.patient = makePatient(30);
+      assessmentStore.assessment = makeAssessment();
+
+      render(QuestionnaireModule);
+
+      const readPct = (): number =>
+        Number(screen.getByRole('progressbar').getAttribute('aria-valuenow') ?? '0');
+
+      const qActions: Record<string, () => Promise<boolean>> = {
+        'vitality.sleep_quality.q1': clickLastOption,
+        'vitality.nutrition.q1': clickLastOption,
+        'vitality.fatigue.q1': clickFirstOption,
+        'locomotion.activity_level.q1': clickLastOption,
+        'locomotion.walking_ability.q1': clickLastOption,
+        'cognition.cognitive_self_report.q1': clickLastOption,
+      };
+
+      let prevPct = readPct();
+      // 走完 6 題螢檢 → 此時 rawPct 較高（answered/12）
+      for (let i = 0; i < 6; i++) {
+        await waitFor(() => { expect(getCurrentQuestionId()).toBeTruthy(); }, { timeout: 2000 });
+        const action = qActions[getCurrentQuestionId()!] ?? clickLastOption;
+        await action();
+        const now = readPct();
+        expect(now).toBeGreaterThanOrEqual(prevPct);
+        prevPct = now;
+      }
+
+      // depression q1+q2 高分 → 解鎖 PHQ-8 detail，visibleTotal 跳增；進度條不可倒退
+      await waitFor(() => { expect(getCurrentQuestionId()).toBe('psychological.depression.q1'); }, { timeout: 2000 });
+      await clickOptionByLabel('幾乎每天');
+      expect(readPct()).toBeGreaterThanOrEqual(prevPct);
+      prevPct = readPct();
+
+      await waitFor(() => { expect(getCurrentQuestionId()).toBe('psychological.depression.q2'); }, { timeout: 2000 });
+      await clickOptionByLabel('幾乎每天');
+      // 解鎖瞬間 visibleTotal 由 ~12 跳到 ~19；aria-valuenow 必須 >= 解鎖前
+      await waitFor(() => { expect(getCurrentQuestionId()).toBe('psychological.depression.q3'); }, { timeout: 3000 });
+      expect(readPct()).toBeGreaterThanOrEqual(prevPct);
+    },
+  );
 });

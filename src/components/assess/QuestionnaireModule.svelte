@@ -113,7 +113,13 @@
   );
   const answeredCount = $derived(Object.keys(answers).length);
   const visibleTotal = $derived(visibleQuestions.length);
-  const progressPct = $derived(visibleTotal > 0 ? Math.round((answeredCount / visibleTotal) * 100) : 0);
+  const rawPct = $derived(visibleTotal > 0 ? Math.round((answeredCount / visibleTotal) * 100) : 0);
+  // 自適應問卷長度未知：detail 解鎖會讓 visibleTotal 跳增、原始比例倒退。
+  // 進度條改為單調不倒退（標準 adaptive UX）——解鎖時暫停而非後退，待作答追上再前進。
+  let peakPct = $state(0);
+  $effect(() => {
+    if (rawPct > peakPct) peakPct = rawPct;
+  });
 
   // ---- Per-domain summary (capacity 0-100 from scorer) ----
   const domainSummary = $derived(
@@ -205,11 +211,11 @@
 
 <div class="questionnaire">
   {#if phase === 'asking' && currentQuestion}
-    <div class="progress-bar-wrap" role="progressbar" aria-valuenow={progressPct} aria-valuemin={0} aria-valuemax={100}>
+    <div class="progress-bar-wrap" role="progressbar" aria-valuenow={peakPct} aria-valuemin={0} aria-valuemax={100}>
       <div class="progress-bar-track">
-        <div class="progress-bar-fill" style="width: {progressPct}%"></div>
+        <div class="progress-bar-fill" style="width: {peakPct}%"></div>
       </div>
-      <span class="progress-label" data-testid="progress-label" data-answered={answeredCount} data-visible-total={visibleTotal}>已完成 {answeredCount} 題（目前共 {visibleTotal} 題）</span>
+      <span class="progress-label" data-testid="progress-label" data-answered={answeredCount} data-visible-total={visibleTotal}>已完成 {answeredCount} 題</span>
     </div>
 
     <div class="domain-badge" data-testid="current-question-id" data-question-id={currentQuestion.questionId}>{currentQuestion.domainLabel} · {currentQuestion.indicatorLabel}</div>
