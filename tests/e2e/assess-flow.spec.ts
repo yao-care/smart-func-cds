@@ -105,13 +105,21 @@ test.describe('成人 IC 評估流程', () => {
     await page.getByLabel(/出生日期/).fill('1980-06-15');
     await page.getByRole('button', { name: '開始評估' }).click();
 
-    // 逐題點選項，直到出現「查看評估結果」
+    // 逐題點選項，直到出現「查看評估結果」。
+    // 認知自評螢檢點「最佳」選項以維持 cognition=high，避免進入計時的客觀測驗 phase
+    // （客觀測驗的進入/施測由 component 單元測試覆蓋，不在此 e2e 重跑計時測驗）。
     const seeResult = page.getByRole('button', { name: '查看評估結果' });
+    const opts = page.locator('.option-btn');
     for (let i = 0; i < 60; i++) {
       if (await seeResult.isVisible().catch(() => false)) break;
-      const opt = page.locator('.option-btn').first();
-      if (await opt.isVisible().catch(() => false)) {
-        await opt.click();
+      if (await opts.first().isVisible().catch(() => false)) {
+        const qid = await page.locator('[data-testid="current-question-id"]')
+          .getAttribute('data-question-id').catch(() => null);
+        if (qid === 'cognition.cognitive_self_report.q1') {
+          await opts.last().click();
+        } else {
+          await opts.first().click();
+        }
         await page.waitForTimeout(120);
       } else {
         await page.waitForTimeout(120);
