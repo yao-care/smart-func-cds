@@ -1,6 +1,6 @@
 # Smart Func 成人功能健康評估系統 — 維護指南
 
-開源**成人（18–64 歲）功能健康自評／CDSS**，聚焦 WHO **內在能力（IC）**，採 SMART on FHIR、瀏覽器端、零後端，部署於 GitHub Pages。線上站：https://smart-func-cds.yao.care/（品牌 **Smart Func**）。對外角色稱「受測者」，內容一律成人 IC 主題（不引入兒科／親職／育兒）。
+開源**成人（18–64 歲）功能健康自評／CDSS**，聚焦 WHO **內在能力（IC）**，採 SMART on FHIR、瀏覽器端、零後端，部署於 GitHub Pages。線上站：https://smart-func-cds.yao.care/（品牌 **Smart Func**）。對外角色稱「受測者」，內容為成人 IC 主題。
 
 ## 兩個子系統
 
