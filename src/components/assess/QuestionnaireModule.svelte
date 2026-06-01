@@ -44,7 +44,7 @@
     )
   );
 
-  // Flat question type
+  // FlatQuestion — 一個待呈現題目的顯示與作答內容
   interface FlatQuestion {
     indicatorId: string;
     domain: ICDomain;
@@ -64,11 +64,17 @@
   let showCrisis = $state(false);
 
   // 即時域分數（只反映已作答題；未答的 detail 指標自然不計入 → band = screener band）
-  const bandByDomain = $derived.by<Partial<Record<ICDomain, 'high' | 'moderate' | 'low'>>>(() => {
-    if (!ageGroup) return {};
-    const { domainScores } = scoreAssessment({ indicators: ALL_INDICATORS, answers, objectiveResults: {}, ageGroup });
-    return Object.fromEntries(domainScores.map(d => [d.domain, d.band]));
+  // 單次 scoreAssessment；bandByDomain 與 domainSummary 共用同一結果避免重複計算。
+  const assessmentResult = $derived.by(() => {
+    if (!ageGroup) return null;
+    return scoreAssessment({ indicators: ALL_INDICATORS, answers, objectiveResults: {}, ageGroup });
   });
+
+  const bandByDomain = $derived<Partial<Record<ICDomain, 'high' | 'moderate' | 'low'>>>(
+    assessmentResult
+      ? Object.fromEntries(assessmentResult.domainScores.map(d => [d.domain, d.band]))
+      : {}
+  );
 
   function toFlat(ind: LikertIndicator, q: LikertQuestion): FlatQuestion {
     return {
@@ -110,24 +116,19 @@
   const progressPct = $derived(visibleTotal > 0 ? Math.round((answeredCount / visibleTotal) * 100) : 0);
 
   // ---- Per-domain summary (capacity 0-100 from scorer) ----
-  const domainSummary = $derived.by(() => {
-    if (!ageGroup) return [];
-    const { domainScores } = scoreAssessment({
-      indicators: ALL_INDICATORS,
-      answers,
-      objectiveResults: {},
-      ageGroup,
-    });
-    return IC_DOMAIN_NAMES.map(domain => {
-      const d = domainScores.find(ds => ds.domain === domain);
-      return {
-        domain,
-        label: DOMAIN_LABELS[domain],
-        score: d?.score ?? null,
-        band: d?.band ?? null,
-      };
-    });
-  });
+  const domainSummary = $derived(
+    !assessmentResult
+      ? []
+      : IC_DOMAIN_NAMES.map(domain => {
+          const d = assessmentResult.domainScores.find(ds => ds.domain === domain);
+          return {
+            domain,
+            label: DOMAIN_LABELS[domain],
+            score: d?.score ?? null,
+            band: d?.band ?? null,
+          };
+        })
+  );
 
   // ---- Answer handler ----
   async function handleAnswer(option: { label: string; score: number }) {
@@ -168,9 +169,9 @@
       });
     }
 
-    isSaving = false;
     await new Promise(r => setTimeout(r, 320));
     lastAnswerLabel = null;
+    isSaving = false;
 
     // currentQuestion 為 derived：設定 answers 後若已無未答可見題 → 進摘要
     if (!currentQuestion) {
