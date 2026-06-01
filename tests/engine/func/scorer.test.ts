@@ -333,3 +333,57 @@ describe('isDetailRevealed', () => {
     expect(isDetailRevealed(revLike, { 'vitality.fatigue.q1': 4 })).toBe(false);
   });
 });
+
+const phq9Like: LikertIndicator = {
+  kind: 'likert', id: 'psychological.depression', domain: 'psychological', label: 'PHQ-9',
+  tier: 'screener', style: 'symptom', direction: 'higher_is_worse',
+  maxScore: 3, weight: 1.0, license: 'public-domain', minCompletionPolicy: 1.0,
+  clinicalCutoff: { threshold: 3, comparator: '>=', flagLabel: 'positive-depression-screen', severity: 'advisory', citation: 'Kroenke 2003' },
+  revealDetailWhen: { screenerQuestionIds: ['psychological.depression.q1', 'psychological.depression.q2'], threshold: 3, comparator: '>=' },
+  questions: [
+    { id: 'psychological.depression.q1', text: 'a', options: [{ label: '從不', score: 0 }, { label: '幾乎每天', score: 3 }] },
+    { id: 'psychological.depression.q2', text: 'b', options: [{ label: '從不', score: 0 }, { label: '幾乎每天', score: 3 }] },
+    { id: 'psychological.depression.q3', text: 'c', tier: 'detail', options: [{ label: '從不', score: 0 }, { label: '幾乎每天', score: 3 }] },
+  ],
+};
+
+describe('scoreLikertIndicator 自適應完成度', () => {
+  it('detail 未觸發：只用螢檢題計分，不因 detail 未答而回 null', () => {
+    const s = scoreLikertIndicator(phq9Like, {
+      'psychological.depression.q1': 0, 'psychological.depression.q2': 0,
+    });
+    expect(s).not.toBeNull();
+    expect(s!.questionsTotal).toBe(2);
+    expect(s!.questionsAnswered).toBe(2);
+  });
+
+  it('clinicalCutoff 在螢檢題（PHQ-2）上評估：q1+q2>=3 即 flag（detail 已觸發需補答 q3）', () => {
+    // q1+q2=3 觸發 detail→需答 q3；cutoff 仍由螢檢題 sum=3≥3 決定
+    const s = scoreLikertIndicator(phq9Like, {
+      'psychological.depression.q1': 2, 'psychological.depression.q2': 1, 'psychological.depression.q3': 0,
+    });
+    expect(s!.cutoffFlag).toBe(true);
+    expect(s!.cutoffFlagLabel).toBe('positive-depression-screen');
+  });
+
+  it('detail 觸發但未答完：要求全 9 題（policy 1.0）→ 回 null', () => {
+    const s = scoreLikertIndicator(phq9Like, {
+      'psychological.depression.q1': 2, 'psychological.depression.q2': 2,
+    });
+    expect(s).toBeNull();
+  });
+
+  it('detail 觸發且答完：用全部題計分', () => {
+    const s = scoreLikertIndicator(phq9Like, {
+      'psychological.depression.q1': 2, 'psychological.depression.q2': 2, 'psychological.depression.q3': 3,
+    });
+    expect(s).not.toBeNull();
+    expect(s!.questionsTotal).toBe(3);
+  });
+
+  it('fatigue：detail 未觸發只算 q1（symptom，minCompletionPolicy 預設 1.0 over N=1）', () => {
+    const s = scoreLikertIndicator(fatigueLike, { 'vitality.fatigue.q1': 1 });
+    expect(s).not.toBeNull();
+    expect(s!.questionsTotal).toBe(1);
+  });
+});

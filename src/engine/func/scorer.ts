@@ -70,7 +70,6 @@ export function scoreLikertIndicator(
   indicator: LikertIndicator,
   answers: Record<string, number>,
 ): IndicatorScore | null {
-  const N = indicator.questions.length;
   const minScore = indicator.minScore ?? 0;
   const maxScore = indicator.maxScore;
   const range = maxScore - minScore;
@@ -78,7 +77,15 @@ export function scoreLikertIndicator(
     throw new Error(`Invalid scale for ${indicator.id}: maxScore must > minScore`);
   }
 
-  const validAnswerEntries = indicator.questions.map(q => ({
+  // ---- 自適應：決定本次計分的 active 題集 ----
+  const hasDetail = indicator.questions.some(q => q.tier === 'detail');
+  const detailRevealed = hasDetail && isDetailRevealed(indicator, answers);
+  const activeQuestions = hasDetail && !detailRevealed
+    ? indicator.questions.filter(q => q.tier !== 'detail')
+    : indicator.questions;
+  const N = activeQuestions.length;
+
+  const validAnswerEntries = activeQuestions.map(q => ({
     qid: q.id,
     raw: answers[q.id],
     reverseScored: q.reverseScored ?? false,
@@ -102,15 +109,25 @@ export function scoreLikertIndicator(
   const raw = (adjustedSum - N * minScore) / (N * range);
   const capacity = indicator.direction === 'higher_is_better' ? raw : 1 - raw;
 
+  // ---- clinicalCutoff 一律在「螢檢題」上評估（驗證過的短篩），與 detail 是否揭露無關 ----
   let cutoffFlag: boolean | undefined;
   let cutoffSeverity: 'consult' | 'advisory' | undefined;
   let cutoffFlagLabel: string | undefined;
-  if (indicator.clinicalCutoff && validAnswerEntries.length === N) {
-    const { threshold, comparator, severity, flagLabel } = indicator.clinicalCutoff;
-    cutoffFlag = comparator === '>=' ? rawSum >= threshold : rawSum <= threshold;
-    if (cutoffFlag) {
-      cutoffSeverity = severity;
-      cutoffFlagLabel = flagLabel;
+  if (indicator.clinicalCutoff) {
+    const screenerQs = indicator.questions.filter(q => q.tier !== 'detail');
+    const screenerVals = screenerQs.map(q => ({
+      raw: answers[q.id],
+      rev: q.reverseScored ?? false,
+    })).filter(e => Number.isFinite(e.raw));
+    if (screenerVals.length === screenerQs.length) {
+      const screenerSum = screenerVals.reduce(
+        (s, e) => s + (e.rev ? reverseScoreOf(e.raw, maxScore, minScore) : e.raw), 0);
+      const { threshold, comparator, severity, flagLabel } = indicator.clinicalCutoff;
+      cutoffFlag = comparator === '>=' ? screenerSum >= threshold : screenerSum <= threshold;
+      if (cutoffFlag) {
+        cutoffSeverity = severity;
+        cutoffFlagLabel = flagLabel;
+      }
     }
   }
 
