@@ -8,6 +8,7 @@
     type Indicator,
     type LikertIndicator,
     type LikertQuestion,
+    type ObjectiveIndicator,
   } from '../../engine/func/questionnaire';
   import { scoreAssessment, isDetailRevealed } from '../../engine/func/scorer';
   import { IC_DOMAIN_NAMES, type ICDomain } from '../../lib/education/schemas';
@@ -34,8 +35,17 @@
     return out;
   })();
 
-  // Only Likert indicators are answerable in S1. Objective indicators have null
-  // norms (not yet scorable) and are surfaced as "not measured" in the result.
+  // 客觀測驗施測參數一律由 indicators.yaml 帶入（避免元件預設與 YAML/計分不同步）。
+  const rtTest = ALL_INDICATORS.find(
+    (i): i is ObjectiveIndicator => i.kind === 'objective' && i.id === 'cognition.processing_speed',
+  )?.test;
+  const tmtTest = ALL_INDICATORS.find(
+    (i): i is ObjectiveIndicator => i.kind === 'objective' && i.id === 'cognition.executive_function',
+  )?.test;
+  const rtTrials = rtTest?.type === 'reaction-time' ? rtTest.trials : 20;
+  const rtWarmup = rtTest?.type === 'reaction-time' ? rtTest.warmupTrials : 5;
+  const tmtTargets = tmtTest?.type === 'tmt-a' ? tmtTest.targetCount : 25;
+
   const ageGroup = $derived(assessmentStore.ageGroup);
 
   const likertIndicators = $derived<LikertIndicator[]>(
@@ -275,9 +285,9 @@
         <span class="objective-step-indicator">{objectiveStep === 'reaction-time' ? '1' : '2'} / 2</span>
       </div>
       {#if objectiveStep === 'reaction-time'}
-        <ReactionTimeTest onComplete={onReactionTimeComplete} />
+        <ReactionTimeTest trials={rtTrials} warmupTrials={rtWarmup} onComplete={onReactionTimeComplete} />
       {:else}
-        <TmtATest onComplete={onTmtAComplete} />
+        <TmtATest targetCount={tmtTargets} onComplete={onTmtAComplete} />
       {/if}
     </div>
 
@@ -522,7 +532,6 @@
 
   .objective-step-indicator {
     font-size: var(--text-sm);
-    color: color-mix(in srgb, var(--text), var(--bg) 30%);
     background: color-mix(in srgb, var(--accent) 12%, var(--bg));
     color: var(--accent);
     padding: var(--space-1) var(--space-3);
