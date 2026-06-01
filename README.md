@@ -1,145 +1,123 @@
-# CDSS 兒科臨床決策輔助系統
+# Smart Func — 成人功能健康評估系統
 
-開源的兒科臨床決策輔助系統，以 SMART on FHIR 標準運行於瀏覽器端，任何擁有 FHIR R4 Server 的醫療機構皆可免費使用。
+開源的**成人（18–64 歲）功能健康自評／臨床決策輔助系統（CDSS）**，聚焦 WHO **內在能力（Intrinsic Capacity, IC）** 框架。採 SMART on FHIR 標準、**純瀏覽器端、零後端**，部署於 GitHub Pages。
 
-## 特色
+線上站：<https://smart-func-cds.yao.care/>
 
-- **零後端** — 所有邏輯在瀏覽器執行，部署於 GitHub Pages
-- **即插即用** — 醫院接上自己的 FHIR Server 即可運作
-- **隱私優先** — 資料僅在瀏覽器與醫院 FHIR Server 之間流動
-- **AI 預警** — 規則引擎 + ONNX ML 混合判定，即時風險評估
-- **閉環追蹤** — 監測 → 預警 → 介入 → 追蹤 → 結案 自動化流程
-- **可客製化** — Fork repo 替換規則與衛教內容即可
+> 對外角色稱「**受測者**」；所有問卷／衛教／文案一律成人 IC 主題（不含兒科／親職／育兒內容）。
+
+## 系統做什麼
+
+兩個子系統共用同一個瀏覽器端 App：
+
+1. **成人 IC 評估**（核心）：引導式問卷＋客觀測驗 → 五大功能域分級＋分流建議＋衛教推薦。受測者可把結果上傳到**收案點**（醫院 FHIR Server 或 GCM 協會），走標準 SMART on FHIR。
+2. **FHIR 臨床監測／閉環**：生命徵象規則引擎、基線、ONNX ML 風險分析、閉環通知，供臨床端使用（工作台 `/workspace/`、`dashboard/`）。
+
+資料預設只存在瀏覽器 IndexedDB；只有受測者主動選擇上傳時，才送往收案點 FHIR Server。
 
 ## 技術棧
 
 | 元件 | 技術 |
 |------|------|
-| 框架 | [Astro 5](https://astro.build/) SSG |
-| 互動元件 | [Svelte 5](https://svelte.dev/) (runes) |
-| 圖表 | D3 子模組 |
-| 樣式 | CSS Custom Properties + OKLCH |
-| FHIR | [fhirclient.js](https://docs.smarthealthit.org/client-js/) |
-| ML 推論 | [ONNX Runtime Web](https://onnxruntime.ai/) (WASM) |
-| 資料庫 | IndexedDB via [Dexie.js 4](https://dexie.org/) |
-| 搜尋 | [Pagefind](https://pagefind.app/) |
-| PDF | jsPDF |
-| 部署 | GitHub Pages + GitHub Actions |
+| 框架 | [Astro 5](https://astro.build/) SSG（`base = /`） |
+| 互動元件 | [Svelte 5](https://svelte.dev/) runes（`$state`/`$derived`/`$effect`） |
+| 樣式 | CSS Custom Properties + OKLCH（`src/styles/tokens.css`） |
+| 內容 | Astro Content Layer + Zod（`src/content.config.ts`） |
+| 資料庫 | IndexedDB via [Dexie.js 4](https://dexie.org/)（`src/lib/db/`） |
+| 圖表 | D3 子模組（**禁止** `import * as d3`） |
+| ML | [ONNX Runtime Web](https://onnxruntime.ai/)（WASM，跑在 Web Worker） |
+| FHIR | [fhirclient.js](https://docs.smarthealthit.org/client-js/)（醫院）＋原生 `fetch`/PKCE（GCM 收案） |
+| 搜尋 / PDF | [Pagefind](https://pagefind.app/) / jsPDF |
+| 套件管理 / 部署 | pnpm / GitHub Pages + Actions |
 
 ## 快速開始
 
 ```bash
-# 安裝依賴
 pnpm install
-
-# 開發模式
-pnpm dev
-
-# 建置
-pnpm build
-
-# 預覽建置結果
-pnpm preview
+pnpm dev        # http://localhost:4321/ （predev 會先重建 content/questionnaire 索引）
+pnpm build      # prebuild 索引+守門 → astro build → postbuild Pagefind+SEO 守門
+pnpm preview    # 本機預覽 dist/
 ```
 
-開發伺服器預設在 `http://localhost:4321/smart-pedi-cds/` 啟動。
+開發前先讀根目錄 `CLAUDE.md`（強制規則：TS strict 無 `any`、Svelte 5 runes、D3 子模組、OKLCH、字級 18px／觸控 44px、安全與架構規範）。
 
 ## 專案結構
 
 ```
 src/
-├── components/        # Svelte 5 互動元件
-│   ├── ui/           # 通用 UI (Button, Badge, Modal, Toast...)
-│   ├── blocks/       # 頁面區塊 (Header, Footer, Hero, Breadcrumb)
-│   ├── fhir/         # FHIR 連線 (LaunchSelector, ConnectionStatus...)
-│   ├── dashboard/    # 儀表板 (PatientList, RiskSummary, AlertFeed)
-│   ├── patient/      # 個案檢視 (TrendChart, AlertTimeline, PatientView)
-│   ├── alerts/       # 預警管理 (AlertCard, AlertFilter, AlertManager)
-│   ├── education/    # 衛教 (ContentViewer, InteractionTracker)
-│   └── settings/     # 設定 (RuleEditor, WebhookConfig, ModelManager...)
-├── engine/           # 客戶端引擎
-│   ├── workers/      # Web Workers (rule-engine, baseline, ml-inference)
-│   ├── closed-loop.ts
-│   ├── notification.ts
-│   ├── webhook.ts
-│   ├── risk-analyzer.ts
-│   ├── fhir-writer.ts
-│   └── tab-coordinator.ts
-├── lib/              # 共用函式庫
-│   ├── fhir/         # SMART on FHIR client + sync
-│   ├── db/           # IndexedDB DAOs (Dexie.js)
-│   ├── stores/       # Svelte 5 runes stores
-│   └── utils/        # 工具 (risk-levels, loinc-map, date)
-├── data/             # Content Layer 資料
-│   ├── education/    # 衛教 Markdown
-│   ├── rules/        # YAML 閾值規則
-│   └── baselines/    # 人群基線 JSON
-├── layouts/          # Astro 佈局
-├── pages/            # 頁面路由
-└── styles/           # 設計系統 (OKLCH tokens)
+├── engine/              # 客戶端引擎（非 UI）
+│   ├── func/            # ★ IC 評估：scorer / triage / questionnaire / objective-tests / recommendations
+│   └── workers/         # 重計算 Web Workers（規則引擎、基線、ML 推論）
+├── lib/
+│   ├── fhir/            # SMART on FHIR：client/launch（醫院）、cdsa-resources/submit（資源產生）
+│   │                    #   gcm-submit / collection-points / launch-return（GCM 收案點）
+│   ├── db/              # IndexedDB DAO（Dexie schema 在 db/schema.ts）
+│   ├── stores/          # Svelte 5 runes stores（assessment、auth…）
+│   ├── education/       # 衛教/影片 schema 與 runtime 索引
+│   └── utils/           # age-groups、loinc-map…
+├── components/          # UI：assess / education / workspace / dashboard / settings / fhir / ui …
+├── data/                # 內容層：education（文章）/ questionnaire（indicators.yaml）/ video-catalog
+├── pages/               # 路由：/assess /result /launch /education /history /workspace /settings
+├── layouts/  └ styles/  # 佈局 / 設計系統（OKLCH tokens）
+public/                  # models/*.onnx（ML）、sounds/（音效）、data/（建置產出索引）
+scripts/                 # build-content-index / validate-indicators / curate-videos / gcm-conformance …
 ```
 
-## SMART on FHIR 連線
+## 維護指引（依任務查）
 
-### Standalone Launch
+| 我要改… | 動哪裡 | 注意 |
+|---------|--------|------|
+| **衛教文章** | `src/data/education/*.md`（frontmatter 須過 `content.config.ts` schema） | 成人 IC 主題 |
+| **IC 指標／問卷** | `src/data/questionnaire/indicators.yaml` | prebuild 經 `validate-indicators` 守門，改完跑 `pnpm build` 驗證 |
+| **衛教影片策展** | `pnpm curate:videos`（yt-dlp 取真實 metadata → 報告複審 → 寫 `video-catalog/`） | 需 yt-dlp + Chrome；channel-seeds/keywords 在 `scripts/curate/` |
+| **trigger ↔ 文章/影片對照** | `src/data/education/content-relevance.yaml`（單一真相源） | 改完 `pnpm build:video-index` |
+| **監測規則（閾值）** | **不在檔案**：臨床端於「設定 → 規則編輯器」維護，存進 IndexedDB | — |
+| **ML 模型** | 設定頁上傳新 `.onnx`（即時替換），或放 `public/models/` | — |
+| **收案點 / FHIR 上傳** | 見下節 | — |
 
-1. 開啟系統，選擇「獨立啟動」
-2. 輸入醫院 FHIR Server URL 和 Client ID
-3. 完成 OAuth 2.0 + PKCE 授權
+### 收案點與 FHIR 上傳
 
-### EHR Launch
+結果頁（in-flow `ResultView` 與獨立 `/result/?id=` 的 `ResultViewWrapper`）都提供 `CollectionPointPicker`，受測者可選：
 
-從醫院 HIS/EHR 系統內嵌啟動，自動繼承病患上下文。
+- **醫院 FHIR Server**：手動填 Server URL + Client ID（fhirclient.js，standalone SMART launch）。
+- **GCM 預防醫學發展協會**（`https://gcm.fhir.yao.care`）：填暱稱即可，免事先設定。用原生 `fetch` + `crypto.subtle` 做 PKCE/動態註冊（要帶自訂 `login_hint`/`nickname`），模組 `src/lib/fhir/gcm-submit.ts`。
 
-### FHIR Server 需求
+兩條流程都導向統一的 **`/launch/`** 返回頁（`LaunchReturn.svelte` + 純函式 `launch-return.ts` 分流：GCM 優先、否則 fhirclient callback）。跨 redirect 在 sessionStorage 只存 `assessmentId`，返回頁再從 IndexedDB 重建 Observation/DiagnosticReport（`cdsa-resources.ts`，`CODE_SYSTEM = https://smart-func-cds.yao.care/code`）。
 
-- FHIR R4 相容
-- 支援 SMART App Launch Framework
-- 允許 GitHub Pages 網域的 CORS 請求
+收案點清單為 typed 常數（`collection-points.ts`），新增機構在此加一條。
 
-## 監測指標
+驗證 GCM 端到端（對線上實例）：
 
-| 指標 | LOINC Code | 單位 |
-|------|-----------|------|
-| 心率 | 8867-4 | bpm |
-| 血氧飽和度 | 2708-6 | % |
-| 呼吸頻率 | 9279-1 | breaths/min |
-| 體溫 | 8310-5 | °C |
-| 睡眠品質 | 93832-4 | 分 (0-100) |
-| 活動量 | 82290-8 | 分 |
-| 醣類攝取 | 2339-0 | g |
+```bash
+pnpm conformance https://gcm.fhir.yao.care   # register→authorize→token→transaction，斷言 POST / (application/fhir+json) → 200
+```
 
-## 預警等級
+> GCM 注意事項：scope **不帶** `openid`/`fhirUser`、`aud` 必為 GCM base、不自組 Patient（身分＝瀏覽器碼＋暱稱）、`redirect_uri` 三處（register/authorize/token）逐字一致。傳給 IndexedDB 的 `triageResult` 須 `$state.snapshot()` 解包（proxy 無法結構化複製）。
 
-| 等級 | 說明 | 動作 |
-|------|------|------|
-| normal | 所有指標正常 | 無 |
-| advisory | 單一指標輕微偏離 | 推薦衛教 |
-| warning | 多指標偏離或持續異常 | 通知 + 衛教 + Webhook |
-| critical | 嚴重異常 | 通知 + 音效 + Webhook + FHIR 寫回 |
+## 領域常數速查
 
-## 客製化
+- **年齡組**：`18-39` / `40-54` / `55-64`（55+ 全歸此組；65+ 可填，結果頁 advisory）
+- **五大域**：vitality 活力 / locomotion 行動 / cognition 認知 / psychological 心理 / sensory 感官
+- **域分級**：`high` ≥70 / `moderate` 40–69 / `low` <40
+- **分流**：`normal` / `observe` / `consult` / `incomplete`
+- **監測預警**：`normal` / `advisory` / `warning` / `critical`
 
-### 自訂規則
+## 測試
 
-替換 `src/data/rules/pediatric-default.yaml`，定義年齡組 × 指標 × 閾值。
+```bash
+pnpm test       # Vitest（單元 + 元件，jsdom + fake-indexeddb）
+pnpm test:e2e   # Playwright
+pnpm check      # astro check + svelte-check（型別）
+pnpm lint       # ESLint
+```
 
-### 自訂衛教內容
+## 部署
 
-在 `src/data/education/` 新增 Markdown 檔案，frontmatter 需符合 Content Layer schema。
-
-### 自訂 ML 模型
-
-在設定頁面上傳新的 ONNX 模型（7 inputs → 4 outputs），即時替換。
+- **push 到 `main` 自動觸發 `deploy.yml`**（GitHub Pages，`build_type=workflow`，自訂網域 + 強制 HTTPS）。需要時可 `gh workflow run deploy.yml --ref main` 手動觸發。
+- CI（`ci.yml`）：測試 + content-index 一致性 + Lighthouse（門檻全 warn）。
+- **驗站**：本機 proxy 會把網域解析成 198.18.x.x 假 IP — 一律用
+  `curl --resolve smart-func-cds.yao.care:443:185.199.108.153 https://smart-func-cds.yao.care/…` 或 DoH，別信本機 dig/curl。
 
 ## 授權
 
 MIT License
-
-## 致謝
-
-- [Astro](https://astro.build/)
-- [Svelte](https://svelte.dev/)
-- [SMART on FHIR](https://docs.smarthealthit.org/)
-- [ONNX Runtime](https://onnxruntime.ai/)
-- [Dexie.js](https://dexie.org/)
