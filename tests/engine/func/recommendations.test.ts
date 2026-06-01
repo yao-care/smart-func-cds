@@ -46,5 +46,16 @@ describe('recommendations 自適應後', () => {
     const r = recs.find(x => x.triggerIndicators?.includes('psychological.self_harm'));
     expect(r).toBeTruthy();
     expect(r!.type).toBe('consult-medical');
+    expect(r!.message).toContain('1925');
+  });
+
+  it('anxiety advisory cutoff 文案反映焦慮篩檢（非 S2，含 GAD-7）', () => {
+    const recs = recommendationsFor('observe', [], [], [
+      { indicatorId: 'psychological.anxiety', domain: 'psychological', severity: 'advisory', flagLabel: 'positive-anxiety-screen' },
+    ]);
+    const r = recs.find(x => x.triggerIndicators?.includes('psychological.anxiety'));
+    expect(r).toBeTruthy();
+    expect(r!.message).not.toContain('S2');
+    expect(r!.message).toContain('GAD-7');
   });
 });

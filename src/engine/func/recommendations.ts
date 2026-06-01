@@ -18,6 +18,7 @@ export function recommendationsFor(
   }
 
   for (const c of cutoffs) {
+    // 安全：任何 self_harm 旗標（不論 severity）都升級為緊急建議，故在 advisory 判斷前攔截
     if (c.indicatorId === 'psychological.self_harm') {
       recs.push({
         domain: 'psychological',
