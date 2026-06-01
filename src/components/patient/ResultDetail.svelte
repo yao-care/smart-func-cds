@@ -51,7 +51,7 @@
         returnUrl = `/workspace/result/?id=${encodeURIComponent(id)}`;
 
         if (!isAuthorized()) {
-          // Redirect parent-style view; do not render any medical data here.
+          // Redirect to the simple result view; do not render any medical data here.
           window.location.replace(`/result/?id=${encodeURIComponent(id)}`);
           return; // loading stays true until redirect lands
         }

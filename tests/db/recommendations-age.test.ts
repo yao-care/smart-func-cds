@@ -20,11 +20,11 @@ const MOCK_INDEX: RuntimeIndex = {
   recommendations: {
     'monitor::gross_motor::13-24m': [
       { source: 'internal', slug: 'gross-motor-activities', title: '粗動作發展促進活動', summary: '適合各年齡層的粗動作訓練遊戲' },
-      { source: 'internal', slug: 'exercise-guide', title: '兒童運動建議指南', summary: '各年齡層兒童適當運動量' },
+      { source: 'internal', slug: 'exercise-guide', title: '成人運動建議指南', summary: '各年齡層成人適當運動量' },
     ],
     'refer::gross_motor::13-24m': [
       { source: 'internal', slug: 'gross-motor-activities', title: '粗動作發展促進活動', summary: '適合各年齡層的粗動作訓練遊戲' },
-      { source: 'internal', slug: 'when-to-seek-help', title: '何時該尋求專業協助', summary: '兒童發展警訊與轉介建議' },
+      { source: 'internal', slug: 'when-to-seek-help', title: '何時該尋求專業協助', summary: '功能警訊與轉介建議' },
     ],
     'monitor::fine_motor::13-24m': [
       { source: 'internal', slug: 'fine-motor-activities', title: '精細動作發展促進活動', summary: '手部精細動作與手眼協調' },

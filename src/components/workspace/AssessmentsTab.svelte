@@ -7,7 +7,7 @@
    *      server (every patient the user can read).
    *   2. Demo mode (not authenticated) → all completed assessments in this
    *      device's IndexedDB, so a clinician can browse the same surface
-   *      with parent-side test data before any FHIR integration.
+   *      with sample test data before any FHIR integration.
    */
   import { listAssessmentsFromFhir, type AssessmentSummary } from '../../lib/fhir/assessment-fetch';
   import { getClient, isAuthorized } from '../../lib/fhir/client';

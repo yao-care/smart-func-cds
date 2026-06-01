@@ -9,7 +9,7 @@
   const cardTriggers = $state<Record<string, string[]>>({});
   const cardExpanded = $state<Record<string, boolean>>({});
 
-  // The pediatric CDSS vital-sign → education trigger path was retired in the
+  // The earlier vital-sign → education trigger path was retired in the
   // adult IC transition (S1). The monitoring dashboard no longer surfaces
   // per-alert education videos; this is a no-op pending an S2/S3 redesign of
   // the alert→content mapping for the adult functional model.

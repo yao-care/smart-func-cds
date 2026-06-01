@@ -1,6 +1,6 @@
 /**
  * @deprecated S1: not wired, S2 verbal fluency entry-point.
- *             Adult voice analysis 需重寫（pediatric pitch 80-600Hz → adult prosody / verbal fluency）。
+ *             Adult voice analysis 需重寫（早期音域 80-600Hz → 成人 prosody / verbal fluency）。
  */
 export interface VoiceMetrics {
   pitchMean: number | null;

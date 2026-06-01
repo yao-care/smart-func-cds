@@ -22,7 +22,7 @@ const TEST_INDEX: RuntimeIndex = {
   recommendations: {
     'observe::vitality::18-39': [
       { source: 'internal', slug: 'gross-motor-activities', title: '粗動作發展促進活動', summary: '適合各年齡層的粗動作訓練遊戲' },
-      { source: 'internal', slug: 'exercise-guide', title: '兒童運動建議指南', summary: '各年齡層兒童適當運動量' },
+      { source: 'internal', slug: 'exercise-guide', title: '成人運動建議指南', summary: '各年齡層成人適當運動量' },
     ],
     'observe::locomotion::18-39': [
       { source: 'internal', slug: 'fine-motor-activities', title: '精細動作發展促進活動', summary: '手部精細動作' },
@@ -94,7 +94,7 @@ describe('recommendations DAO + merge', () => {
       expect(DOMAINS).toContain('cognition');
       expect(DOMAINS).toContain('psychological');
       expect(DOMAINS).toContain('sensory');
-      // Should NOT include retired pediatric domains
+      // Should NOT include retired legacy domains
       expect(DOMAINS).not.toContain('gross_motor');
       expect(DOMAINS).not.toContain('diet');
     });

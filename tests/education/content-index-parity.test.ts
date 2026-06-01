@@ -1,7 +1,7 @@
 /**
  * content-index invariants (adult IC).
  *
- * 原本是「與改版前兒科 video-index fixture 做 parity」的測試；成人化後該
+ * 原本是「與改版前舊 video-index fixture 做 parity」的測試；成人化後該
  * fixture 已無意義並刪除。改為驗證 build-content-index 對成人 IC 內容層
  * 產出的結構不變量：catalog / recommendations / triggers / 矩陣覆蓋 /
  * 已策展影片接線。

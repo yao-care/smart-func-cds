@@ -102,9 +102,9 @@ export interface WebhookHistoryEntry {
 
 export type AssessmentStatus = 'started' | 'paused' | 'resumed' | 'completed' | 'incomplete';
 
-/** The adult subject of a functional-health assessment. (Was `Child` in the
- *  pediatric CDSA; renamed to the neutral `AssessmentPatient` to avoid
- *  colliding with the FHIR-monitoring `Patient` interface above.) */
+/** The adult subject of a functional-health assessment. (Renamed to the
+ *  neutral `AssessmentPatient` to avoid colliding with the FHIR-monitoring
+ *  `Patient` interface above.) */
 export interface AssessmentPatient {
   id: string;
   birthDate: string;
@@ -349,10 +349,11 @@ export class CdssDatabase extends Dexie {
         a.forceFullAssessment = false;
       });
     });
-    // v6: pediatric → adult functional-health. Rename children→assessmentPatients
-    // and childId→patientId on assessment-scoped tables. The DB name itself
-    // changed (cdss-pediatric → smart-func-cds), so in practice this is a fresh
-    // store for all users; the migration steps exist only for completeness.
+    // v6: transition to the adult functional-health model. Rename the old
+    // subject table → assessmentPatients and childId→patientId on
+    // assessment-scoped tables. The DB name itself changed in this transition,
+    // so in practice this is a fresh store for all users; the migration steps
+    // exist only for completeness.
     this.version(6).stores({
       patients: 'id, ageGroup, currentRiskLevel, lastSyncedAt',
       observations: 'id, patientId, indicator, effectiveDateTime, [patientId+indicator]',

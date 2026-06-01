@@ -10,8 +10,8 @@
   import type { AssessmentPatient } from '../../lib/db/schema';
 
   // Stand-alone result page entry. Reads ?id= from the URL, loads the
-  // stored assessment from IndexedDB, and renders the parent-facing
-  // simple view using the already-computed triageResult (no recompute).
+  // stored assessment from IndexedDB, and renders the simple result view
+  // using the already-computed triageResult (no recompute).
 
   let loading = $state(true);
   let error = $state<'invalid' | 'not_found' | null>(null);

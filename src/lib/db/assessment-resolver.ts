@@ -12,7 +12,7 @@ export type ResolveResult =
 /**
  * Resolve an Assessment by id, regardless of which device produced it.
  *
- * 1. Hit local IndexedDB first (same-device case: clinic tablet, parent device).
+ * 1. Hit local IndexedDB first (same-device case: clinic tablet or the subject's own device).
  *    A cached FHIR record (`_source: 'fhir-cache'`) is reported back with
  *    source='fhir' so the UI can show the data-origin badge correctly.
  * 2. Miss + authenticated → call the FHIR server; on success, persist the
