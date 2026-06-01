@@ -23,6 +23,7 @@ export const likertQuestionSchema = z.object({
   id: z.string().min(1),
   text: z.string().min(1),
   reverseScored: z.boolean().optional(),
+  tier: z.enum(['screener', 'detail']).optional(),
   loincCode: z.string().regex(loincRegex).nullable().optional(),
   options: z.array(z.object({
     label: z.string(),
@@ -38,6 +39,12 @@ export const clinicalCutoffSchema = z.object({
   citation: z.string().min(1),
 });
 
+export const revealDetailWhenSchema = z.object({
+  screenerQuestionIds: z.array(z.string()).min(1),
+  threshold: z.number(),
+  comparator: z.enum(['>=', '<=']),
+});
+
 export const likertSubScaleSchema = z.object({
   id: z.string().min(1),
   label: z.string().min(1),
@@ -50,6 +57,7 @@ const baseIndicatorFields = {
   id: z.string().regex(/^[a-z_]+\.[a-z_]+$/, 'id must be <domain>.<name>'),
   domain: z.enum(IC_DOMAIN_NAMES),
   label: z.string().min(1),
+  tier: z.enum(['screener', 'detail']).default('screener'),
   style: z.enum(INDICATOR_STYLES),
   direction: z.enum(DIRECTION_KINDS),
   weight: z.number().nonnegative(),
@@ -66,6 +74,7 @@ export const likertIndicatorSchema = z.object({
   questions: z.array(likertQuestionSchema).min(1),
   subScales: z.array(likertSubScaleSchema).optional(),
   clinicalCutoff: clinicalCutoffSchema.optional(),
+  revealDetailWhen: revealDetailWhenSchema.optional(),
   minCompletionPolicy: z.number().min(0).max(1).optional(),
 }).refine(d => d.maxScore > (d.minScore ?? 0), { message: 'maxScore must > minScore' });
 
@@ -113,6 +122,7 @@ export const indicatorSchema = z.discriminatedUnion('kind', [
 export type LikertQuestion = z.infer<typeof likertQuestionSchema>;
 export type LikertSubScale = z.infer<typeof likertSubScaleSchema>;
 export type ClinicalCutoff = z.infer<typeof clinicalCutoffSchema>;
+export type RevealDetailWhen = z.infer<typeof revealDetailWhenSchema>;
 export type LikertIndicator = z.infer<typeof likertIndicatorSchema>;
 export type ObjectiveIndicator = z.infer<typeof objectiveIndicatorSchema>;
 export type Indicator = z.infer<typeof indicatorSchema>;

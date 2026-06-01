@@ -116,3 +116,31 @@ describe('indicatorSchema (discriminated union)', () => {
     expect(lik.kind).toBe('likert');
   });
 });
+
+describe('tier 分層欄位', () => {
+  it('指標層 tier 預設為 screener', () => {
+    const parsed = indicatorSchema.parse({
+      kind: 'likert', id: 'vitality.sleep_quality', domain: 'vitality',
+      label: '睡眠', style: 'capacity', direction: 'higher_is_better',
+      maxScore: 3, weight: 1.0, license: 'public-domain',
+      questions: [{ id: 'vitality.sleep_quality.q1', text: 'x',
+        options: [{ label: 'a', score: 0 }, { label: 'b', score: 3 }] }],
+    });
+    expect(parsed.kind === 'likert' && parsed.tier).toBe('screener');
+  });
+
+  it('題層 tier:detail 與 revealDetailWhen 可被解析', () => {
+    const parsed = indicatorSchema.parse({
+      kind: 'likert', id: 'vitality.fatigue', domain: 'vitality',
+      label: '疲勞', style: 'symptom', direction: 'higher_is_worse',
+      maxScore: 4, weight: 1.0, license: 'cc-by-nc-sa',
+      revealDetailWhen: { screenerQuestionIds: ['vitality.fatigue.q1'], threshold: 2, comparator: '>=' },
+      questions: [
+        { id: 'vitality.fatigue.q1', text: 'x', options: [{ label: 'a', score: 0 }, { label: 'b', score: 4 }] },
+        { id: 'vitality.fatigue.q2', text: 'y', tier: 'detail', options: [{ label: 'a', score: 0 }, { label: 'b', score: 4 }] },
+      ],
+    });
+    expect(parsed.kind === 'likert' && parsed.questions[1].tier).toBe('detail');
+    expect(parsed.kind === 'likert' && parsed.revealDetailWhen?.threshold).toBe(2);
+  });
+});
