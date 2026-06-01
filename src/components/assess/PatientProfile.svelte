@@ -18,7 +18,7 @@
   let canSubmit = $derived(nameError === '' && birthError === '');
   let ageAdvisory = $derived(
     birthDate !== '' && isAdult(birthDate) && !isWithinValidatedRange(birthDate)
-      ? '本系統採用的篩檢工具——WHO-5 / BAT-12 / PHQ-2 / GAD-2 / PSS-4 / PROMIS Fatigue / 反應時間 / TMT-A——主要在 18-64 工作人口校準/驗證；65+ 結果僅供參考，建議使用專為高齡設計的評估（如 ICOPE / GDS-15）並向醫療人員諮詢。'
+      ? '本系統採用的篩檢工具——WHO-5 / PHQ-2/PHQ-8 / GAD-2/GAD-7 / PSS-4 / PROMIS Fatigue / 自我傷害意念篩檢 / 反應時間 / TMT-A——主要在 18-64 工作人口校準/驗證；65+ 結果僅供參考，建議使用專為高齡設計的評估（如 ICOPE / GDS-15）並向醫療人員諮詢。'
       : ''
   );
 
