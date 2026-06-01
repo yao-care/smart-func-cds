@@ -18,6 +18,16 @@ export function recommendationsFor(
   }
 
   for (const c of cutoffs) {
+    if (c.indicatorId === 'psychological.self_harm') {
+      recs.push({
+        domain: 'psychological',
+        type: 'consult-medical',
+        message: '篩檢顯示自我傷害意念，請立即尋求專業協助（安心專線 1925 / 生命線 1995）。',
+        suggestedSpecialties: ['身心科', '精神科'],
+        triggerIndicators: ['psychological.self_harm'],
+      });
+      continue;
+    }
     if (c.severity === 'advisory') {
       const r = advisoryCutoffRec(c.indicatorId);
       if (r) recs.push(r);
@@ -66,28 +76,25 @@ function perDomainRec(domain: ICDomain, band: 'moderate' | 'low'): Recommendatio
 function advisoryCutoffRec(indicatorId: string): Recommendation | null {
   if (indicatorId === 'psychological.depression') {
     return { domain: 'psychological', type: 'in-depth-assessment',
-             message: 'PHQ-2 篩檢偏高，建議完成 PHQ-9 進一步評估（S2）。',
+             message: 'PHQ-8 顯示憂鬱症狀，建議找身心科或心理諮商進一步評估。',
+             suggestedSpecialties: ['身心科', '精神科', '心理諮商'],
              triggerIndicators: [indicatorId] };
   }
   if (indicatorId === 'psychological.anxiety') {
     return { domain: 'psychological', type: 'in-depth-assessment',
-             message: 'GAD-2 篩檢偏高，建議完成 GAD-7 進一步評估（S2）。',
+             message: 'GAD-7 顯示焦慮症狀，建議找身心科或心理諮商進一步評估。',
+             suggestedSpecialties: ['身心科', '精神科', '心理諮商'],
              triggerIndicators: [indicatorId] };
   }
   if (indicatorId === 'psychological.stress') {
-    return { domain: 'psychological', type: 'in-depth-assessment',
-             message: 'PSS-4 顯示高壓力，建議完成 PSS-10 進一步評估（S2）。',
+    return { domain: 'psychological', type: 'self-care',
+             message: 'PSS-4 顯示高壓力，建議壓力管理與情緒照顧。',
              triggerIndicators: [indicatorId] };
   }
   if (indicatorId === 'psychological.wellbeing') {
     return { domain: 'psychological', type: 'consult-medical',
              message: 'WHO-5 wellbeing 偏低，建議找身心科討論。',
              suggestedSpecialties: ['身心科', '精神科'],
-             triggerIndicators: [indicatorId] };
-  }
-  if (indicatorId === 'psychological.burnout') {
-    return { domain: 'psychological', type: 'self-care',
-             message: 'BAT-12 burnout 偏高，建議工作壓力管理。',
              triggerIndicators: [indicatorId] };
   }
   return null;
@@ -101,9 +108,6 @@ function sensoryIndicatorRec(indicatorId: string): Recommendation | null {
   if (indicatorId === 'sensory.hearing_impact') {
     return { domain: 'sensory', type: 'consult-medical', message: '建議找耳鼻喉科檢查。',
              suggestedSpecialties: ['耳鼻喉科'], triggerIndicators: [indicatorId] };
-  }
-  if (indicatorId === 'sensory.screen_fatigue') {
-    return { domain: 'sensory', type: 'self-care', message: '建議減少螢幕使用、20-20-20 護眼法。' };
   }
   return null;
 }

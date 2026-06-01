@@ -20,13 +20,31 @@ describe('recommendationsFor', () => {
     expect(cog?.suggestedSpecialties).toContain('神經內科');
     expect(cog?.suggestedSpecialties).toContain('精神科');
   });
+});
 
-  it('PHQ-2 advisory cutoff → in-depth-assessment 提示 PHQ-9', () => {
-    const r = recommendationsFor('observe', [], [], [
-      { indicatorId: 'psychological.depression', domain: 'psychological',
-        flagLabel: 'positive-depression-screen', severity: 'advisory' },
+describe('recommendations 自適應後', () => {
+  it('depression advisory cutoff 文案反映憂鬱篩檢（非 S2）', () => {
+    const recs = recommendationsFor('observe', [], [], [
+      { indicatorId: 'psychological.depression', domain: 'psychological', severity: 'advisory', flagLabel: 'positive-depression-screen' },
     ]);
-    const phq = r.find(x => x.triggerIndicators?.includes('psychological.depression'));
-    expect(phq?.type).toBe('in-depth-assessment');
+    const r = recs.find(x => x.triggerIndicators?.includes('psychological.depression'));
+    expect(r).toBeTruthy();
+    expect(r!.message).not.toContain('S2');
+  });
+
+  it('不再為已移除的 burnout 產生建議', () => {
+    const recs = recommendationsFor('observe', [], [], [
+      { indicatorId: 'psychological.burnout', domain: 'psychological', severity: 'advisory', flagLabel: 'x' },
+    ]);
+    expect(recs).toEqual([]);
+  });
+
+  it('self_harm（consult cutoff）產生明確緊急建議', () => {
+    const recs = recommendationsFor('consult', [], [], [
+      { indicatorId: 'psychological.self_harm', domain: 'psychological', severity: 'consult', flagLabel: 'self-harm-ideation' },
+    ]);
+    const r = recs.find(x => x.triggerIndicators?.includes('psychological.self_harm'));
+    expect(r).toBeTruthy();
+    expect(r!.type).toBe('consult-medical');
   });
 });
