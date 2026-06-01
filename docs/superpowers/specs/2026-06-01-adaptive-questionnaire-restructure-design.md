@@ -91,9 +91,13 @@ tier 需在**兩個層級**表達：
 - **`minCompletionPolicy` 重新定義**為「螢檢題完成率」；未觸發的 detail 題不計入分母。
 - 心理域：PHQ-2/GAD-2 螢檢負 → 域分數由雙篩決定（screened-negative = high）；螢檢陽 → PHQ-9/GAD-7 全量尺給嚴重度分級。
 
-## 8. PHQ-9 第 9 題（自殺/自傷意念）安全處理
+## 8. 自殺/自傷意念安全處理（2026-06-01 內容審查後修訂）
 
-保留**完整 PHQ-9 含第 9 題**（最具臨床價值，PHQ-9 正規用法）。新增 `CrisisResources.svelte`：第 9 題分數 >0 即顯示（非阻擋式橫幅/卡片），列台灣資源（1925 安心專線、1995 生命線、110/119），用 `--danger` token（對齊 `LEVEL_TO_COLOR` critical）。結果頁若帶此旗標再顯示一次。目前 codebase 無可重用危機 UI（僅 `mood-self-awareness.md` 一句話），需新做。
+**修訂緣由**：原設計把自殺意念題（PHQ-9 第 9 題）放在 PHQ-9 detail tier（僅 PHQ-2 篩陽才出現）。內容審查指出：PHQ-2 陰性但有自殺意念者會被漏接、危機資源永不觸發（PHQ-2 敏感度僅 ~83%），對自填式無臨床監督工具是安全盲點。
+
+**最終設計**：把自殺意念題拆為**獨立的全體螢檢指標** `psychological.self_harm`（`tier: screener`，所有人都答，不受 PHQ-2 閘門）；`depression` 改為 **PHQ-2 → PHQ-8**（q1-q2 螢檢、q3-q8 detail，不含自殺題）。`self_harm` 帶 `clinicalCutoff`（score ≥1 → `self-harm-ideation`，severity **consult**），讓 triage 也能接到並升級分流。
+
+新增 `CrisisResources.svelte`：`psychological.self_harm.q1` 分數 >0 即顯示（非阻擋式橫幅/卡片），列台灣資源（1925 安心專線、1995 生命線、110/119），用 `--danger` token（對齊 `LEVEL_TO_COLOR` critical）。結果頁若帶此旗標再顯示一次。目前 codebase 無可重用危機 UI（僅 `mood-self-awareness.md` 一句話），需新做。
 
 ## 9. 下游改動（已查證，耦合鬆）
 

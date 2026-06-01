@@ -771,7 +771,7 @@ sensory:
 - [ ] **Step 2: 跑現有驗證確認可解析**
 
 Run: `pnpm tsx scripts/validate-indicators.ts`
-Expected: `[validate-indicators] OK: 16 indicators across 5 domains`（dev 模式 objective norms null 只 warn）
+Expected: `[validate-indicators] OK: 18 indicators across 5 domains`（dev 模式 objective norms null 只 warn）
 
 - [ ] **Step 3: Commit**
 
@@ -892,7 +892,7 @@ for (const e of tierErrors) fail(e);
 - [ ] **Step 4: 跑測試 + 實檔驗證確認通過**
 
 Run: `pnpm vitest run tests/data/validate-indicators.test.ts && pnpm tsx scripts/validate-indicators.ts`
-Expected: 測試 PASS；實檔輸出 `[validate-indicators] OK: 16 indicators across 5 domains`
+Expected: 測試 PASS；實檔輸出 `[validate-indicators] OK: 18 indicators across 5 domains`
 
 - [ ] **Step 5: Commit**
 
@@ -1181,9 +1181,10 @@ git commit -m "feat(assess): 新增 CrisisResources 危機求助資源元件"
 在 `tests/components/QuestionnaireModule.test.ts` 加（健康路徑：只回答螢檢題，可見題數應為螢檢題數；視測試現有 setup 設定 ageGroup/patient）：
 
 ```ts
-it('初始只顯示 screener 題（11 題：sleep/nutrition/fatigue.q1/activity/walking/cognitive/PHQ-2×2/GAD-2×2/functional_acuity）', async () => {
+it('初始只顯示 screener 題（12 題：sleep/nutrition/fatigue.q1/activity/walking/cognitive/PHQ-2×2/self_harm/GAD-2×2/functional_acuity）', async () => {
   // 參考既有測試的 store 初始化方式設定 patient + ageGroup
-  // 斷言：第一輪未觸發任何 detail 時，能走訪到的 screener 題總數 = 11
+  // 斷言：第一輪未觸發任何 detail 時，能走訪到的 screener 題總數 = 12
+  // （self_harm 為全體必答的自我傷害意念螢檢題，id psychological.self_harm.q1）
   // （細節依本檔既有 render/互動 helper 撰寫）
 });
 
@@ -1284,8 +1285,8 @@ Expected: FAIL（目前 flatten 全部題、無 tier 過濾）
     const indicatorId = currentQuestion.indicatorId;
     const questionText = currentQuestion.text;
 
-    // 安全：PHQ-9 第 9 題（自殺/自傷意念）勾選非零 → 立即顯示危機資源
-    if (qid === 'psychological.depression.q9' && option.score > 0) {
+    // 安全：自我傷害意念螢檢題（全體必答）勾選非零 → 立即顯示危機資源
+    if (qid === 'psychological.self_harm.q1' && option.score > 0) {
       showCrisis = true;
     }
 
@@ -1362,7 +1363,7 @@ Run: `grep -n "triageResult\|partialAnalysis\|<script" src/components/assess/Res
   import { assessmentStore } from '../../lib/stores/assessment.svelte';
 
   const selfHarmFlagged = $derived(
-    (assessmentStore.partialAnalysis.answers?.['psychological.depression.q9'] ?? 0) > 0
+    (assessmentStore.partialAnalysis.answers?.['psychological.self_harm.q1'] ?? 0) > 0
   );
 ```
 
@@ -1405,17 +1406,17 @@ Run: `sed -n '1,120p' tests/e2e/assess-flow.spec.ts`
 依既有 selector 慣例，新增三個情境（用既有的 option-btn 點擊 helper）：
 
 ```ts
-test('健康路徑：全選最佳選項，只走 11 題螢檢即進摘要', async ({ page }) => {
-  // 進入問卷後，反覆點「最佳」選項（capacity 取最高分、symptom 取最低分）
-  // 斷言：作答 11 次後出現「問卷完成！」摘要，且未出現 PHQ-9 q3 題幹
+test('健康路徑：全選最佳選項（self_harm 選「從不」），只走 12 題螢檢即進摘要', async ({ page }) => {
+  // 進入問卷後，反覆點「最佳」選項（capacity 取最高分、symptom 取最低分，self_harm 取「從不」）
+  // 斷言：作答 12 次後出現「問卷完成！」摘要，且未出現 PHQ-8 q3 題幹、未出現危機資源
 });
 
-test('憂鬱篩陽：PHQ-2 兩題皆選「幾乎每天」→ 展開 PHQ-9（出現 q3 題幹）', async ({ page }) => {
+test('憂鬱篩陽：PHQ-2 兩題皆選「幾乎每天」→ 展開 PHQ-8（出現 q3 題幹）', async ({ page }) => {
   // 走到 depression.q1/q2 各選最高分，斷言後續出現「入睡困難、睡不安穩」題幹
 });
 
-test('PHQ-9 第 9 題勾選非零 → 出現危機資源（role=alert，含 1925）', async ({ page }) => {
-  // 觸發 PHQ-9 後，於 q9 選非「從不」選項，斷言 [role=alert] 出現且含文字 1925
+test('自我傷害意念螢檢題勾選非零 → 出現危機資源（role=alert，含 1925）', async ({ page }) => {
+  // self_harm 為全體必答螢檢題（無需先觸發 PHQ）；於該題選非「從不」，斷言 [role=alert] 出現且含文字 1925
 });
 ```
 
