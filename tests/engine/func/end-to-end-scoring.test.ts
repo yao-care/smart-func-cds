@@ -18,8 +18,8 @@ for (const list of Object.values(raw)) {
 }
 
 describe('end-to-end IC assessment', () => {
-  it('loads + validates all 20 indicators from indicators.yaml', () => {
-    expect(indicators.length).toBe(20);
+  it('loads + validates all 19 indicators from indicators.yaml', () => {
+    expect(indicators.length).toBe(19);
     const domains = new Set(indicators.map(i => i.domain));
     expect([...domains].sort()).toEqual(['cognition', 'locomotion', 'psychological', 'sensory', 'vitality']);
   });
