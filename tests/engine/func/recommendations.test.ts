@@ -58,4 +58,24 @@ describe('recommendations 自適應後', () => {
     expect(r!.message).not.toContain('S2');
     expect(r!.message).toContain('GAD-7');
   });
+
+  it('PHQ-8 完整量表嚴重度（phq8-moderate-depression，consult）→ 明確就醫建議', () => {
+    const recs = recommendationsFor('consult', [], [], [
+      { indicatorId: 'psychological.depression', domain: 'psychological', severity: 'consult', flagLabel: 'phq8-moderate-depression' },
+    ]);
+    const r = recs.find(x => x.triggerIndicators?.includes('psychological.depression'));
+    expect(r).toBeTruthy();
+    expect(r!.type).toBe('consult-medical');
+    expect(r!.message).toContain('PHQ-8');
+  });
+
+  it('GAD-7 完整量表嚴重度（gad7-moderate-anxiety，consult）→ 明確就醫建議', () => {
+    const recs = recommendationsFor('consult', [], [], [
+      { indicatorId: 'psychological.anxiety', domain: 'psychological', severity: 'consult', flagLabel: 'gad7-moderate-anxiety' },
+    ]);
+    const r = recs.find(x => x.triggerIndicators?.includes('psychological.anxiety'));
+    expect(r).toBeTruthy();
+    expect(r!.type).toBe('consult-medical');
+    expect(r!.message).toContain('GAD-7');
+  });
 });

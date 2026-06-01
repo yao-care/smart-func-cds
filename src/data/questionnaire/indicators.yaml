@@ -173,6 +173,12 @@ psychological:
       flagLabel: positive-depression-screen
       severity: advisory
       citation: "Kroenke 2003 (PHQ-2 sens 83% / spec 92%)"
+    fullCutoff:
+      threshold: 10
+      comparator: ">="
+      flagLabel: phq8-moderate-depression
+      severity: consult
+      citation: "Kroenke 2009 (PHQ-8 ≥10 ≈ 中度以上憂鬱)"
     questions:
       - { id: psychological.depression.q1, text: "過去 2 週，您對任何事都提不起興趣", loincCode: "44250-9", options: [{label: "從不", score: 0}, {label: "幾天", score: 1}, {label: "超過一半時間", score: 2}, {label: "幾乎每天", score: 3}] }
       - { id: psychological.depression.q2, text: "過去 2 週，您感到沮喪、憂鬱或無望", loincCode: "44255-8", options: [{label: "從不", score: 0}, {label: "幾天", score: 1}, {label: "超過一半時間", score: 2}, {label: "幾乎每天", score: 3}] }
@@ -218,6 +224,12 @@ psychological:
       flagLabel: positive-anxiety-screen
       severity: advisory
       citation: "Kroenke 2007 (GAD-2 sens 86% / spec 83%)"
+    fullCutoff:
+      threshold: 10
+      comparator: ">="
+      flagLabel: gad7-moderate-anxiety
+      severity: consult
+      citation: "Spitzer 2006 (GAD-7 ≥10 ≈ 中度以上焦慮)"
     questions:
       - { id: psychological.anxiety.q1, text: "過去 2 週，您感到緊張、焦慮或坐立不安", loincCode: "69725-0", options: [{label: "從不", score: 0}, {label: "幾天", score: 1}, {label: "超過一半時間", score: 2}, {label: "幾乎每天", score: 3}] }
       - { id: psychological.anxiety.q2, text: "過去 2 週，您無法停止或控制擔憂", loincCode: "68509-9", options: [{label: "從不", score: 0}, {label: "幾天", score: 1}, {label: "超過一半時間", score: 2}, {label: "幾乎每天", score: 3}] }

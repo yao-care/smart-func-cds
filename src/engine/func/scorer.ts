@@ -34,6 +34,10 @@ export interface IndicatorScore {
   cutoffFlag?: boolean;
   cutoffSeverity?: 'consult' | 'advisory';
   cutoffFlagLabel?: string;
+  /** 完整量表嚴重度切點（例 PHQ-8≥10 / GAD-7≥10）：僅在整個量表全部作答時評估。 */
+  fullCutoffFlag?: boolean;
+  fullCutoffSeverity?: 'consult' | 'advisory';
+  fullCutoffFlagLabel?: string;
   subScaleScores?: SubScaleScore[];
   measuredValue?: number;
   zScore?: number;
@@ -130,6 +134,19 @@ export function scoreLikertIndicator(
     }
   }
 
+  // 完整量表嚴重度切點：僅在整個量表（所有題，含 detail）全部作答時，以全題 rawSum 評估。
+  let fullCutoffFlag: boolean | undefined;
+  let fullCutoffSeverity: 'consult' | 'advisory' | undefined;
+  let fullCutoffFlagLabel: string | undefined;
+  if (indicator.fullCutoff && validAnswerEntries.length === indicator.questions.length) {
+    const { threshold, comparator, severity, flagLabel } = indicator.fullCutoff;
+    fullCutoffFlag = comparator === '>=' ? rawSum >= threshold : rawSum <= threshold;
+    if (fullCutoffFlag) {
+      fullCutoffSeverity = severity;
+      fullCutoffFlagLabel = flagLabel;
+    }
+  }
+
   let subScaleScores: SubScaleScore[] | undefined;
   if (indicator.subScales) {
     subScaleScores = indicator.subScales.map(sub => {
@@ -177,6 +194,9 @@ export function scoreLikertIndicator(
     cutoffFlag,
     cutoffSeverity,
     cutoffFlagLabel,
+    fullCutoffFlag,
+    fullCutoffSeverity,
+    fullCutoffFlagLabel,
     subScaleScores,
     questionsAnswered: validAnswerEntries.length,
     questionsTotal: N,

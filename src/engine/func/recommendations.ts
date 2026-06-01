@@ -29,6 +29,9 @@ export function recommendationsFor(
       });
       continue;
     }
+    // 完整量表嚴重度（PHQ-8≥10 / GAD-7≥10，consult）→ 明確的就醫建議
+    const fr = fullCutoffRec(c.flagLabel);
+    if (fr) { recs.push(fr); continue; }
     if (c.severity === 'advisory') {
       const r = advisoryCutoffRec(c.indicatorId);
       if (r) recs.push(r);
@@ -72,6 +75,22 @@ function perDomainRec(domain: ICDomain, band: 'moderate' | 'low'): Recommendatio
     },
   };
   return band === 'low' ? table[domain].low : table[domain].mod;
+}
+
+function fullCutoffRec(flagLabel: string): Recommendation | null {
+  if (flagLabel === 'phq8-moderate-depression') {
+    return { domain: 'psychological', type: 'consult-medical',
+             message: 'PHQ-8 顯示中度以上憂鬱，建議盡快尋求身心科或心理諮商協助。',
+             suggestedSpecialties: ['身心科', '精神科', '心理諮商'],
+             triggerIndicators: ['psychological.depression'] };
+  }
+  if (flagLabel === 'gad7-moderate-anxiety') {
+    return { domain: 'psychological', type: 'consult-medical',
+             message: 'GAD-7 顯示中度以上焦慮，建議盡快尋求身心科或心理諮商協助。',
+             suggestedSpecialties: ['身心科', '精神科', '心理諮商'],
+             triggerIndicators: ['psychological.anxiety'] };
+  }
+  return null;
 }
 
 function advisoryCutoffRec(indicatorId: string): Recommendation | null {

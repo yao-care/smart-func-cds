@@ -387,3 +387,42 @@ describe('scoreLikertIndicator 自適應完成度', () => {
     expect(s!.questionsTotal).toBe(1);
   });
 });
+
+describe('scoreLikertIndicator fullCutoff（完整量表嚴重度）', () => {
+  const phq8Like: LikertIndicator = {
+    kind: 'likert', id: 'psychological.depression', domain: 'psychological', label: 'PHQ-8',
+    tier: 'screener', style: 'symptom', direction: 'higher_is_worse',
+    maxScore: 3, weight: 1.0, license: 'public-domain', minCompletionPolicy: 1.0,
+    clinicalCutoff: { threshold: 3, comparator: '>=', flagLabel: 'positive-depression-screen', severity: 'advisory', citation: 'Kroenke 2003' },
+    fullCutoff: { threshold: 10, comparator: '>=', flagLabel: 'phq8-moderate-depression', severity: 'consult', citation: 'Kroenke 2009' },
+    revealDetailWhen: { screenerQuestionIds: ['psychological.depression.q1', 'psychological.depression.q2'], threshold: 3, comparator: '>=' },
+    questions: [
+      { id: 'psychological.depression.q1', text: 'a', options: [{ label: '從不', score: 0 }, { label: '幾乎每天', score: 3 }] },
+      { id: 'psychological.depression.q2', text: 'b', options: [{ label: '從不', score: 0 }, { label: '幾乎每天', score: 3 }] },
+      ...[3, 4, 5, 6, 7, 8].map(n => ({
+        id: `psychological.depression.q${n}`, text: `q${n}`, tier: 'detail' as const,
+        options: [{ label: '從不', score: 0 }, { label: '幾乎每天', score: 3 }],
+      })),
+    ],
+  };
+
+  const allAnswered = (perQ: number): Record<string, number> =>
+    Object.fromEntries([1, 2, 3, 4, 5, 6, 7, 8].map(n => [`psychological.depression.q${n}`, perQ]));
+
+  it('detail 未觸發（量表未完成）→ 無 fullCutoffFlag', () => {
+    const s = scoreLikertIndicator(phq8Like, { 'psychological.depression.q1': 0, 'psychological.depression.q2': 0 });
+    expect(s!.fullCutoffFlag).toBeFalsy();
+  });
+
+  it('全 8 題作答且總分≥10 → fullCutoffFlag、consult、phq8-moderate-depression', () => {
+    const s = scoreLikertIndicator(phq8Like, allAnswered(2)); // 2×8=16 ≥10
+    expect(s!.fullCutoffFlag).toBe(true);
+    expect(s!.fullCutoffSeverity).toBe('consult');
+    expect(s!.fullCutoffFlagLabel).toBe('phq8-moderate-depression');
+  });
+
+  it('全 8 題作答但總分<10 → 無 fullCutoffFlag', () => {
+    const s = scoreLikertIndicator(phq8Like, allAnswered(1)); // 1×8=8 <10
+    expect(s!.fullCutoffFlag).toBeFalsy();
+  });
+});

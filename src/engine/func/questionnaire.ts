@@ -74,6 +74,9 @@ export const likertIndicatorSchema = z.object({
   questions: z.array(likertQuestionSchema).min(1),
   subScales: z.array(likertSubScaleSchema).optional(),
   clinicalCutoff: clinicalCutoffSchema.optional(),
+  // 完整量表嚴重度切點：僅在整個量表（含 detail 題）全部作答時，以全題分數加總評估。
+  // 例：PHQ-8 ≥10（中度以上憂鬱）、GAD-7 ≥10。與 clinicalCutoff（螢檢短篩）並存。
+  fullCutoff: clinicalCutoffSchema.optional(),
   revealDetailWhen: revealDetailWhenSchema.optional(),
   minCompletionPolicy: z.number().min(0).max(1).optional(),
 }).refine(d => d.maxScore > (d.minScore ?? 0), { message: 'maxScore must > minScore' });

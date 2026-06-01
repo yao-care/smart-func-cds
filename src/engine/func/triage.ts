@@ -56,6 +56,14 @@ export function computeTriage(input: {
         severity: ind.cutoffSeverity,
       });
     }
+    if (ind.fullCutoffFlag && ind.fullCutoffSeverity) {
+      clinicalCutoffs.push({
+        indicatorId: ind.indicatorId,
+        domain: ind.domain,
+        flagLabel: ind.fullCutoffFlagLabel ?? `${ind.indicatorId}-full-cutoff`,
+        severity: ind.fullCutoffSeverity,
+      });
+    }
     if (ind.subScaleScores) {
       for (const sub of ind.subScaleScores) {
         if (sub.cutoffFlag && sub.cutoffSeverity) {
