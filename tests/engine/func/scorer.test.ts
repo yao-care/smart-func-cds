@@ -1,7 +1,7 @@
 // tests/engine/func/scorer.test.ts
 import { describe, it, expect } from 'vitest';
 import type { LikertIndicator, ObjectiveIndicator } from '../../../src/engine/func/questionnaire';
-import { scoreLikertIndicator, scoreObjectiveIndicator, scoreDomain, scoreAssessment, type DomainScore, type IndicatorScore } from '../../../src/engine/func/scorer';
+import { scoreLikertIndicator, scoreObjectiveIndicator, scoreDomain, scoreAssessment, isDetailRevealed, type DomainScore, type IndicatorScore } from '../../../src/engine/func/scorer';
 
 const PHQ2: LikertIndicator = {
   kind: 'likert', id: 'psychological.depression', domain: 'psychological',
@@ -279,5 +279,31 @@ describe('scoreAssessment integration', () => {
     expect(r.domainScores).toHaveLength(1);
     expect(r.domainScores[0].score).toBe(100);  // PHQ-2 全 0 + higher_is_worse → capacity 100
     expect(r.applicableWeights['psychological.depression']).toBe(1);
+  });
+});
+
+const fatigueLike: LikertIndicator = {
+  kind: 'likert', id: 'vitality.fatigue', domain: 'vitality', label: '疲勞',
+  tier: 'screener', style: 'symptom', direction: 'higher_is_worse',
+  maxScore: 4, weight: 1.0, license: 'cc-by-nc-sa',
+  revealDetailWhen: { screenerQuestionIds: ['vitality.fatigue.q1'], threshold: 2, comparator: '>=' },
+  questions: [
+    { id: 'vitality.fatigue.q1', text: 'x', options: [{ label: 'a', score: 0 }, { label: 'b', score: 4 }] },
+    { id: 'vitality.fatigue.q2', text: 'y', tier: 'detail', options: [{ label: 'a', score: 0 }, { label: 'b', score: 4 }] },
+  ],
+};
+
+describe('isDetailRevealed', () => {
+  it('螢檢題未達門檻 → 不揭露', () => {
+    expect(isDetailRevealed(fatigueLike, { 'vitality.fatigue.q1': 1 })).toBe(false);
+  });
+  it('螢檢題達門檻 → 揭露', () => {
+    expect(isDetailRevealed(fatigueLike, { 'vitality.fatigue.q1': 2 })).toBe(true);
+  });
+  it('螢檢題未作答 → 不揭露', () => {
+    expect(isDetailRevealed(fatigueLike, {})).toBe(false);
+  });
+  it('無 revealDetailWhen → 不揭露', () => {
+    expect(isDetailRevealed({ ...fatigueLike, revealDetailWhen: undefined }, { 'vitality.fatigue.q1': 4 })).toBe(false);
   });
 });

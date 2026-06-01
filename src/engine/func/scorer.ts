@@ -42,6 +42,30 @@ export interface IndicatorScore {
   questionsTotal?: number;
 }
 
+/**
+ * 判斷某指標的「題層 detail」是否該被揭露：
+ * 取 revealDetailWhen.screenerQuestionIds 的有效（reverse 校正後）分數加總，
+ * 全部螢檢題都作答且符合 threshold/comparator 才回 true。
+ */
+export function isDetailRevealed(
+  indicator: LikertIndicator,
+  answers: Record<string, number>,
+): boolean {
+  const cond = indicator.revealDetailWhen;
+  if (!cond) return false;
+  const minScore = indicator.minScore ?? 0;
+  const maxScore = indicator.maxScore;
+  const qById = new Map(indicator.questions.map(q => [q.id, q]));
+  let sum = 0;
+  for (const qid of cond.screenerQuestionIds) {
+    const q = qById.get(qid);
+    const raw = answers[qid];
+    if (!q || !Number.isFinite(raw)) return false;
+    sum += (q.reverseScored ?? false) ? reverseScoreOf(raw, maxScore, minScore) : raw;
+  }
+  return cond.comparator === '>=' ? sum >= cond.threshold : sum <= cond.threshold;
+}
+
 export function scoreLikertIndicator(
   indicator: LikertIndicator,
   answers: Record<string, number>,
