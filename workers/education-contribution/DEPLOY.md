@@ -112,7 +112,7 @@ PUBLIC_CONTRIBUTION_WORKER_URL=https://education-contribution.<account>.workers.
 ```bash
 curl -X POST https://education-contribution.<account>.workers.dev/education-contribution \
   -H "Content-Type: application/json" \
-  -H "Origin: https://smart-pedi-cds.yao.care" \
+  -H "Origin: https://smart-func-cds.yao.care" \
   -d '{
     "type": "youtube",
     "domain": "language",
@@ -127,12 +127,12 @@ curl -X POST https://education-contribution.<account>.workers.dev/education-cont
 預期成功回應（HTTP 201）：
 ```json
 {
-  "issueUrl": "https://github.com/yao-care/smart-pedi-cds/issues/XXX"
+  "issueUrl": "https://github.com/yao-care/smart-func-cds/issues/XXX"
 }
 ```
 
 常見錯誤排查：
-- **CORS 錯誤**: 檢查 Origin header 是否為 `https://smart-pedi-cds.yao.care`
+- **CORS 錯誤**: 檢查 Origin header 是否為 `https://smart-func-cds.yao.care`
 - **GitHub auth 失敗**: 確認三個密鑰（App ID、Private Key、Installation ID）已正確設置
 - **無效 payload**: 檢查 `type`、`domain`、`ageGroup` 是否在有效值清單中
 
@@ -165,7 +165,7 @@ wrangler tail
 
 ### 無法連接到 GitHub API
 
-確保網路連線正常，GitHub API 可達。檢查 GitHub App 是否已安裝到目標 repo（`yao-care/smart-pedi-cds`）。
+確保網路連線正常，GitHub API 可達。檢查 GitHub App 是否已安裝到目標 repo（`yao-care/smart-func-cds`）。
 
 ---
 

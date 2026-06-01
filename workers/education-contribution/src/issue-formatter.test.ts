@@ -68,9 +68,9 @@ describe('formatIssueBody', () => {
   it('includes submitter when provided', () => {
     const body = formatIssueBody({
       type: 'article', domain: 'cognition', ageGroup: '25-36m',
-      title: '文章', submitter: 'Dr. Chen，台大兒科',
+      title: '文章', submitter: 'Dr. Chen，台大家醫科',
     });
-    expect(body).toContain('Dr. Chen，台大兒科');
+    expect(body).toContain('Dr. Chen，台大家醫科');
   });
 });
 

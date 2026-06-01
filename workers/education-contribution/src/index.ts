@@ -98,7 +98,7 @@ export default {
             Accept: 'application/vnd.github+json',
             'Content-Type': 'application/json',
             'X-GitHub-Api-Version': '2022-11-28',
-            'User-Agent': 'yao-care-smart-pedi-cds/1.0',
+            'User-Agent': 'yao-care-smart-func-cds/1.0',
           },
           body: JSON.stringify({
             title: formatIssueTitle(payload),
