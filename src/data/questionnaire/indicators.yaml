@@ -133,9 +133,9 @@ cognition:
       warmupTrials: 5
       validRangeMs: { min: 100, max: 2000 }
       norms:
-        "18-39": null
-        "40-54": null
-        "55-64": null
+        "18-39": { mean: 250, std: 55, citation: "MindCrowd web simple visual RT (npj Aging 2021, n=75,666)" }
+        "40-54": { mean: 285, std: 60, citation: "MindCrowd web simple visual RT (npj Aging 2021, n=75,666)" }
+        "55-64": { mean: 315, std: 65, citation: "MindCrowd web simple visual RT (npj Aging 2021, n=75,666)" }
   - id: cognition.executive_function
     kind: objective
     domain: cognition
@@ -150,9 +150,9 @@ cognition:
       targetCount: 25
       administration: browser-mouse
       norms:
-        "18-39": null
-        "40-54": null
-        "55-64": null
+        "18-39": { mean: 26, std: 9, citation: "Tombaugh 2004 (Arch Clin Neuropsychol 19:203-214)" }
+        "40-54": { mean: 31, std: 10, citation: "Tombaugh 2004 (Arch Clin Neuropsychol 19:203-214)" }
+        "55-64": { mean: 40, std: 12, citation: "Tombaugh 2004 (Arch Clin Neuropsychol 19:203-214)" }
 
 psychological:
   - id: psychological.depression
