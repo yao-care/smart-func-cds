@@ -7,9 +7,11 @@
     indicatorSchema,
     type Indicator,
     type LikertIndicator,
+    type LikertQuestion,
   } from '../../engine/func/questionnaire';
-  import { scoreAssessment } from '../../engine/func/scorer';
+  import { scoreAssessment, isDetailRevealed } from '../../engine/func/scorer';
   import { IC_DOMAIN_NAMES, type ICDomain } from '../../lib/education/schemas';
+  import CrisisResources from './CrisisResources.svelte';
 
   const DOMAIN_LABELS: Record<ICDomain, string> = {
     vitality: '身體活力',
@@ -42,7 +44,7 @@
     )
   );
 
-  // Flatten all questions across applicable likert indicators, in YAML order.
+  // Flat question type
   interface FlatQuestion {
     indicatorId: string;
     domain: ICDomain;
@@ -54,34 +56,58 @@
     clinicallyReviewed: boolean;
   }
 
-  const questions = $derived<FlatQuestion[]>(
-    likertIndicators.flatMap(ind =>
-      ind.questions.map(q => ({
-        indicatorId: ind.id,
-        domain: ind.domain,
-        domainLabel: DOMAIN_LABELS[ind.domain],
-        indicatorLabel: ind.label,
-        questionId: q.id,
-        text: q.text,
-        options: q.options,
-        // S1 indicators are spec-sourced screeners (WHO-5/PHQ-2/...) — treat as reviewed.
-        clinicallyReviewed: true,
-      }))
-    )
-  );
-
   // ---- Module state ----
-  let currentIndex = $state(0);
-  // answers keyed by questionId -> numeric score (consumed by scoreAssessment)
   let answers = $state<Record<string, number>>({});
   let lastAnswerLabel = $state<string | null>(null);
   let phase = $state<'asking' | 'summary'>('asking');
   let isSaving = $state(false);
+  let showCrisis = $state(false);
 
-  const currentQuestion = $derived(questions[currentIndex] ?? null);
-  const totalQuestions = $derived(questions.length);
+  // 即時域分數（只反映已作答題；未答的 detail 指標自然不計入 → band = screener band）
+  const bandByDomain = $derived.by<Partial<Record<ICDomain, 'high' | 'moderate' | 'low'>>>(() => {
+    if (!ageGroup) return {};
+    const { domainScores } = scoreAssessment({ indicators: ALL_INDICATORS, answers, objectiveResults: {}, ageGroup });
+    return Object.fromEntries(domainScores.map(d => [d.domain, d.band]));
+  });
+
+  function toFlat(ind: LikertIndicator, q: LikertQuestion): FlatQuestion {
+    return {
+      indicatorId: ind.id,
+      domain: ind.domain,
+      domainLabel: DOMAIN_LABELS[ind.domain],
+      indicatorLabel: ind.label,
+      questionId: q.id,
+      text: q.text,
+      options: q.options,
+      clinicallyReviewed: true,
+    };
+  }
+
+  // 答案驅動的可見題：螢檢題恆顯示；指標層 detail 於域 band != high 時顯示；
+  // 題層 detail 於同指標 revealDetailWhen 觸發時顯示。
+  const visibleQuestions = $derived.by<FlatQuestion[]>(() => {
+    const out: FlatQuestion[] = [];
+    for (const ind of likertIndicators) {
+      if (ind.tier === 'detail') {
+        const band = bandByDomain[ind.domain];
+        if (!band || band === 'high') continue; // 螢檢未完成或正常 → 不展開整個 detail 指標
+      }
+      const detailRevealed = isDetailRevealed(ind, answers);
+      for (const q of ind.questions) {
+        if (q.tier === 'detail' && !detailRevealed) continue;
+        out.push(toFlat(ind, q));
+      }
+    }
+    return out;
+  });
+
+  // 下一個未作答的可見題；皆作答完畢則 null。
+  const currentQuestion = $derived<FlatQuestion | null>(
+    visibleQuestions.find(q => answers[q.questionId] === undefined) ?? null
+  );
   const answeredCount = $derived(Object.keys(answers).length);
-  const progressPct = $derived(totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0);
+  const visibleTotal = $derived(visibleQuestions.length);
+  const progressPct = $derived(visibleTotal > 0 ? Math.round((answeredCount / visibleTotal) * 100) : 0);
 
   // ---- Per-domain summary (capacity 0-100 from scorer) ----
   const domainSummary = $derived.by(() => {
@@ -108,8 +134,17 @@
     if (!currentQuestion || isSaving) return;
     isSaving = true;
     lastAnswerLabel = option.label;
+    const qid = currentQuestion.questionId;
+    const domain = currentQuestion.domain;
+    const indicatorId = currentQuestion.indicatorId;
+    const questionText = currentQuestion.text;
 
-    answers = { ...answers, [currentQuestion.questionId]: option.score };
+    // 安全：自我傷害意念螢檢題（全體必答）勾選非零 → 立即顯示危機資源
+    if (qid === 'psychological.self_harm.q1' && option.score > 0) {
+      showCrisis = true;
+    }
+
+    answers = { ...answers, [qid]: option.score };
 
     const assessment = assessmentStore.assessment;
     const patient = assessmentStore.patient;
@@ -121,10 +156,10 @@
         eventType: 'questionnaire_answer',
         timestamp: new Date(),
         data: {
-          questionId: currentQuestion.questionId,
-          indicatorId: currentQuestion.indicatorId,
-          domain: currentQuestion.domain,
-          questionText: currentQuestion.text,
+          questionId: qid,
+          indicatorId,
+          domain,
+          questionText,
           answerLabel: option.label,
           score: option.score,
           ageGroup,
@@ -137,9 +172,8 @@
     await new Promise(r => setTimeout(r, 320));
     lastAnswerLabel = null;
 
-    if (currentIndex < totalQuestions - 1) {
-      currentIndex++;
-    } else {
+    // currentQuestion 為 derived：設定 answers 後若已無未答可見題 → 進摘要
+    if (!currentQuestion) {
       persistScoresToStore();
       phase = 'summary';
     }
@@ -174,10 +208,12 @@
       <div class="progress-bar-track">
         <div class="progress-bar-fill" style="width: {progressPct}%"></div>
       </div>
-      <span class="progress-label">第 {currentIndex + 1} 題，共 {totalQuestions} 題</span>
+      <span class="progress-label" data-testid="progress-label" data-answered={answeredCount} data-visible-total={visibleTotal}>已完成 {answeredCount} 題（目前共 {visibleTotal} 題）</span>
     </div>
 
-    <div class="domain-badge">{currentQuestion.domainLabel} · {currentQuestion.indicatorLabel}</div>
+    <div class="domain-badge" data-testid="current-question-id" data-question-id={currentQuestion.questionId}>{currentQuestion.domainLabel} · {currentQuestion.indicatorLabel}</div>
+
+    <CrisisResources visible={showCrisis} />
 
     <h2 class="question-text">{currentQuestion.text}</h2>
 

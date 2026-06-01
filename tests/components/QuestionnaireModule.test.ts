@@ -31,6 +31,49 @@ function makeAssessment(): Assessment {
   } as Assessment;
 }
 
+/** Click the first option-btn and wait for transition. */
+async function clickFirstOption(): Promise<boolean> {
+  const buttons = screen.queryAllByRole('button');
+  const optionBtn = buttons.find((b) => b.classList.contains('option-btn'));
+  if (!optionBtn) return false;
+  await fireEvent.click(optionBtn);
+  await new Promise((r) => setTimeout(r, 380));
+  return true;
+}
+
+/** Click the last option-btn (highest score) and wait. */
+async function clickLastOption(): Promise<boolean> {
+  const buttons = screen.queryAllByRole('button');
+  const optionBtns = buttons.filter((b) => b.classList.contains('option-btn'));
+  if (optionBtns.length === 0) return false;
+  await fireEvent.click(optionBtns[optionBtns.length - 1]);
+  await new Promise((r) => setTimeout(r, 380));
+  return true;
+}
+
+/** Click the option button with the given label text. */
+async function clickOptionByLabel(label: string): Promise<boolean> {
+  const buttons = screen.queryAllByRole('button');
+  const target = buttons.find((b) => b.classList.contains('option-btn') && b.textContent?.trim() === label);
+  if (!target) return false;
+  await fireEvent.click(target);
+  await new Promise((r) => setTimeout(r, 380));
+  return true;
+}
+
+/** Get current question id from data-question-id attribute on domain-badge. */
+function getCurrentQuestionId(): string | null {
+  const badge = document.querySelector('[data-testid="current-question-id"]');
+  return badge?.getAttribute('data-question-id') ?? null;
+}
+
+/** Get visible total from data-visible-total attribute on progress label. */
+function getVisibleTotal(): number {
+  const label = document.querySelector('[data-testid="progress-label"]');
+  const val = label?.getAttribute('data-visible-total');
+  return val ? Number(val) : 0;
+}
+
 describe('QuestionnaireModule', () => {
   beforeEach(async () => {
     assessmentStore.reset();
@@ -117,4 +160,93 @@ describe('QuestionnaireModule', () => {
       expect(d.score).toBeLessThanOrEqual(100);
     }
   });
+
+  it(
+    '初始只顯示 12 題 screener：未作答時 visibleTotal = 12',
+    async () => {
+      assessmentStore.patient = makePatient(30);
+      assessmentStore.assessment = makeAssessment();
+
+      render(QuestionnaireModule);
+
+      // Before any answers, bandByDomain is empty → no detail indicators revealed
+      // → visibleQuestions = only the 12 screener questions
+      await waitFor(() => {
+        expect(getVisibleTotal()).toBe(12);
+      }, { timeout: 2000 });
+
+      // First question should be the first screener question (sleep_quality.q1)
+      expect(getCurrentQuestionId()).toBe('vitality.sleep_quality.q1');
+    },
+  );
+
+  it(
+    'PHQ-2 兩題皆答 3（總分 6≥3）→ visibleQuestions 包含 depression detail（q3 出現）',
+    { timeout: 30000 },
+    async () => {
+      assessmentStore.patient = makePatient(30);
+      assessmentStore.assessment = makeAssessment();
+
+      render(QuestionnaireModule);
+
+      // Answer screener questions leading up to depression.q1 with "good" responses
+      // so that domains stay at 'high' (no other detail is triggered).
+      // Questions 1-6 (in YAML order):
+      //   1. vitality.sleep_quality.q1  (capacity)  → last option = "非常好"
+      //   2. vitality.nutrition.q1      (capacity)  → last option = "穩定良好"
+      //   3. vitality.fatigue.q1        (symptom)   → first option = "從不" (score=0)
+      //   4. locomotion.activity_level.q1 (capacity) → last option = "5+ 天"
+      //   5. locomotion.walking_ability.q1 (capacity) → last option = "非常輕鬆"
+      //   6. cognition.cognitive_self_report.q1 (capacity) → last option = "很好"
+
+      // For simplicity, advance by clicking last option for capacities and first for symptoms.
+      // We use question ID tracking to handle order reliably.
+      const qActions: Record<string, () => Promise<boolean>> = {
+        'vitality.sleep_quality.q1': clickLastOption,
+        'vitality.nutrition.q1': clickLastOption,
+        'vitality.fatigue.q1': clickFirstOption,       // symptom: "從不" (score=0) → no detail
+        'locomotion.activity_level.q1': clickLastOption,
+        'locomotion.walking_ability.q1': clickLastOption,
+        'cognition.cognitive_self_report.q1': clickLastOption,
+      };
+
+      for (let i = 0; i < 6; i++) {
+        await waitFor(() => {
+          const qid = getCurrentQuestionId();
+          expect(qid).toBeTruthy();
+        }, { timeout: 2000 });
+        const qid = getCurrentQuestionId()!;
+        const action = qActions[qid] ?? clickLastOption;
+        await action();
+      }
+
+      // Now we should be at depression.q1
+      await waitFor(() => {
+        expect(getCurrentQuestionId()).toBe('psychological.depression.q1');
+      }, { timeout: 2000 });
+
+      // Answer depression.q1 with highest score ("幾乎每天", score=3)
+      const depQ1answered = await clickOptionByLabel('幾乎每天');
+      expect(depQ1answered).toBe(true);
+
+      // Answer depression.q2 with highest score ("幾乎每天", score=3)
+      // PHQ-2 total = 3+3=6 >= threshold=3 → detail revealed
+      await waitFor(() => {
+        expect(getCurrentQuestionId()).toBe('psychological.depression.q2');
+      }, { timeout: 2000 });
+
+      const depQ2answered = await clickOptionByLabel('幾乎每天');
+      expect(depQ2answered).toBe(true);
+
+      // After q1+q2 answered with high scores, depression.q3 (first detail) should be current
+      await waitFor(() => {
+        expect(getCurrentQuestionId()).toBe('psychological.depression.q3');
+      }, { timeout: 3000 });
+
+      // Also verify the question text is correct
+      expect(
+        screen.getByText('過去 2 週，您入睡困難、睡不安穩，或睡得太多'),
+      ).toBeInTheDocument();
+    },
+  );
 });
