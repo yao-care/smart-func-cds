@@ -132,14 +132,20 @@ describe('QuestionnaireModule', () => {
 
     render(QuestionnaireModule);
 
+    // Keep cognition screener at 'high' so the test reaches summary without the objective phase.
+    // All other capacity questions: last option (highest score). Symptom questions: first option (score 0).
+    // Cognition screener q1 must be answered with last option ("很好") explicitly.
     const MAX_ITERATIONS = 80;
     for (let i = 0; i < MAX_ITERATIONS; i++) {
       if (screen.queryByText('問卷完成！')) break;
-      const buttons = screen.queryAllByRole('button');
-      const optionBtn = buttons.find((b) => b.classList.contains('option-btn'));
-      if (!optionBtn) break;
-      await fireEvent.click(optionBtn);
-      await new Promise((r) => setTimeout(r, 380));
+      const qid = getCurrentQuestionId();
+      if (!qid) break; // left likert phase (e.g. entered objective phase unexpectedly)
+      // Use last option for cognition screener to keep it 'high'; first for everything else.
+      const clicked =
+        qid === 'cognition.cognitive_self_report.q1'
+          ? await clickLastOption()
+          : await clickFirstOption();
+      if (!clicked) break;
     }
 
     await waitFor(
@@ -247,6 +253,115 @@ describe('QuestionnaireModule', () => {
       expect(
         screen.getByText('過去 2 週，您入睡困難、睡不安穩，或睡得太多'),
       ).toBeInTheDocument();
+    },
+  );
+
+  // ---- Objective tests gating ----
+
+  it(
+    '認知篩陰（screener band = high）→ 問卷結束後直接進摘要，不出現 RT 測驗',
+    { timeout: 60000 },
+    async () => {
+      assessmentStore.patient = makePatient(30);
+      assessmentStore.assessment = makeAssessment();
+
+      render(QuestionnaireModule);
+
+      // Answer every screener with best options so every domain stays 'high'.
+      // Per YAML screener order:
+      //   vitality.sleep_quality.q1   → "非常好"      (last, score 3)
+      //   vitality.nutrition.q1       → "穩定良好"    (last, score 3)
+      //   vitality.fatigue.q1         → "從不"        (first, score 0 = best for symptom)
+      //   locomotion.activity_level.q1 → "5+ 天"     (last, score 3)
+      //   locomotion.walking_ability.q1 → "非常輕鬆" (last, score 3)
+      //   cognition.cognitive_self_report.q1 → "很好" (last, score 3)
+      //   psychological.depression.q1 → "從不"        (first, score 0)
+      //   psychological.depression.q2 → "從不"        (first, score 0)
+      //   psychological.self_harm.q1  → "從不"        (first, score 0)
+      //   psychological.anxiety.q1    → "從不"        (first, score 0)
+      //   psychological.anxiety.q2    → "從不"        (first, score 0)
+      //   sensory.functional_acuity.q1 → "非常清楚"  (last, score 3)
+      const qBestActions: Record<string, () => Promise<boolean>> = {
+        'vitality.sleep_quality.q1': clickLastOption,
+        'vitality.nutrition.q1': clickLastOption,
+        'vitality.fatigue.q1': clickFirstOption,
+        'locomotion.activity_level.q1': clickLastOption,
+        'locomotion.walking_ability.q1': clickLastOption,
+        'cognition.cognitive_self_report.q1': clickLastOption,
+        'psychological.depression.q1': clickFirstOption,
+        'psychological.depression.q2': clickFirstOption,
+        'psychological.self_harm.q1': clickFirstOption,
+        'psychological.anxiety.q1': clickFirstOption,
+        'psychological.anxiety.q2': clickFirstOption,
+        'sensory.functional_acuity.q1': clickLastOption,
+      };
+
+      const MAX = 20;
+      for (let i = 0; i < MAX; i++) {
+        if (screen.queryByText('問卷完成！')) break;
+        await waitFor(() => { expect(getCurrentQuestionId()).toBeTruthy(); }, { timeout: 2000 });
+        const qid = getCurrentQuestionId()!;
+        const action = qBestActions[qid] ?? clickLastOption;
+        await action();
+      }
+
+      // Should reach summary without objective phase
+      await waitFor(() => {
+        expect(screen.getByText('問卷完成！')).toBeInTheDocument();
+      }, { timeout: 5000 });
+
+      // RT test heading must NOT appear
+      expect(screen.queryByText('反應時間測驗')).not.toBeInTheDocument();
+    },
+  );
+
+  it(
+    '認知篩陽（cognitive_self_report q1 = 很差）→ Likert 結束後進入 RT 測驗畫面',
+    { timeout: 60000 },
+    async () => {
+      assessmentStore.patient = makePatient(30);
+      assessmentStore.assessment = makeAssessment();
+
+      render(QuestionnaireModule);
+
+      // Screener answer map: answer cognition q1 with "很差" (score 0) → cognition low.
+      // All other screeners answered with neutral/best so they stay 'high' (no extra detail unlock).
+      const qScreenerActions: Record<string, () => Promise<boolean>> = {
+        'vitality.sleep_quality.q1': clickLastOption,
+        'vitality.nutrition.q1': clickLastOption,
+        'vitality.fatigue.q1': clickFirstOption,
+        'locomotion.activity_level.q1': clickLastOption,
+        'locomotion.walking_ability.q1': clickLastOption,
+        'cognition.cognitive_self_report.q1': () => clickOptionByLabel('很差'), // score 0 → band low
+        'psychological.depression.q1': clickFirstOption,
+        'psychological.depression.q2': clickFirstOption,
+        'psychological.self_harm.q1': clickFirstOption,
+        'psychological.anxiety.q1': clickFirstOption,
+        'psychological.anxiety.q2': clickFirstOption,
+        'sensory.functional_acuity.q1': clickLastOption,
+        // Cognition detail unlocked after screener flagged:
+        'cognition.attention_self_report.q1': clickLastOption,
+        'cognition.memory_self_report.q1': clickLastOption,
+      };
+
+      const MAX = 30;
+      for (let i = 0; i < MAX; i++) {
+        // Stop when objective phase appears (RT heading shown) or summary appears
+        if (screen.queryByText('反應時間測驗')) break;
+        if (screen.queryByText('問卷完成！')) break;
+        await waitFor(() => { expect(getCurrentQuestionId()).toBeTruthy(); }, { timeout: 2000 });
+        const qid = getCurrentQuestionId()!;
+        const action = qScreenerActions[qid] ?? clickLastOption;
+        await action();
+      }
+
+      // The objective phase heading should be visible
+      await waitFor(() => {
+        expect(screen.getByText('反應時間測驗')).toBeInTheDocument();
+      }, { timeout: 5000 });
+
+      // Summary must NOT be shown yet (objective tests still pending)
+      expect(screen.queryByText('問卷完成！')).not.toBeInTheDocument();
     },
   );
 

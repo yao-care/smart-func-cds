@@ -12,6 +12,8 @@
   import { scoreAssessment, isDetailRevealed } from '../../engine/func/scorer';
   import { IC_DOMAIN_NAMES, type ICDomain } from '../../lib/education/schemas';
   import CrisisResources from './CrisisResources.svelte';
+  import ReactionTimeTest from './ReactionTimeTest.svelte';
+  import TmtATest from './TmtATest.svelte';
 
   const DOMAIN_LABELS: Record<ICDomain, string> = {
     vitality: '身體活力',
@@ -59,7 +61,9 @@
   // ---- Module state ----
   let answers = $state<Record<string, number>>({});
   let lastAnswerLabel = $state<string | null>(null);
-  let phase = $state<'asking' | 'summary'>('asking');
+  let phase = $state<'asking' | 'objective' | 'summary'>('asking');
+  let objectiveStep = $state<'reaction-time' | 'tmt-a'>('reaction-time');
+  let objectiveResults = $state<Record<string, number[]>>({});
   let isSaving = $state(false);
   let showCrisis = $state(false);
 
@@ -67,13 +71,18 @@
   // 單次 scoreAssessment；bandByDomain 與 domainSummary 共用同一結果避免重複計算。
   const assessmentResult = $derived.by(() => {
     if (!ageGroup) return null;
-    return scoreAssessment({ indicators: ALL_INDICATORS, answers, objectiveResults: {}, ageGroup });
+    return scoreAssessment({ indicators: ALL_INDICATORS, answers, objectiveResults, ageGroup });
   });
 
   const bandByDomain = $derived<Partial<Record<ICDomain, 'high' | 'moderate' | 'low'>>>(
     assessmentResult
       ? Object.fromEntries(assessmentResult.domainScores.map(d => [d.domain, d.band]))
       : {}
+  );
+
+  // 客觀測驗只在認知域篩陽（非 high）時施測。
+  const cognitionFlagged = $derived(
+    bandByDomain.cognition !== undefined && bandByDomain.cognition !== 'high'
   );
 
   function toFlat(ind: LikertIndicator, q: LikertQuestion): FlatQuestion {
@@ -179,10 +188,16 @@
     lastAnswerLabel = null;
     isSaving = false;
 
-    // currentQuestion 為 derived：設定 answers 後若已無未答可見題 → 進摘要
+    // currentQuestion 為 derived：設定 answers 後若已無未答可見題 → 決定下一階段
     if (!currentQuestion) {
-      persistScoresToStore();
-      phase = 'summary';
+      if (cognitionFlagged) {
+        // 認知域篩陽 → 施測客觀測驗，等完成後再 persist
+        phase = 'objective';
+        objectiveStep = 'reaction-time';
+      } else {
+        persistScoresToStore();
+        phase = 'summary';
+      }
     }
   }
 
@@ -191,16 +206,27 @@
     const { indicatorScores, domainScores, applicableWeights } = scoreAssessment({
       indicators: ALL_INDICATORS,
       answers,
-      objectiveResults: {},
+      objectiveResults,
       ageGroup,
     });
     assessmentStore.addAnalysis({
       answers,
-      objectiveResults: {},
+      objectiveResults,
       indicatorScores,
       domainScores,
       applicableWeights,
     });
+  }
+
+  function onReactionTimeComplete(trialsMs: number[]) {
+    objectiveResults = { ...objectiveResults, 'cognition.processing_speed': trialsMs };
+    objectiveStep = 'tmt-a';
+  }
+
+  function onTmtAComplete(result: number[]) {
+    objectiveResults = { ...objectiveResults, 'cognition.executive_function': result };
+    persistScoresToStore();
+    phase = 'summary';
   }
 
   async function handleFinish() {
@@ -240,6 +266,19 @@
           {option.label}
         </button>
       {/each}
+    </div>
+
+  {:else if phase === 'objective'}
+    <div class="objective-phase">
+      <div class="objective-header">
+        <h2 class="objective-title">認知客觀測驗</h2>
+        <span class="objective-step-indicator">{objectiveStep === 'reaction-time' ? '1' : '2'} / 2</span>
+      </div>
+      {#if objectiveStep === 'reaction-time'}
+        <ReactionTimeTest onComplete={onReactionTimeComplete} />
+      {:else}
+        <TmtATest onComplete={onTmtAComplete} />
+      {/if}
     </div>
 
   {:else if phase === 'summary'}
@@ -460,4 +499,34 @@
   }
 
   .empty-state p { margin-bottom: var(--space-6); }
+
+  .objective-phase {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .objective-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-2);
+  }
+
+  .objective-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: var(--text);
+    margin: 0;
+  }
+
+  .objective-step-indicator {
+    font-size: var(--text-sm);
+    color: color-mix(in srgb, var(--text), var(--bg) 30%);
+    background: color-mix(in srgb, var(--accent) 12%, var(--bg));
+    color: var(--accent);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    font-weight: var(--font-medium);
+  }
 </style>
