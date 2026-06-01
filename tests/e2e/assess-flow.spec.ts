@@ -77,7 +77,7 @@ test.describe('成人 IC 評估流程', () => {
 
   test('進入評估顯示受測者基本資料表單', async ({ page }) => {
     await page.goto('/assess/');
-    await expect(page).toHaveTitle(/成人功能健康評估/);
+    await expect(page).toHaveTitle(/Smart Func/);
     await expect(page.getByRole('heading', { name: '受測者基本資料' })).toBeVisible({ timeout: 10000 });
   });
 
