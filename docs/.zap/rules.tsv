@@ -1,0 +1,16 @@
+# ZAP Rules Configuration for Smart Func（GitHub Pages）
+# 下列 ZAP 發現屬「HTTP 回應標頭層」，而本站部署於 GitHub Pages（不允許自訂回應標頭），
+# 且 yao.care 不在可用的 Cloudflare 帳號可前置注入標頭。經評估接受風險（站台純靜態、
+# 無伺服器端逐人資料，受測者資料全在 client 端 IndexedDB），降為 WARN：報告但不算 failure。
+# 風險接受紀錄與未來補強方案見受測 repo 的 SECURITY-HEADERS.md。
+# 格式：<rule_id>	<action>	<description>　參考：https://www.zaproxy.org/docs/docker/baseline-scan/#rules-file-format
+#
+# 註：CSP 內容層（10055：unsafe-inline / wildcard / 缺指令）已修復（Astro 每頁雜湊 CSP，
+#     以 <meta http-equiv> 交付），故「不」在此豁免，留待重掃驗證修復成果。
+10020	WARN	(Missing Anti-clickjacking Header - GitHub Pages cannot set X-Frame-Options / frame-ancestors only works as header)
+10021	WARN	(X-Content-Type-Options Header Missing - GitHub Pages cannot set HTTP headers)
+10038	WARN	(CSP Header Not Set - CSP delivered via <meta http-equiv>; GitHub Pages cannot set the header)
+10063	WARN	(Permissions Policy Header Not Set - GitHub Pages cannot set HTTP headers)
+10098	WARN	(Cross-Domain Misconfiguration - Access-Control-Allow-Origin set by GitHub CDN, not changeable)
+90004	WARN	(Cross-Origin-Embedder-Policy Header Missing - GitHub Pages cannot set HTTP headers)
+90005	WARN	(Cross-Origin-Opener-Policy Header Missing - GitHub Pages cannot set HTTP headers)
