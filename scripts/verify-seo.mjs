@@ -7,7 +7,8 @@ const dist = resolve(process.cwd(), 'dist');
 let failed = false;
 const ok = (m) => console.log('✓', m);
 const fail = (m) => { console.error('✗', m); failed = true; };
-// nosemgrep: path-traversal — p 僅為固定字面值（'404.html'、'settings/index.html' 等）
+// p 僅為固定字面值（'404.html'、'settings/index.html' 等），非外部輸入。
+// nosemgrep
 const exists = (p) => access(resolve(dist, p)).then(() => true).catch(() => false);
 
 // robots.txt 含 Sitemap
@@ -32,7 +33,8 @@ async function findIndexHtml(dir) {
   const out = [];
   const entries = await readdir(dir, { withFileTypes: true }).catch(() => []);
   for (const e of entries) {
-    // nosemgrep: path-traversal — dir 起點為常數 dist/education，e.name 為 readdir 取得的建置產出檔名
+    // dir 起點為常數 dist/education，e.name 為 readdir 取得的建置產出檔名，非外部輸入。
+    // nosemgrep
     const full = resolve(dir, e.name);
     if (e.isDirectory()) out.push(...(await findIndexHtml(full)));
     else if (e.name === 'index.html') out.push(full);

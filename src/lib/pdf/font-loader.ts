@@ -8,8 +8,9 @@ async function fetchFontBase64(filename: string, exportName: string): Promise<st
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to fetch ${url}: ${res.status}`);
   const text = await res.text();
-  // nosemgrep: non-literal-regexp — exportName 僅來自本檔 loadChineseFontInto() 的兩個編譯期字面值
+  // exportName 僅來自本檔 loadChineseFontInto() 的兩個編譯期字面值
   // （'NotoSansTC_Regular_base64' / 'NotoSansTC_Bold_base64'），非外部輸入；且 [^']+ 為線性比對，無指數回溯。
+  // nosemgrep
   const match = text.match(new RegExp(`export const ${exportName} = '([^']+)'`));
   if (!match) throw new Error(`Cannot parse font module: ${filename}`);
   return match[1];
