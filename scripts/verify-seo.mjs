@@ -1,10 +1,13 @@
 import { readFile, access, readdir } from 'fs/promises';
 import { resolve } from 'path';
 
+// 本檔為 postbuild 守門腳本（非 HTTP 端點）。所有 resolve() 的基底 dist 為常數，
+// 路徑參數皆來自原始碼字面值或 readdir 取得的建置產出檔名，無任何外部/使用者輸入。
 const dist = resolve(process.cwd(), 'dist');
 let failed = false;
 const ok = (m) => console.log('✓', m);
 const fail = (m) => { console.error('✗', m); failed = true; };
+// nosemgrep: path-traversal — p 僅為固定字面值（'404.html'、'settings/index.html' 等）
 const exists = (p) => access(resolve(dist, p)).then(() => true).catch(() => false);
 
 // robots.txt 含 Sitemap
@@ -29,6 +32,7 @@ async function findIndexHtml(dir) {
   const out = [];
   const entries = await readdir(dir, { withFileTypes: true }).catch(() => []);
   for (const e of entries) {
+    // nosemgrep: path-traversal — dir 起點為常數 dist/education，e.name 為 readdir 取得的建置產出檔名
     const full = resolve(dir, e.name);
     if (e.isDirectory()) out.push(...(await findIndexHtml(full)));
     else if (e.name === 'index.html') out.push(full);

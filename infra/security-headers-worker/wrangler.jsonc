@@ -1,0 +1,18 @@
+{
+  // Smart Func 安全標頭前置代理 Worker
+  // 部署：cd infra/security-headers-worker && npx wrangler deploy
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "smart-func-security-headers",
+  "main": "src/index.js",
+  "compatibility_date": "2026-06-01",
+  "account_id": "9d9e58b5e0d1657b8f74bd2cbfc91ee3",
+  "observability": { "enabled": true },
+
+  // ⚠️ 生產切換：啟用下方 routes 會讓 Worker 接管 smart-func-cds.yao.care 全部流量。
+  // 前置條件：yao.care 的 DNS 記錄 smart-func-cds 必須在 Cloudflare 上且為「Proxied(橘雲)」，
+  // 指向 GitHub Pages（185.199.108.153/.109/.110/.111）。Worker 以 fetch(request) 直取 origin。
+  // 確認無誤後再取消註解部署。
+  // "routes": [
+  //   { "pattern": "smart-func-cds.yao.care/*", "zone_name": "yao.care" }
+  // ]
+}

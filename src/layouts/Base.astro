@@ -26,7 +26,7 @@ import '../styles/global.css';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="Content-Security-Policy" content="frame-src https://www.youtube-nocookie.com;" />
+    {/* CSP 由 Astro security.csp 於建置期自動產生（含每頁 script/style 雜湊），見 astro.config.mjs */}
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
