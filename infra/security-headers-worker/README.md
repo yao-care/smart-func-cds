@@ -1,4 +1,11 @@
-# Smart Func — 安全標頭前置代理 Worker
+# Smart Func — 安全標頭前置代理 Worker（未啟用／保留為未來選項）
+
+> **狀態（2026-06-10）：未部署。** 決策為「接受 GitHub Pages 標頭層限制」。
+> 原因：`yao.care` 目前不在任何可用的 Cloudflare 帳號（登入帳號 0 zone），無 zone 可綁 route；
+> 站台直連 GitHub Pages。本目錄保留為**未來若採方案 A（把 yao.care 搬上 Cloudflare）的現成實作**。
+> 已關閉的發現（依賴、SAST、CSP 內容層）見 repo 根 `SECURITY-HEADERS.md`。
+>
+> 啟用前提：先把 `yao.care` 整個網域搬上 Cloudflare（改 nameserver、完整搬 DNS/MX 記錄）。
 
 把 `smart-func-cds.yao.care` proxy 過 Cloudflare，由邊緣 Worker 注入 GitHub Pages 無法設定的
 安全回應標頭，並把 Astro 建置期產生的每頁 CSP（含 script/style 雜湊）升級為真正的
