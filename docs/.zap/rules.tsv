@@ -5,8 +5,10 @@
 # 風險接受紀錄與未來補強方案見受測 repo 的 SECURITY-HEADERS.md。
 # 格式：<rule_id>	<action>	<description>　參考：https://www.zaproxy.org/docs/docker/baseline-scan/#rules-file-format
 #
-# 註：CSP 內容層（10055：unsafe-inline / wildcard / 缺指令）已修復（Astro 每頁雜湊 CSP，
-#     以 <meta http-equiv> 交付），故「不」在此豁免，留待重掃驗證修復成果。
+# 註：CSP 內容層（10055）原 unsafe-inline / 缺指令部分已修復（Astro 每頁雜湊 CSP，以
+#     <meta http-equiv> 交付）。剩餘的 wildcard 告警係 connect-src 'self' https: blob:
+#     的 https:，為連線使用者指定之 FHIR/API 端點所必需，無法收斂為固定來源；經評估為
+#     功能必需、風險接受（純靜態前端、client 端資料，殘餘風險低），降為 WARN。
 10020	WARN	(Missing Anti-clickjacking Header - GitHub Pages cannot set X-Frame-Options / frame-ancestors only works as header)
 10021	WARN	(X-Content-Type-Options Header Missing - GitHub Pages cannot set HTTP headers)
 10038	WARN	(CSP Header Not Set - CSP delivered via <meta http-equiv>; GitHub Pages cannot set the header)
@@ -14,3 +16,4 @@
 10098	WARN	(Cross-Domain Misconfiguration - Access-Control-Allow-Origin set by GitHub CDN, not changeable)
 90004	WARN	(Cross-Origin-Embedder-Policy Header Missing - GitHub Pages cannot set HTTP headers)
 90005	WARN	(Cross-Origin-Opener-Policy Header Missing - GitHub Pages cannot set HTTP headers)
+10055	WARN	(CSP Wildcard — connect-src 'https:' 為連線使用者指定 FHIR/API 端點所必需，無法收斂為固定來源；純靜態前端、client 端資料，殘餘風險低，經資安負責人 2026-06-11 簽核接受)
