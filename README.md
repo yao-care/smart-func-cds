@@ -1,123 +1,68 @@
-# Smart Func — 成人功能健康評估系統
+# Smart Func — 成人功能健康自評
 
-開源的**成人（18–64 歲）功能健康自評／臨床決策輔助系統（CDSS）**，聚焦 WHO **內在能力（Intrinsic Capacity, IC）** 框架。採 SMART on FHIR 標準、**純瀏覽器端、零後端**，部署於 GitHub Pages。
+**Smart Func** 是一個免費、開源的**成人功能健康自我評估服務**。花十幾分鐘回答問卷、做幾個小測驗，就能看見自己在五大面向的身心功能狀態，知道哪裡值得留意、可以怎麼照顧自己，必要時還能把結果交到醫療單位手上。
 
-線上站：<https://smart-func-cds.yao.care/>
+🔗 **立即使用：<https://smart-func-cds.yao.care/>**（手機、平板、電腦皆可，免註冊、免下載）
 
-> 對外角色稱「**受測者**」；問卷／衛教／文案皆為成人 IC 主題。
+---
 
-## 系統做什麼
+## 為什麼需要它
 
-兩個子系統共用同一個瀏覽器端 App：
+我們習慣用「有沒有生病」來看健康，但對 18–64 歲的成人來說，真正影響生活品質的，往往是**功能**——睡得好不好、走得動不動、記性與專注、情緒、視聽。這些變化通常是慢慢累積的，等到察覺時已經走了一段路。
 
-1. **成人 IC 評估**（核心）：引導式問卷＋客觀測驗 → 五大功能域分級＋分流建議＋衛教推薦。受測者可把結果上傳到**收案點**（醫院 FHIR Server 或 GCM 協會），走標準 SMART on FHIR。
-2. **FHIR 臨床監測／閉環**：生命徵象規則引擎、基線、ONNX ML 風險分析、閉環通知，供臨床端使用（工作台 `/workspace/`、`dashboard/`）。
+Smart Func 採用世界衛生組織（WHO）提出的**「內在能力（Intrinsic Capacity, IC）」**框架，把成人的功能健康拆成五個可以觀察、可以追蹤的面向，幫你**及早看見、及早照顧**——這是健康老化的起點，不必等到年長才開始。
 
-資料預設只存在瀏覽器 IndexedDB；只有受測者主動選擇上傳時，才送往收案點 FHIR Server。
+> 服務聚焦 18–64 歲成人；65 歲以上也可以填，結果頁會額外給予提醒。
 
-## 技術棧
+## 它幫你看的五件事
 
-| 元件 | 技術 |
-|------|------|
-| 框架 | [Astro 5](https://astro.build/) SSG（`base = /`） |
-| 互動元件 | [Svelte 5](https://svelte.dev/) runes（`$state`/`$derived`/`$effect`） |
-| 樣式 | CSS Custom Properties + OKLCH（`src/styles/tokens.css`） |
-| 內容 | Astro Content Layer + Zod（`src/content.config.ts`） |
-| 資料庫 | IndexedDB via [Dexie.js 4](https://dexie.org/)（`src/lib/db/`） |
-| 圖表 | D3 子模組（**禁止** `import * as d3`） |
-| ML | [ONNX Runtime Web](https://onnxruntime.ai/)（WASM，跑在 Web Worker） |
-| FHIR | [fhirclient.js](https://docs.smarthealthit.org/client-js/)（醫院）＋原生 `fetch`/PKCE（GCM 收案） |
-| 搜尋 / PDF | [Pagefind](https://pagefind.app/) / jsPDF |
-| 套件管理 / 部署 | pnpm / GitHub Pages + Actions |
+| 面向 | 看的是什麼 |
+|------|-----------|
+| 🔋 **活力** | 睡眠、營養、疲勞與精力 |
+| 🚶 **行動** | 體能活動、行走能力、久坐情況 |
+| 🧠 **認知** | 注意力、記憶、反應速度與執行功能 |
+| 💚 **心理** | 情緒、壓力、焦慮與整體幸福感 |
+| 👁️ **感官** | 視覺與聽覺對日常生活的影響 |
 
-## 快速開始
+## 一次評估，你會得到什麼
 
-```bash
-pnpm install
-pnpm dev        # http://localhost:4321/ （predev 會先重建 content/questionnaire 索引）
-pnpm build      # prebuild 索引+守門 → astro build → postbuild Pagefind+SEO 守門
-pnpm preview    # 本機預覽 dist/
-```
+1. **聰明的問卷** — 先問最關鍵的幾題；只有在某個面向出現訊號時，才會接著追問細節。健康的人很快就能填完，不會被冗長的題目疲勞轟炸。
+2. **小測驗** — 認知面向若需要，會用簡單的互動小遊戲（反應速度、連連看）做更客觀的測量。
+3. **清楚的結果** — 五大面向各自分級（良好／需留意／偏低），並給出整體**分流建議**：一切正常、值得自我觀察、或建議尋求專業協助。
+4. **個人化衛教** — 依你的結果，推薦相關的衛教文章與精選影片，告訴你下一步可以做什麼。
+5. **安全網** — 若問卷觸及情緒低落或自我傷害的訊號，會立即顯示台灣的求助資源（1925、1995、119）。
 
-開發前先讀根目錄 `CLAUDE.md`（強制規則：TS strict 無 `any`、Svelte 5 runes、D3 子模組、OKLCH、字級 18px／觸控 44px、安全與架構規範）。
+## 你的資料，留在你的裝置
 
-## 專案結構
+Smart Func **沒有後端伺服器、不收集你的個資**。所有作答與結果預設只存在你自己瀏覽器的本機資料庫裡。**只有當你主動選擇**把結果送出時，資料才會離開你的裝置——而且是送到你指定的醫療收案單位。你也可以隨時把結果匯出成 PDF 自行保存。
 
-```
-src/
-├── engine/              # 客戶端引擎（非 UI）
-│   ├── func/            # ★ IC 評估：scorer / triage / questionnaire / objective-tests / recommendations
-│   └── workers/         # 重計算 Web Workers（規則引擎、基線、ML 推論）
-├── lib/
-│   ├── fhir/            # SMART on FHIR：client/launch（醫院）、cdsa-resources/submit（資源產生）
-│   │                    #   gcm-submit / collection-points / launch-return（GCM 收案點）
-│   ├── db/              # IndexedDB DAO（Dexie schema 在 db/schema.ts）
-│   ├── stores/          # Svelte 5 runes stores（assessment、auth…）
-│   ├── education/       # 衛教/影片 schema 與 runtime 索引
-│   └── utils/           # age-groups、loinc-map…
-├── components/          # UI：assess / education / workspace / dashboard / settings / fhir / ui …
-├── data/                # 內容層：education（文章）/ questionnaire（indicators.yaml）/ video-catalog
-├── pages/               # 路由：/assess /result /launch /education /history /workspace /settings
-├── layouts/  └ styles/  # 佈局 / 設計系統（OKLCH tokens）
-public/                  # models/*.onnx（ML）、sounds/（音效）、data/（建置產出索引）
-scripts/                 # build-content-index / validate-indicators / curate-videos / gcm-conformance …
-```
+---
 
-## 維護指引（依任務查）
+## 給不同的你
 
-| 我要改… | 動哪裡 | 注意 |
-|---------|--------|------|
-| **衛教文章** | `src/data/education/*.md`（frontmatter 須過 `content.config.ts` schema） | 成人 IC 主題 |
-| **IC 指標／問卷** | `src/data/questionnaire/indicators.yaml` | prebuild 經 `validate-indicators` 守門，改完跑 `pnpm build` 驗證 |
-| **衛教影片策展** | `pnpm curate:videos`（yt-dlp 取真實 metadata → 報告複審 → 寫 `video-catalog/`） | 需 yt-dlp + Chrome；channel-seeds/keywords 在 `scripts/curate/` |
-| **trigger ↔ 文章/影片對照** | `src/data/education/content-relevance.yaml`（單一真相源） | 改完 `pnpm build:video-index` |
-| **監測規則（閾值）** | **不在檔案**：臨床端於「設定 → 規則編輯器」維護，存進 IndexedDB | — |
-| **ML 模型** | 設定頁上傳新 `.onnx`（即時替換），或放 `public/models/` | — |
-| **收案點 / FHIR 上傳** | 見下節 | — |
+### 🙋 如果你是想了解自己的人
 
-### 收案點與 FHIR 上傳
+直接打開 <https://smart-func-cds.yao.care/> 開始評估即可，不需要任何帳號。評估完可以反覆查看歷次紀錄、匯出 PDF，或在徵詢醫療協助時把結果一併帶過去。這是一份**自我覺察的工具**，不是診斷——結果建議「尋求專業協助」時，請洽合格的醫療人員。
 
-結果頁（in-flow `ResultView` 與獨立 `/result/?id=` 的 `ResultViewWrapper`）都提供 `CollectionPointPicker`，受測者可選：
+### 🏥 如果你是醫療或收案單位
 
-- **醫院 FHIR Server**：手動填 Server URL + Client ID（fhirclient.js，standalone SMART launch）。
-- **GCM 預防醫學發展協會**（`https://gcm.fhir.yao.care`）：填暱稱即可，免事先設定。用原生 `fetch` + `crypto.subtle` 做 PKCE/動態註冊（要帶自訂 `login_hint`/`nickname`），模組 `src/lib/fhir/gcm-submit.ts`。
+受測者可以在結果頁選擇把評估結果，透過國際標準的 **SMART on FHIR** 上傳到你的收案點：
 
-兩條流程都導向統一的 **`/launch/`** 返回頁（`LaunchReturn.svelte` + 純函式 `launch-return.ts` 分流：GCM 優先、否則 fhirclient callback）。跨 redirect 在 sessionStorage 只存 `assessmentId`，返回頁再從 IndexedDB 重建 Observation/DiagnosticReport（`cdsa-resources.ts`，`CODE_SYSTEM = https://smart-func-cds.yao.care/code`）。
+- **醫院 FHIR Server** — 接上貴院既有的 FHIR 系統。
+- **GCM 預防醫學發展協會** — 受測者填個暱稱即可上傳，免事先設定。
 
-收案點清單為 typed 常數（`collection-points.ts`），新增機構在此加一條。
+除了自評，Smart Func 也內建一套**臨床監測與照護閉環**模組（生命徵象規則引擎、個人基線、AI 風險分析、異常通知與追蹤），提供臨床端的工作台與儀表板，協助把「一次評估」延伸為「持續照護」。
 
-驗證 GCM 端到端（對線上實例）：
+### 👩‍💻 如果你是開發者 / 開源社群
 
-```bash
-pnpm conformance https://gcm.fhir.yao.care   # register→authorize→token→transaction，斷言 POST / (application/fhir+json) → 200
-```
+Smart Func 完全開源（MIT 授權），純前端、零後端，部署在 GitHub Pages，任何人都可以自行架設、改作、貢獻內容（衛教文章、評估指標、衛教影片策展皆為開放的內容層）。
 
-> GCM 注意事項：scope **不帶** `openid`/`fhirUser`、`aud` 必為 GCM base、不自組 Patient（身分＝瀏覽器碼＋暱稱）、`redirect_uri` 三處（register/authorize/token）逐字一致。傳給 IndexedDB 的 `triageResult` 須 `$state.snapshot()` 解包（proxy 無法結構化複製）。
+> 完整的技術架構、開發規範、建置與部署說明，請見專案根目錄的 **`CLAUDE.md`**。
 
-## 領域常數速查
-
-- **年齡組**：`18-39` / `40-54` / `55-64`（55+ 全歸此組；65+ 可填，結果頁 advisory）
-- **五大域**：vitality 活力 / locomotion 行動 / cognition 認知 / psychological 心理 / sensory 感官
-- **域分級**：`high` ≥70 / `moderate` 40–69 / `low` <40
-- **分流**：`normal` / `observe` / `consult` / `incomplete`
-- **監測預警**：`normal` / `advisory` / `warning` / `critical`
-
-## 測試
-
-```bash
-pnpm test       # Vitest（單元 + 元件，jsdom + fake-indexeddb）
-pnpm test:e2e   # Playwright
-pnpm check      # astro check + svelte-check（型別）
-pnpm lint       # ESLint
-```
-
-## 部署
-
-- **push 到 `main` 自動觸發 `deploy.yml`**（GitHub Pages，`build_type=workflow`，自訂網域 + 強制 HTTPS）。需要時可 `gh workflow run deploy.yml --ref main` 手動觸發。
-- CI（`ci.yml`）：測試 + content-index 一致性 + Lighthouse（門檻全 warn）。
-- **驗站**：本機 proxy 會把網域解析成 198.18.x.x 假 IP — 一律用
-  `curl --resolve smart-func-cds.yao.care:443:185.199.108.153 https://smart-func-cds.yao.care/…` 或 DoH，別信本機 dig/curl。
+---
 
 ## 授權
 
-MIT License
+MIT License — 歡迎自由使用、修改與散布。
+
+> Smart Func 是一個**自我評估與決策輔助**服務，不能取代專業醫療診斷。若你對自己的健康有疑慮，請諮詢合格的醫療人員。
