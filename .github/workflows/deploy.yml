@@ -24,7 +24,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
-      - run: pnpm lint --max-warnings 10
+      - run: pnpm lint --max-warnings 0
       - run: pnpm build
         env:
           PUBLIC_CONTRIBUTION_WORKER_URL: ${{ vars.PUBLIC_CONTRIBUTION_WORKER_URL }}
