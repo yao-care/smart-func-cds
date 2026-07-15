@@ -30,6 +30,29 @@ interface Bundle {
   entry?: BundleEntry[];
 }
 
+/** Minimal Observation shape the CDSA write produces and this module reads.
+ *  Indicator-level detail is absent by design (see observationsToDomainScores). */
+interface FhirObservation {
+  identifier?: Array<{ system?: string; value?: string }>;
+  code?: { text?: string };
+  valueQuantity?: { value?: number };
+  note?: Array<{ text?: string }>;
+  interpretation?: Array<{ coding?: Array<{ code?: string }> }>;
+}
+
+/** Minimal DiagnosticReport shape this module reads. */
+interface FhirDiagnosticReport {
+  id?: string;
+  identifier?: Array<{ system?: string; value?: string }>;
+  status?: string;
+  subject?: { reference?: string };
+  effectivePeriod?: { start?: string; end?: string };
+  effectiveDateTime?: string;
+  extension?: Array<{ url?: string; valueDecimal?: number }>;
+  conclusion?: string;
+  conclusionCode?: Array<{ coding?: Array<{ code?: string }> }>;
+}
+
 /**
  * Map SNOMED conclusionCode → IC triage category. Falls back to 'observe'
  * when the code is unrecognised so reverse-mapped reports stay usable.
@@ -67,31 +90,29 @@ export function parseObservationCode(text: string): { domain: string } | null {
  * persisted in this minimal write, so it defaults to 0 / [] on read-back.
  */
 export function observationsToDomainScores(
-  observations: Record<string, any>[],
+  observations: FhirObservation[],
 ): DomainScore[] {
   const scores: DomainScore[] = [];
   for (const obs of observations) {
     // domain: prefer the project identifier "<assessmentId>::<domain>";
     // fall back to parsing code.text "Func IC <domain>".
-    const idVal = (obs.identifier as Array<{ system?: string; value?: string }> | undefined)
-      ?.find((i) => i.system === ID_SYSTEM)?.value;
+    const idVal = obs.identifier?.find((i) => i.system === ID_SYSTEM)?.value;
     let domain = idVal?.includes('::') ? idVal.split('::')[1] : undefined;
-    if (!domain) domain = parseObservationCode((obs.code?.text as string) ?? '')?.domain;
+    if (!domain) domain = parseObservationCode(obs.code?.text ?? '')?.domain;
     if (!domain || !IC_DOMAINS.has(domain)) continue;
 
-    const value = (obs.valueQuantity as { value?: number } | undefined)?.value;
+    const value = obs.valueQuantity?.value;
     if (typeof value !== 'number') continue;
 
     // band: authoritative from note "band: <band>"; fall back to L/N interpretation
     // (N → high; L is moderate-or-low, degrade to 'low' when the note is absent).
-    const noteText = (obs.note as Array<{ text?: string }> | undefined)?.[0]?.text ?? '';
+    const noteText = obs.note?.[0]?.text ?? '';
     const bandMatch = noteText.match(/band:\s*(high|moderate|low)/);
     let band: DomainScore['band'];
     if (bandMatch) {
       band = bandMatch[1] as DomainScore['band'];
     } else {
-      const interp = (obs.interpretation as Array<{ coding?: Array<{ code?: string }> }> | undefined)
-        ?.[0]?.coding?.[0]?.code;
+      const interp = obs.interpretation?.[0]?.coding?.[0]?.code;
       band = interp === 'N' ? 'high' : 'low';
     }
 
@@ -113,31 +134,30 @@ export function observationsToDomainScores(
  * Observations (domain/score/band); indicator-level detail is not persisted.
  */
 export function bundleToAssessment(
-  report: Record<string, any>,
-  observations: Record<string, any>[],
+  report: FhirDiagnosticReport,
+  observations: FhirObservation[],
 ): Assessment {
-  const identifiers = (report.identifier as Array<{ system?: string; value?: string }>) ?? [];
-  const idVal = identifiers.find((i) => i.system === ID_SYSTEM)?.value ?? report.id;
+  const identifiers = report.identifier ?? [];
+  const idVal = identifiers.find((i) => i.system === ID_SYSTEM)?.value ?? report.id ?? '';
 
-  const conclusionCode = report.conclusionCode?.[0]?.coding?.[0]?.code as string | undefined;
+  const conclusionCode = report.conclusionCode?.[0]?.coding?.[0]?.code;
   const category = snomedToCategory(conclusionCode);
 
-  const extensions = (report.extension as Array<{ url?: string; valueDecimal?: number }>) ?? [];
+  const extensions = report.extension ?? [];
   const confidence = extensions.find((x) => x.url === CONFIDENCE_EXT_URL)?.valueDecimal ?? 0;
 
-  const period = report.effectivePeriod as { start?: string; end?: string } | undefined;
+  const period = report.effectivePeriod;
   const startedAtStr = period?.start ?? report.effectiveDateTime;
   const startedAt = startedAtStr ? new Date(startedAtStr) : new Date(0);
   const completedAt = period?.end ? new Date(period.end) : undefined;
 
-  const conclusion = (report.conclusion as string | undefined) ?? '';
+  const conclusion = report.conclusion ?? '';
   const summary = stripLegacyConclusionPrefix(conclusion);
 
-  const subjectRef = (report.subject as { reference?: string } | undefined)?.reference ?? '';
+  const subjectRef = report.subject?.reference ?? '';
   const patientId = subjectRef.replace(/^Patient\//, '');
 
-  const period2 = report.effectivePeriod as { start?: string; end?: string } | undefined;
-  const assessmentDate = (period2?.start ?? report.effectiveDateTime ?? '').slice(0, 10);
+  const assessmentDate = (period?.start ?? report.effectiveDateTime ?? '').slice(0, 10);
 
   // Per-domain round-trip from the Observation resources (S2). Indicator-level
   // detail isn't persisted in the minimal write, so it defaults to 0 / [].
@@ -191,8 +211,8 @@ export async function fetchAssessmentFromFhir(
   if (!reportEntry) return null;
   const observations = entries
     .filter((e) => e.resource.resourceType === 'Observation')
-    .map((e) => e.resource as Record<string, any>);
-  return bundleToAssessment(reportEntry.resource as Record<string, any>, observations);
+    .map((e) => e.resource as FhirObservation);
+  return bundleToAssessment(reportEntry.resource as FhirDiagnosticReport, observations);
 }
 
 /**
@@ -214,20 +234,19 @@ export async function listAssessmentsFromFhir(
       `&_sort=-date`,
   )) as Bundle;
   return (bundle.entry ?? []).map((e) => {
-    const r = e.resource as Record<string, any>;
-    const identifiers = (r.identifier as Array<{ system?: string; value?: string }>) ?? [];
-    const idVal = identifiers.find((i) => i.system === ID_SYSTEM)?.value ?? (r.id as string);
-    const period = r.effectivePeriod as { start?: string } | undefined;
-    const dateStr = period?.start ?? (r.effectiveDateTime as string | undefined);
-    const conclusionCode = r.conclusionCode?.[0]?.coding?.[0]?.code as string | undefined;
-    const patientRef = (r.subject as { reference?: string } | undefined)?.reference ?? '';
+    const r = e.resource as FhirDiagnosticReport;
+    const identifiers = r.identifier ?? [];
+    const idVal = identifiers.find((i) => i.system === ID_SYSTEM)?.value ?? r.id ?? '';
+    const dateStr = r.effectivePeriod?.start ?? r.effectiveDateTime;
+    const conclusionCode = r.conclusionCode?.[0]?.coding?.[0]?.code;
+    const patientRef = r.subject?.reference ?? '';
     return {
       id: idVal,
-      fhirReportId: r.id as string,
+      fhirReportId: r.id ?? '',
       patientRef,
       date: new Date(dateStr ?? 0),
       category: snomedToCategory(conclusionCode),
-      summary: stripLegacyConclusionPrefix((r.conclusion as string) ?? ''),
+      summary: stripLegacyConclusionPrefix(r.conclusion ?? ''),
     };
   });
 }

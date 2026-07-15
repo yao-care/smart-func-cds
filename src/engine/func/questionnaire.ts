@@ -1,6 +1,6 @@
 import { z } from 'astro/zod';
-import { IC_DOMAIN_NAMES, type ICDomain } from '../../lib/education/schemas';
-import { AGE_GROUPS_ADULT, type AgeGroupAdult } from '../../lib/utils/age-groups';
+import { IC_DOMAIN_NAMES } from '../../lib/education/schemas';
+import { AGE_GROUPS_ADULT } from '../../lib/utils/age-groups';
 
 export const INDICATOR_KINDS = ['likert', 'objective'] as const;
 export type IndicatorKind = typeof INDICATOR_KINDS[number];
