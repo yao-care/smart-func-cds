@@ -9,12 +9,13 @@
 
 ## 技術棧
 
-Astro 5 SSG ＋ Svelte 5 runes｜CSS Custom Properties + OKLCH（`src/styles/tokens.css`）｜Content Layer + Zod｜IndexedDB via Dexie 4｜D3 子模組｜ONNX Runtime Web (WASM) in Worker｜**FHIR**：fhirclient.js（醫院）＋原生 fetch/`crypto.subtle` PKCE（GCM 收案，`src/lib/fhir/gcm-submit.ts`）｜Pagefind｜jsPDF｜pnpm。
+Astro 6 SSG ＋ Svelte 5 runes｜CSS Custom Properties + OKLCH（`src/styles/tokens.css`）｜Content Layer + Zod｜IndexedDB via Dexie 4｜D3 子模組｜ONNX Runtime Web (WASM) in Worker｜**FHIR**：fhirclient.js（醫院）＋原生 fetch/`crypto.subtle` PKCE（GCM 收案，`src/lib/fhir/gcm-submit.ts`）｜Pagefind｜jsPDF｜pnpm。
 
 ## 強制規則
 
 - **程式碼**：TypeScript strict、不允許 `any`；Svelte 5 runes（`$state`/`$derived`/`$effect`），不用 Svelte 4 store；D3 僅子模組匯入（禁 `import * as d3`）；CSS 色彩用 OKLCH + `@supports` hex fallback；Mermaid 色彩用 hex（非 oklch()）；最小字級 18px（`--text-xs`）、最小觸控目標 44px。
 - **安全**：禁硬編碼密碼/Token/密鑰；console.log 禁輸出 PII（姓名、身分證）；PDF 報告僅用 FHIR Patient ID；不使用大陸廠牌 AI。GCM 收案 scope **不帶 `openid`/`fhirUser`**、`aud` 必為 GCM base。
+- **供應鏈**：`.github/workflows/` 的 `uses:` 一律釘 40 字元 commit SHA ＋ `# vX.Y.Z` 註解，禁用 `@v4` 這類可變 tag（tag 可被上游靜默重指）。annotated tag 需 deref 到 commit 再釘，勿用 tag 物件 SHA。SHA 更新交由 Dependabot（`.github/dependabot.yml`）。
 - **架構**：重計算（規則引擎、基線、ML、IC 評分）放 Web Worker，主執行緒只處理 UI 與閉環狀態；多分頁用 BroadcastChannel；離線操作排入 sync queue。
 - **內容**：衛教文章 `src/data/education/`（Content Collections，schema 於 `src/content.config.ts`）；IC 指標／問卷 `src/data/questionnaire/indicators.yaml`（prebuild 經 `validate-indicators` 守門）；影片策展 `src/data/video-catalog/`（`pnpm curate:videos`）；trigger↔文章/影片單一真相源 `src/data/education/content-relevance.yaml`；監測規則 YAML 由臨床端在「設定→規則編輯器」存進 IndexedDB（非檔案）；模型 `public/models/*.onnx`、音效 `public/sounds/`。
 
