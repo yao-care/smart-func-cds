@@ -1,7 +1,6 @@
 ---
 import App from '../layouts/App.astro';
-import JsonLd from '../components/seo/JsonLd.astro';
-import { organizationSchema } from '../lib/seo/schema';
+import { SITE } from '../lib/seo/site';
 
 const introHighlights = [
   '成人可自行操作的功能健康自評',
@@ -43,8 +42,6 @@ const outcomes = [
 ---
 
 <App title="關於" description="關於 Smart Func 成人功能健康評估：免費、純瀏覽器、保護隱私的成人內在能力（IC）自評工具。">
-  <JsonLd data={organizationSchema(Astro.site!)} />
-
   <h1>關於 Smart Func 成人功能健康評估</h1>
 
   <section class="about-section about-twocol" aria-label="系統介紹">
@@ -108,6 +105,16 @@ const outcomes = [
       </ul>
       <p class="flow-note">判讀為「功能良好」時，僅顯示結果摘要與內在能力雷達圖，不另行推送衛教資源。</p>
     </div>
+  </section>
+
+  <section class="about-section" aria-label="開發與維運">
+    <h2>開發與維運</h2>
+    <p>
+      本系統由{SITE.organization.legalName}（{SITE.organization.name}，統一編號 {SITE.organization.taxID}，
+      地址：{SITE.organization.address.addressLocality}{SITE.organization.address.streetAddress}）開發與維運。
+      產品說明見 <a href={SITE.organization.productPage}>{SITE.organization.productPage}</a>，
+      原始碼公開於 <a href={SITE.repo} rel="noopener noreferrer">{SITE.repo}</a>。
+    </p>
   </section>
 
   <section class="about-cta" aria-label="開始評估">

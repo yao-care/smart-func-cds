@@ -3,7 +3,6 @@ import App from '../layouts/App.astro';
 import { siteFaqs } from '../data/site-faqs';
 import JsonLd from '../components/seo/JsonLd.astro';
 import {
-  organizationSchema,
   webSiteSchema,
   softwareApplicationSchema,
   faqPageSchema,
@@ -32,7 +31,8 @@ const trust = [
 ---
 
 <App title="免費成人功能健康自評" description="免費的成人內在能力（IC）自評工具：依年齡引導式問卷，即時提供身體活力、行動、認知、心理、感官五大面向的功能分級與衛教建議。資料只在瀏覽器端運算，免登入、保護隱私。">
-  <JsonLd data={[organizationSchema(site), webSiteSchema(site), softwareApplicationSchema(site), faqPageSchema(siteFaqs)]} />
+  {/* 公司節點由 Base.astro 統一輸出（全站每頁），此處只放本頁自己的節點。 */}
+  <JsonLd data={[webSiteSchema(site), softwareApplicationSchema(site), faqPageSchema(siteFaqs)]} />
 
   <!-- 1. Hero -->
   <section class="hero" aria-label="主要訴求">

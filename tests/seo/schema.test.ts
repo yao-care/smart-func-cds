@@ -12,17 +12,40 @@ import { SITE } from '../../src/lib/seo/site';
 
 const site = new URL('https://smart-func-cds.yao.care/');
 
+const ORG_ID = 'https://www.yao.care/#organization';
+
 describe('organizationSchema', () => {
-  it('帶 @type Organization 與機構名', () => {
-    const s = organizationSchema(site);
+  it('公司節點帶官網的 @id 與法律登記名稱', () => {
+    const s = organizationSchema();
     expect(s['@context']).toBe('https://schema.org');
-    expect(s['@type']).toBe('Organization');
-    expect(s.name).toBe('yao.care 藥提醒科技');
-    expect(s.url).toBe('https://yao.care');
+    expect(s['@type']).toEqual(['Organization', 'MedicalOrganization']);
+    expect(s['@id']).toBe(ORG_ID);
+    expect(s.name).toBe('yao.care');
+    expect(s.legalName).toBe('藥提醒科技有限公司');
+    expect(s.url).toBe('https://www.yao.care');
+    expect(s.taxID).toBe('83620786');
   });
-  it('sameAs 為空時不輸出該欄位', () => {
-    const s = organizationSchema(site) as Record<string, unknown>;
-    expect('sameAs' in s).toBe(false);
+  it('@id 用官網網域，不用本站網域', () => {
+    // 各站若用自己的 #organization，實體圖會裂成多個不相干的公司。
+    expect(organizationSchema()['@id']).not.toContain('smart-func-cds');
+  });
+});
+
+describe('公司只定義一次、其餘節點以 @id 參照', () => {
+  it('WebSite / SoftwareApplication / FAQPage 的 publisher 是純參照', () => {
+    const nodes = [
+      webSiteSchema(site),
+      softwareApplicationSchema(site),
+      faqPageSchema([{ question: 'Q', answer: 'A' }]),
+      medicalWebPageSchema(site, {
+        title: 't', summary: 's', ageGroups: ['18-39'],
+        url: 'https://x/', publishedAt: new Date('2026-01-01'),
+      }),
+    ] as Array<Record<string, any>>;
+    for (const n of nodes) {
+      expect(n.publisher).toEqual({ '@id': ORG_ID });
+      expect(JSON.stringify(n)).not.toContain('藥提醒科技有限公司');
+    }
   });
 });
 
@@ -43,6 +66,12 @@ describe('softwareApplicationSchema', () => {
     expect(s.applicationCategory).toBe('HealthApplication');
     expect(s.offers.price).toBe('0');
     expect(s.isAccessibleForFree).toBe(true);
+  });
+  it('帶自己的 @id 與官網產品頁 sameAs', () => {
+    const s = softwareApplicationSchema(site);
+    expect(s['@id']).toBe('https://smart-func-cds.yao.care/#software');
+    expect(s.sameAs).toContain('https://www.yao.care/medical/func/');
+    expect(s.sameAs).toContain('https://github.com/yao-care/smart-func-cds');
   });
 });
 
@@ -108,7 +137,7 @@ describe('faqPageSchema', () => {
 describe('序列化', () => {
   it('所有工廠輸出可 JSON.stringify', () => {
     expect(() => JSON.stringify([
-      organizationSchema(site), webSiteSchema(site),
+      organizationSchema(), webSiteSchema(site),
       softwareApplicationSchema(site),
     ])).not.toThrow();
   });
