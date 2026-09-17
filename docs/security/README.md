@@ -15,7 +15,7 @@
 
 | ISO 27001 控制項 | 文件 | 狀態 |
 |---|---|---|
-| A.8.8 技術弱點管理 | [dependency-risk-acceptance.md](dependency-risk-acceptance.md) | ✅ 掃描 `20260714-231345-04b8` 已處置（High 21→0，commit `044bb7a`）；2026-09-17 複查新增 1 筆 critical 風險接受（附不適用理由） |
+| A.8.8 技術弱點管理 | [dependency-risk-acceptance.md](dependency-risk-acceptance.md) | ✅ 掃描 `20260714-231345-04b8` 已處置（High 21→0，commit `044bb7a`）；2026-09-17 複查發現 1 筆 critical（astro AVIF RCE），當日升級 Astro 7 修補，audit critical 歸零 |
 | A.5.24 事件回應規劃與演練 | [incident-response-plan.md](incident-response-plan.md) | ⚠️ 程序已訂，**演練記錄待填** |
 | A.5.26 事件回應聯絡窗口 | [incident-response-contacts.md](incident-response-contacts.md) | ⚠️ 角色信箱已定，**備援監看者待確認** |
 | A.5.29 備份還原測試 | 見下方「本系統的備份標的」 | ⚠️ 零後端，無資料庫備份標的；原始碼／部署設定的還原測試**待執行** |

@@ -21,34 +21,27 @@
 ## 複查 2026-09-17（`pnpm audit`）
 
 複查方式：`pnpm audit`（全量）與 `pnpm audit --prod`。距上次處置兩個月，
-上游新增了若干告警，其中 **1 筆 critical** 需要判定。
+上游新增了若干告警，其中 **1 筆 critical** 已於同日升級修補（見下），其餘留待正式掃描判定。
+
+### 已修補
+
+#### astro 6.4.8 → 7.3.3 — Astro: Remote code execution through AVIF image optimization（Critical）
+
+- **弱點**：透過 AVIF 影像最佳化路徑可達成遠端程式碼執行；影響 `<7.2.8`，
+  **6.x 分支無修補版**，修補僅存在於 Astro 7。
+- **處置**：2026-09-17 升級 `astro@^7.3.3` + `@astrojs/svelte@^9.0.1`
+  （後者 peer 要求 astro ^7）＋ sitemap／rss 同步升版。
+  升級後 `pnpm audit` 的 **critical 歸零**。
+- **補充**：本專案原本就未使用 Astro 影像最佳化（無 `astro:assets` 匯入、
+  無 `<Image>`／`<Picture>`、`astro.config.mjs` 未設 `image`），故此弱點的
+  觸發條件先前即不成立；升級是為了根治而非緊急遏制。
+- **驗證**：`pnpm check` 0 error、399 測試全綠、`pnpm build` 完成且 SEO 守門通過。
+- **連帶**：`smart-geri-cds`、`smart-pedi-cds` 同步升級（三者版本一致）。
+  geri 原本因 astro 6 綁定而接受的 esbuild 0.27.7 風險亦隨之消解。
 
 ### 接受風險（暫不修補）
 
-#### 1. astro 6.4.8 — Astro: Remote code execution through AVIF image optimization（Critical）
-
-- **弱點**：透過 AVIF 影像最佳化路徑可達成遠端程式碼執行。
-- **影響版本／修補版**：`<7.2.8` → `>=7.2.8`。**6.x 分支無修補版**，
-  修補只存在於 Astro 7。
-- **不適用理由（已核實）**：本專案**完全未使用 Astro 的影像最佳化**——
-  `src/` 內無 `astro:assets` 匯入、無 `<Image>` / `<Picture>` 元件，
-  `astro.config.mjs` 亦未設定 `image`。所有圖片為 `public/` 下的靜態檔，
-  直接由 GitHub Pages 供應，不經最佳化管線。**觸發條件（AVIF 最佳化）
-  在本專案不成立。**
-  - 另：本站為 SSG，產物為靜態檔，執行期無 Node 伺服器可被觸及；
-    即使觸發也僅限建置期（CI runner 與維運者本機），輸入為 repo 內自有檔案。
-- **上游阻因**：修補需升級至 Astro 7（major）。跨 major 升級會牽動
-  Content Layer、integrations 與既有產生檔管線，屬獨立工作，不宜夾在
-  安全修補中倉促進行。
-- **再評估條件**（任一成立即須立即處置）：
-  1. 本專案開始使用 `astro:assets` / `<Image>` / `<Picture>`，或設定影像最佳化
-     → **升級 Astro 7 必須先於該功能上線**。
-  2. 出現針對建置期的實際利用手法，或 CI 開始處理外部來源的影像。
-  3. Astro 7 升級評估完成（三個 CDS app 宜一併進行，版本相同）。
-- **相同狀況的 repo**：`smart-geri-cds`、`smart-pedi-cds` 亦為 astro 6.4.8，
-  同一判定成立；升級應三者同步評估。
-
-#### 2. 其餘 high／moderate 告警
+#### 其餘 high／moderate 告警
 
 `pnpm audit` 的計數同時涵蓋 devDependencies 與間接相依的多條路徑，數字會遠大於
 實際暴露面（多為 DoS 類、僅在建置期或開發伺服器成立）。本次未逐筆接受，

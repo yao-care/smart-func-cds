@@ -9,7 +9,7 @@
 
 ## 技術棧
 
-Astro 6 SSG ＋ Svelte 5 runes｜CSS Custom Properties + OKLCH（`src/styles/tokens.css`）｜Content Layer + Zod｜IndexedDB via Dexie 4｜D3 子模組｜ONNX Runtime Web (WASM) in Worker｜**FHIR**：fhirclient.js（醫院）＋原生 fetch/`crypto.subtle` PKCE（GCM 收案，`src/lib/fhir/gcm-submit.ts`）｜Pagefind｜jsPDF｜pnpm。
+Astro 7 SSG ＋ Svelte 5 runes｜CSS Custom Properties + OKLCH（`src/styles/tokens.css`）｜Content Layer + Zod｜IndexedDB via Dexie 4｜D3 子模組｜ONNX Runtime Web (WASM) in Worker｜**FHIR**：fhirclient.js（醫院）＋原生 fetch/`crypto.subtle` PKCE（GCM 收案，`src/lib/fhir/gcm-submit.ts`）｜Pagefind｜jsPDF｜pnpm。
 
 ## 強制規則
 
