@@ -4,6 +4,23 @@ import { reverseScoreOf, zToPercentile, median, clamp } from './utils';
 import type { ICDomain } from '../../lib/education/schemas';
 import type { AgeGroupAdult } from '../../lib/utils/age-groups';
 
+/**
+ * 本院（收案單位）自行觀測的常模，覆寫 indicators.yaml 內建的文獻常模。
+ * 由「設定 → 本院常模」寫入 IndexedDB `normThresholds`，以 indicator id 為 key。
+ */
+export interface NormOverride {
+  mean: number;
+  std: number;
+}
+
+/** 髒資料防線：與內建常模套用同一組合理性檢查，不合格者一律忽略。 */
+function isUsableNorm(norm: { mean: number; std: number } | null | undefined): norm is NormOverride {
+  if (!norm) return false;
+  const { mean, std } = norm;
+  if (!Number.isFinite(mean) || !Number.isFinite(std)) return false;
+  return std > 0 && std >= Math.abs(mean) * 0.01;
+}
+
 export interface DomainScore {
   domain: ICDomain;
   score: number;
@@ -207,6 +224,7 @@ export function scoreObjectiveIndicator(
   indicator: ObjectiveIndicator,
   trials: number[],
   ageGroup: AgeGroupAdult,
+  normOverride?: NormOverride | null,
 ): IndicatorScore | null {
   const { test } = indicator;
 
@@ -231,15 +249,24 @@ export function scoreObjectiveIndicator(
     ? median(validTrials)
     : validTrials[0];
 
-  const norm = test.norms[ageGroup];
-  if (norm === null) {
-    if (import.meta.env?.PROD) {
-      throw new Error(`Norm for ${indicator.id}@${ageGroup} is null in prod build`);
+  // 常模優先序：本院常模（可用者）→ indicators.yaml 文獻常模。
+  // 本院常模也能補上該年齡層缺漏（norms 為 null）的格子；不可用的本院常模一律忽略，
+  // 退回文獻常模，避免髒輸入污染分數。
+  let effectiveNorm: NormOverride;
+  if (isUsableNorm(normOverride)) {
+    effectiveNorm = normOverride;
+  } else {
+    const norm = test.norms[ageGroup];
+    if (norm === null) {
+      if (import.meta.env?.PROD) {
+        throw new Error(`Norm for ${indicator.id}@${ageGroup} is null in prod build`);
+      }
+      return null;
     }
-    return null;
+    if (!isUsableNorm(norm)) return null;
+    effectiveNorm = norm;
   }
-  const { mean: normMean, std: normStd } = norm;
-  if (normStd <= 0 || normStd < Math.abs(normMean) * 0.01) return null;
+  const { mean: normMean, std: normStd } = effectiveNorm;
 
   let z = (measuredValue - normMean) / normStd;
   if (indicator.direction === 'higher_is_worse') z = -z;
@@ -320,12 +347,14 @@ export function scoreAssessment(input: {
   answers: Record<string, number>;
   objectiveResults: Record<string, number[]>;
   ageGroup: AgeGroupAdult;
+  /** 以 indicator id 為 key 的本院常模；未提供者沿用 indicators.yaml 文獻常模。 */
+  normOverrides?: Record<string, NormOverride>;
 }): {
   indicatorScores: IndicatorScore[];
   domainScores: DomainScore[];
   applicableWeights: Record<string, number>;
 } {
-  const { indicators, answers, objectiveResults, ageGroup } = input;
+  const { indicators, answers, objectiveResults, ageGroup, normOverrides } = input;
 
   const applicable = indicators.filter(ind =>
     !ind.ageApplicability || ind.ageApplicability.includes(ageGroup)
@@ -341,7 +370,7 @@ export function scoreAssessment(input: {
       if (s) indicatorScores.push(s);
     } else {
       const trials = objectiveResults[ind.id] ?? [];
-      const s = scoreObjectiveIndicator(ind, trials, ageGroup);
+      const s = scoreObjectiveIndicator(ind, trials, ageGroup, normOverrides?.[ind.id]);
       if (s) indicatorScores.push(s);
     }
   }

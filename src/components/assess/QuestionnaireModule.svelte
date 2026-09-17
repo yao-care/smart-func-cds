@@ -10,7 +10,8 @@
     type LikertQuestion,
     type ObjectiveIndicator,
   } from '../../engine/func/questionnaire';
-  import { scoreAssessment, isDetailRevealed } from '../../engine/func/scorer';
+  import { scoreAssessment, isDetailRevealed, type NormOverride } from '../../engine/func/scorer';
+  import { db } from '../../lib/db/schema';
   import { IC_DOMAIN_NAMES, type ICDomain } from '../../lib/education/schemas';
   import CrisisResources from './CrisisResources.svelte';
   import ReactionTimeTest from './ReactionTimeTest.svelte';
@@ -77,11 +78,30 @@
   let isSaving = $state(false);
   let showCrisis = $state(false);
 
+  // 本院常模（設定→本院常模寫入 IndexedDB）：有就覆寫 indicators.yaml 的文獻常模。
+  // 空表＝沿用文獻常模，故載入失敗時退回空物件即可，不阻斷評估。
+  let normOverrides = $state<Record<string, NormOverride>>({});
+  $effect(() => {
+    const ag = ageGroup;
+    if (!ag) {
+      normOverrides = {};
+      return;
+    }
+    (async () => {
+      try {
+        const rows = await db.normThresholds.where('ageGroup').equals(ag).toArray();
+        normOverrides = Object.fromEntries(rows.map(r => [r.metric, { mean: r.mean, std: r.std }]));
+      } catch {
+        normOverrides = {};
+      }
+    })();
+  });
+
   // 即時域分數（只反映已作答題；未答的 detail 指標自然不計入 → band = screener band）
   // 單次 scoreAssessment；bandByDomain 與 domainSummary 共用同一結果避免重複計算。
   const assessmentResult = $derived.by(() => {
     if (!ageGroup) return null;
-    return scoreAssessment({ indicators: ALL_INDICATORS, answers, objectiveResults, ageGroup });
+    return scoreAssessment({ indicators: ALL_INDICATORS, answers, objectiveResults, ageGroup, normOverrides });
   });
 
   const bandByDomain = $derived<Partial<Record<ICDomain, 'high' | 'moderate' | 'low'>>>(
@@ -218,6 +238,7 @@
       answers,
       objectiveResults,
       ageGroup,
+      normOverrides,
     });
     assessmentStore.addAnalysis({
       answers,

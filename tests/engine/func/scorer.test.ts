@@ -214,6 +214,69 @@ describe('scoreObjectiveIndicator — reaction-time', () => {
   });
 });
 
+describe('scoreObjectiveIndicator — 本院常模覆寫（normOverride）', () => {
+  it('有效 override 取代 YAML 常模：measured = override.mean → score ≈ 50', () => {
+    const trials = [...Array(5).fill(999), ...Array(20).fill(250)];
+    // YAML 常模 mean=350 → 250ms 算「快」會得高分；套用本院常模 mean=250 後應回到 50。
+    const withYaml = scoreObjectiveIndicator(RT, trials, '18-39');
+    expect(withYaml!.score).toBeGreaterThan(80);
+
+    const r = scoreObjectiveIndicator(RT, trials, '18-39', { mean: 250, std: 55 });
+    expect(r!.score).toBeGreaterThanOrEqual(49);
+    expect(r!.score).toBeLessThanOrEqual(51);
+  });
+
+  it('override 可補上該年齡層缺漏（norms 為 null）的常模', () => {
+    const trials = [...Array(5).fill(999), ...Array(20).fill(285)];
+    expect(scoreObjectiveIndicator(RT, trials, '40-54')).toBeNull();
+
+    const r = scoreObjectiveIndicator(RT, trials, '40-54', { mean: 285, std: 60 });
+    expect(r!.score).toBeGreaterThanOrEqual(49);
+    expect(r!.score).toBeLessThanOrEqual(51);
+  });
+
+  it('無效 override（std<=0 / 非有限值）退回 YAML 常模，不讓髒資料污染分數', () => {
+    const trials = [...Array(5).fill(999), ...Array(20).fill(350)];
+    for (const bad of [{ mean: 250, std: 0 }, { mean: 250, std: -5 }, { mean: Number.NaN, std: 55 }]) {
+      const r = scoreObjectiveIndicator(RT, trials, '18-39', bad);
+      expect(r!.score).toBeGreaterThanOrEqual(49);
+      expect(r!.score).toBeLessThanOrEqual(51);
+    }
+  });
+
+  it('無效 override 且該年齡層本來就沒常模 → null（不憑空計分）', () => {
+    const trials = [...Array(5).fill(999), ...Array(20).fill(285)];
+    expect(scoreObjectiveIndicator(RT, trials, '40-54', { mean: 285, std: 0 })).toBeNull();
+  });
+
+  it('scoreAssessment 依 indicator id 派送 normOverrides', () => {
+    const trials = [...Array(5).fill(999), ...Array(20).fill(250)];
+    const r = scoreAssessment({
+      indicators: [RT],
+      answers: {},
+      objectiveResults: { 'cognition.processing_speed': trials },
+      ageGroup: '18-39',
+      normOverrides: { 'cognition.processing_speed': { mean: 250, std: 55 } },
+    });
+    const s = r.indicatorScores.find(x => x.indicatorId === 'cognition.processing_speed');
+    expect(s!.score).toBeGreaterThanOrEqual(49);
+    expect(s!.score).toBeLessThanOrEqual(51);
+  });
+
+  it('未傳 normOverrides 時行為不變（回歸保護）', () => {
+    const trials = [...Array(5).fill(999), ...Array(20).fill(350)];
+    const r = scoreAssessment({
+      indicators: [RT],
+      answers: {},
+      objectiveResults: { 'cognition.processing_speed': trials },
+      ageGroup: '18-39',
+    });
+    const s = r.indicatorScores.find(x => x.indicatorId === 'cognition.processing_speed');
+    expect(s!.score).toBeGreaterThanOrEqual(49);
+    expect(s!.score).toBeLessThanOrEqual(51);
+  });
+});
+
 describe('scoreDomain', () => {
   const mkScore = (id: string, score: number, style: 'capacity'|'symptom', weight: number = 1): IndicatorScore => ({
     indicatorId: id, domain: 'vitality', style, kind: 'likert', score,

@@ -20,6 +20,8 @@ jobs:
             echo "::error::video-index.json out of sync. Run 'pnpm build:video-index' and commit."
             exit 1
           fi
+      - name: Fail if education coverage regressed
+        run: pnpm validate:coverage
       - run: pnpm test
 
   lighthouse:

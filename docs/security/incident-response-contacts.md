@@ -1,0 +1,51 @@
+# 事件回應聯絡窗口（ISO 27001 A.5.26）
+
+> 本檔與 `smart-geri-cds` / `smart-pedi-cds` 的同名文件內容一致——同一維運者、
+> 同一網域（`yao.care`）、同一組外部相關方。任一處異動時三個 repo 需同步更新。
+>
+> 公開 repo 中**避免放置個人手機／私人 email**；真實聯絡明細置於私有 ISMS，
+> 本檔僅保留角色與指向。至少每半年複查一次。
+
+## 主要窗口
+
+> 本系統目前為**單人維運**：以下四個角色均由同一名維運者身兼。真實個人聯絡明細
+> （姓名／電話／私人 email）放**私有 ISMS**（維運者私有 QC 目錄
+> `agent.system-integration-quality-control`，本機路徑不於公開 repo 揭露）；
+> 本公開檔僅列角色與角色信箱。
+
+| 角色 | 職責 | 擔任者 | 主要聯絡 | 個人明細 |
+|---|---|---|---|---|
+| 事件指揮（IC） | 統籌回應、分級決策 | 單人維運者 | service@yao.care | 私有 ISMS |
+| 技術負責 | 遏制、修補、部署 | 單人維運者 | service@yao.care | 私有 ISMS |
+| 部署／基礎設施 | GitHub Pages、DNS、密鑰輪替、安全標頭 worker | 單人維運者 | service@yao.care | 私有 ISMS |
+| 對外／法遵 | 通知收案機構、法遵溝通 | 單人維運者 | service@yao.care | 私有 ISMS |
+
+**備援聯絡管道**：`service@yao.care`（受監控角色信箱）。主維運者失聯時，
+回應由監看此信箱者承接。
+
+> ⚠️ **殘存單點風險**：以角色信箱作為備援，其**實質韌性取決於是否有第二人也監看
+> `service@yao.care`**。若該信箱目前僅由同一名維運者監看，「主維運者失聯」情境仍未
+> 真正緩解。建議安排至少一名**獨立的人**共同監看此信箱並具回滾權限，明細納入私有 ISMS。
+> （此風險與 geri／pedi 共通，非本 repo 特有。）
+
+## 外部相關方
+
+| 對象 | 用途 | 聯絡指向 |
+|---|---|---|
+| DNS 託管商：**Linode（Akamai）** | 網域 DNS 劫持／異常時還原 zone | Linode 帳號擁有者（明細見私有 ISMS）；https://www.linode.com/support/ |
+| 網域註冊商：**GoDaddy.com, LLC** | 網域層異常／轉移鎖定；續約（到期 **2027-04-16**） | GoDaddy 帳號擁有者（明細見私有 ISMS）；https://www.godaddy.com/help |
+| 收案機構（FHIR 資料接收方） | 涉上傳資料風險時通知 | **GCM 協會**及其他合作醫院；窗口明細見私有 ISMS。註：上傳為**選用**，受測者可選擇不收案（資料僅留瀏覽器端） |
+| GitHub 支援 | Pages／Actions 異常 | https://support.github.com/ |
+
+## 通報路徑
+
+```mermaid
+flowchart LR
+  R[發現者] --> IC[事件指揮 IC]
+  IC --> T[技術負責]
+  IC --> O[對外/法遵]
+  T --> D[部署/基礎設施]
+  style IC fill:#3d6b54,color:#ffffff
+```
+
+> 複查記錄：上次複查（待填 YYYY-MM-DD）／負責人（待填）。

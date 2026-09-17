@@ -14,10 +14,13 @@
     isCurrent: boolean;
   }
 
+  /**
+   * 只放「本地回饋資料算得出來」的指標。
+   * Recall／F1 需要漏報（false negative）的真實事件標註，零後端架構下沒有這個來源，
+   * 故不列入——寧可少一格，也不要顯示假數字讓臨床端誤判模型表現。
+   */
   interface PrecisionMetrics {
     precision: number;
-    recall: number;
-    f1: number;
     falsePositiveRate: number;
     sampleCount: number;
   }
@@ -118,16 +121,13 @@
       const totalAlerts = allAlerts.length;
       const fpCount = fpAlerts.length;
 
-      // Placeholder precision metrics derived from actual data
+      // 臨床端標記為 false_positive 的警示＝誤報；其餘視為真陽性。
+      // 這只支撐 precision 與誤報率，不足以推得 recall（見 PrecisionMetrics 註解）。
       const truePositives = totalAlerts - fpCount;
       const precision = totalAlerts > 0 ? truePositives / totalAlerts : 0;
-      const recall = 0.87; // placeholder — would come from backend evaluation
-      const f1 = precision > 0 && recall > 0
-        ? (2 * precision * recall) / (precision + recall)
-        : 0;
       const falsePositiveRate = totalAlerts > 0 ? fpCount / totalAlerts : 0;
 
-      metrics = { precision, recall, f1, falsePositiveRate, sampleCount: totalAlerts };
+      metrics = { precision, falsePositiveRate, sampleCount: totalAlerts };
     } catch {
       toast = { message: '無法載入精度指標', type: 'error' };
     } finally {
@@ -255,7 +255,10 @@
   <Accordion title="精度指標" defaultOpen={false}>
     {#if !metrics}
       <div class="metrics-placeholder">
-        <p class="metrics-note">指標由本地回饋資料計算，recall 為後端評估佔位值。</p>
+        <p class="metrics-note">
+          指標由臨床端的警示回饋（標記為誤報者）計算。Recall／F1 需要漏報事件的標註，
+          本系統無此資料來源，故不提供。
+        </p>
         <Button variant="secondary" size="sm" onclick={loadMetrics} disabled={isLoadingMetrics}>
           {isLoadingMetrics ? '計算中…' : '計算指標'}
         </Button>
@@ -266,20 +269,14 @@
           <dt>Precision</dt>
           <dd class="metric-value">{pct(metrics.precision)}</dd>
         </div>
-        <div class="metric-card">
-          <dt>Recall</dt>
-          <dd class="metric-value">{pct(metrics.recall)}</dd>
-        </div>
-        <div class="metric-card">
-          <dt>F1 Score</dt>
-          <dd class="metric-value">{pct(metrics.f1)}</dd>
-        </div>
         <div class="metric-card metric-card-warn">
           <dt>False Positive Rate</dt>
           <dd class="metric-value">{pct(metrics.falsePositiveRate)}</dd>
         </div>
       </dl>
-      <p class="sample-count">樣本數：{metrics.sampleCount} 筆警示</p>
+      <p class="sample-count">
+        樣本數：{metrics.sampleCount} 筆警示（僅含本機資料；Recall／F1 因缺漏報標註不計算）
+      </p>
     {/if}
   </Accordion>
 
