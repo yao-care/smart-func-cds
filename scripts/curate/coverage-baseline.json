@@ -1,0 +1,14 @@
+{
+  "_comment": "目前尚無任何衛教內容的 trigger（棘輪基準線）。補齊後請重跑 pnpm validate:coverage --update-baseline 收斂此清單；此檔只會變短，不該變長。",
+  "empty": [
+    "func.triage.consult.18-39",
+    "func.triage.consult.40-54",
+    "func.triage.consult.55-64",
+    "func.triage.incomplete.18-39",
+    "func.triage.incomplete.40-54",
+    "func.triage.incomplete.55-64",
+    "func.triage.observe.18-39",
+    "func.triage.observe.40-54",
+    "func.triage.observe.55-64"
+  ]
+}
