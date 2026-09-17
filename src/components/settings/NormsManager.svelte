@@ -1,21 +1,47 @@
 <script lang="ts">
   /**
-   * Per-hospital norm thresholds. The triage engine first looks up
-   * NormThresholds (ageGroup × metric) in IndexedDB; only when the row
-   * is missing does it fall back to the bundled defaults. This UI lets
-   * a clinic record their own mean/std observations so the radar's
-   * "this child vs our population" reading reflects local reality
-   * instead of a synthetic prior.
+   * 本院常模設定。客觀指標計分（`scoreObjectiveIndicator`）的常模優先序為
+   * 「本院常模（IndexedDB `normThresholds`，ageGroup × indicator id）→ indicators.yaml 文獻常模」，
+   * 由 `QuestionnaireModule` 讀出後以 `normOverrides` 傳入計分引擎。
+   * 此頁讓收案單位登錄自己的 mean/std 觀測值，讓 z-score 反映在地族群而非外部文獻母體。
+   *
+   * 預設值一律從 indicators.yaml 取（含引用出處），不在本檔另訂常數——
+   * 兩邊各寫一份會讓設定頁顯示的「系統預設」與實際計分用的常模悄悄分岔。
    */
+  import yaml from 'js-yaml';
   import { db, type NormThreshold } from '../../lib/db/schema';
   import { AGE_GROUPS_ADULT, AGE_GROUP_LABELS, type AgeGroupAdult } from '../../lib/utils/age-groups';
+  import indicatorsRaw from '../../data/questionnaire/indicators.yaml?raw';
+  import { indicatorSchema, type Indicator, type ObjectiveIndicator } from '../../engine/func/questionnaire';
+  import { IC_DOMAIN_NAMES } from '../../lib/education/schemas';
 
-  // Metrics the objective scorer consults (norms keyed by indicator id).
-  // Defaults are placeholders pending literature norms (see indicators.yaml).
-  const METRICS: Array<{ key: string; label: string; defaultMean: number; defaultStd: number; unit: string }> = [
-    { key: 'cognition.processing_speed', label: '處理速度（反應時間）', defaultMean: 350, defaultStd: 80, unit: 'ms' },
-    { key: 'cognition.executive_function', label: '執行功能（TMT-A）', defaultMean: 35, defaultStd: 12, unit: '秒' },
-  ];
+  interface MetricDef {
+    key: string;
+    label: string;
+    unit: string;
+    /** 文獻常模；該年齡層缺值時為 null（此時本院常模等於「補上缺口」而非覆寫）。 */
+    norms: Record<AgeGroupAdult, { mean: number; std: number; citation: string } | null>;
+  }
+
+  // 客觀指標＝計分引擎會查常模的指標，直接從 indicators.yaml 推導。
+  const METRICS: MetricDef[] = (() => {
+    const doc = yaml.load(indicatorsRaw) as Record<string, unknown[]>;
+    const out: MetricDef[] = [];
+    for (const domain of IC_DOMAIN_NAMES) {
+      for (const raw of doc[domain] ?? []) {
+        const ind: Indicator = indicatorSchema.parse(raw);
+        if (ind.kind !== 'objective') continue;
+        const obj = ind as ObjectiveIndicator;
+        out.push({
+          key: obj.id,
+          label: obj.label,
+          unit: obj.test.type === 'reaction-time' ? 'ms' : '秒',
+          norms: obj.test.norms,
+        });
+      }
+    }
+    return out;
+  })();
 
   let activeAgeGroup = $state<AgeGroupAdult>('18-39');
   let rows = $state<NormThreshold[]>([]);
@@ -39,16 +65,21 @@
     return rows.find((r) => r.metric === metric) ?? null;
   }
 
-  function effectiveMean(metric: string): number {
-    const r = getRow(metric);
-    if (r) return r.mean;
-    return METRICS.find((m) => m.key === metric)?.defaultMean ?? 0;
+  /** 該年齡層的文獻常模；缺值（null）代表 indicators.yaml 未提供此年齡層的常模。 */
+  function literatureNorm(metric: string): { mean: number; std: number; citation: string } | null {
+    return METRICS.find((m) => m.key === metric)?.norms[activeAgeGroup] ?? null;
   }
 
-  function effectiveStd(metric: string): number {
+  function effectiveMean(metric: string): number | null {
+    const r = getRow(metric);
+    if (r) return r.mean;
+    return literatureNorm(metric)?.mean ?? null;
+  }
+
+  function effectiveStd(metric: string): number | null {
     const r = getRow(metric);
     if (r) return r.std;
-    return METRICS.find((m) => m.key === metric)?.defaultStd ?? 0;
+    return literatureNorm(metric)?.std ?? null;
   }
 
   function updateRow(metric: string, mean: number, std: number): void {
@@ -74,14 +105,32 @@
   function onMeanInput(metric: string, e: Event) {
     const value = parseFloat((e.target as HTMLInputElement).value);
     if (Number.isNaN(value)) return;
-    updateRow(metric, value, effectiveStd(metric));
+    updateRow(metric, value, effectiveStd(metric) ?? 0);
   }
 
   function onStdInput(metric: string, e: Event) {
     const value = parseFloat((e.target as HTMLInputElement).value);
     if (Number.isNaN(value)) return;
-    updateRow(metric, effectiveMean(metric), value);
+    updateRow(metric, effectiveMean(metric) ?? 0, value);
   }
+
+  /**
+   * 與 `scorer.ts` 的 `isUsableNorm` 同一組規則：不合格的常模計分時會被忽略，
+   * 所以擋在存檔前，避免使用者以為已生效。
+   */
+  function isRowValid(row: NormThreshold): boolean {
+    if (!Number.isFinite(row.mean) || !Number.isFinite(row.std)) return false;
+    return row.std > 0 && row.std >= Math.abs(row.mean) * 0.01;
+  }
+
+  const invalidDirtyMetrics = $derived(
+    [...dirty]
+      .map((k) => k.split('::')[1])
+      .filter((metric) => {
+        const row = getRow(metric);
+        return row ? !isRowValid(row) : false;
+      }),
+  );
 
   async function resetToDefault(metric: string): Promise<void> {
     const id = `${activeAgeGroup}::${metric}`;
@@ -93,6 +142,7 @@
   }
 
   async function saveAll(): Promise<void> {
+    if (invalidDirtyMetrics.length > 0) return;
     saving = true;
     try {
       for (const key of dirty) {
@@ -112,7 +162,8 @@
 <section class="norms-manager">
   <header class="manager-header">
     <p class="header-note">
-      常模用於計算 z-score。每年齡層 × 指標一筆。未填的條目，分流引擎會 fallback 到系統預設值。
+      常模用於計算客觀測驗的 z-score。每年齡層 × 指標一筆：<strong>填了就以本院常模計分</strong>，
+      未填則沿用 indicators.yaml 的文獻常模（來源見下表）。標準差需大於 0，否則計分時會被忽略。
     </p>
   </header>
 
@@ -144,14 +195,16 @@
       {#each METRICS as m}
         {@const row = getRow(m.key)}
         {@const isCustom = !!row}
-        <tr class:custom={isCustom}>
+        {@const lit = literatureNorm(m.key)}
+        {@const invalid = !!row && !isRowValid(row)}
+        <tr class:custom={isCustom} class:invalid>
           <td>{m.label}</td>
           <td class="muted">{m.unit}</td>
           <td>
             <input
               type="number"
               step="0.01"
-              value={effectiveMean(m.key)}
+              value={effectiveMean(m.key) ?? ''}
               oninput={(e) => onMeanInput(m.key, e)}
               aria-label={`${m.label} 平均值`}
             />
@@ -160,12 +213,21 @@
             <input
               type="number"
               step="0.01"
-              value={effectiveStd(m.key)}
+              value={effectiveStd(m.key) ?? ''}
               oninput={(e) => onStdInput(m.key, e)}
+              aria-invalid={invalid}
               aria-label={`${m.label} 標準差`}
             />
           </td>
-          <td class="muted">{isCustom ? '醫院自訂' : '系統預設'}</td>
+          <td class="muted">
+            {#if isCustom}
+              本院常模
+            {:else if lit}
+              文獻常模：{lit.citation}
+            {:else}
+              此年齡層無文獻常模——未填則此指標不計分
+            {/if}
+          </td>
           <td>
             {#if isCustom}
               <button type="button" class="btn-link danger" onclick={() => resetToDefault(m.key)}>還原預設</button>
@@ -181,10 +243,13 @@
       type="button"
       class="btn-save"
       onclick={saveAll}
-      disabled={dirty.size === 0 || saving}
+      disabled={dirty.size === 0 || saving || invalidDirtyMetrics.length > 0}
     >
       {saving ? '儲存中…' : `儲存變更 (${dirty.size})`}
     </button>
+    {#if invalidDirtyMetrics.length > 0}
+      <span class="warn-note" role="alert">標準差需大於 0（且不得小於平均值的 1%），否則計分時會被忽略。</span>
+    {/if}
     {#if toast}<span class="toast">{toast}</span>{/if}
   </div>
 </section>
@@ -246,6 +311,19 @@
 
   .norms-table tr.custom {
     background: color-mix(in srgb, var(--accent) 10%, var(--bg));
+  }
+
+  .norms-table tr.invalid {
+    background: color-mix(in srgb, var(--danger) 10%, var(--bg));
+  }
+
+  .norms-table input[aria-invalid='true'] {
+    border-color: var(--danger);
+  }
+
+  .warn-note {
+    font-size: var(--text-xs);
+    color: var(--danger);
   }
 
   .norms-table input[type='number'] {
