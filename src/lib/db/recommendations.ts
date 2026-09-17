@@ -121,9 +121,23 @@ export async function mergeRecommendations(
 }
 
 /**
+ * 分流層衛教所掛的虛擬 domain（見 scripts/build-content-index.ts 的
+ * TRIAGE_PSEUDO_DOMAIN）。內容來自 content-relevance 的
+ * `func.triage.<category>.<age>` trigger，屬於跨面向的總體指引。
+ *
+ * 它必須獨立於呼叫端傳入的 domains 之外被併入：`incomplete` 不是面向 band，
+ * 永遠不會出現在 `<severity>::<domain>::<age>`，少了這一層，被判 incomplete 的
+ * 使用者在結果頁只會看到「建議閱讀」標題配一片空白。
+ */
+export const TRIAGE_PSEUDO_DOMAIN = '__triage__';
+
+/**
  * Merge across multiple domains for a single category — used by ResultView
  * (called once per assessment with the anomaly-domain list and the child's ageGroup).
  * Items are deduped across domains by the same composite key.
+ *
+ * 順序：分流層（跨面向的總體指引）→ 各面向。先讀「這個結果代表什麼、接下來怎麼做」，
+ * 再讀個別面向的做法。
  */
 export async function mergeRecommendationsForContext(
   tenantId: string,
@@ -133,7 +147,9 @@ export async function mergeRecommendationsForContext(
 ): Promise<RecommendationItem[]> {
   const seen = new Set<string>();
   const out: RecommendationItem[] = [];
-  for (const domain of domains) {
+  // 去重機制共用，故分流層即使與某面向推薦同一篇文章也只會出現一次。
+  const lookupDomains = [TRIAGE_PSEUDO_DOMAIN, ...domains.filter(d => d !== TRIAGE_PSEUDO_DOMAIN)];
+  for (const domain of lookupDomains) {
     const items = await mergeRecommendations(tenantId, category, domain, ageGroup);
     for (const item of items) {
       const key = itemKey(item);

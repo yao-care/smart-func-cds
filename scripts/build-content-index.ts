@@ -242,10 +242,39 @@ export async function buildContentIndex(opts: BuildOptions = {}): Promise<Runtim
   // Collect all education slugs while building recommendations
   const allEducationSlugs = new Set<string>();
 
+  // 分流層文章掛在這個虛擬 domain 下。它不是真實面向（IC_DOMAIN_NAMES 不含它），
+  // 而是讓 func.triage.<category>.<age> 的文章有地方落腳：結果頁的
+  // mergeRecommendationsForContext 會先併入這一層，再併各面向。
+  // 沒有這層時，被判 incomplete 的使用者必定看到空的「建議閱讀」——
+  // 因為 incomplete 不是面向 band，永遠不會出現在 `<severity>::<domain>::<age>`。
+  const TRIAGE_PSEUDO_DOMAIN = '__triage__';
+
   for (const entry of contentRelevance.triggers) {
-    // Only func.domain triggers contribute to recommendations.
-    // func.domain.<domain>.<band>.<age> — recommendations are keyed by band
-    // as the "severity" slot (low | moderate), matching the runtime lookup.
+    // 分流層：func.triage.<category>.<age>。category 已由 trigger 名稱決定，
+    // 故此處不看 article.severities（面向層才用它區分 observe / consult）。
+    const triageMatch = entry.trigger.match(/^func\.triage\.([^.]+)\.([^.]+)$/);
+    if (triageMatch) {
+      const [, category, age] = triageMatch;
+      for (const article of entry.articles) {
+        allEducationSlugs.add(article.slug);
+        const fm = await readFrontmatter(article.slug, cwd);
+        const key = `${category}::${TRIAGE_PSEUDO_DOMAIN}::${age}`;
+        const list = (recommendations[key] ??= []);
+        if (!list.some(r => r.slug === article.slug)) {
+          const item: { source: 'internal'; slug: string; title?: string; summary?: string } = {
+            source: 'internal',
+            slug: article.slug,
+          };
+          if (fm.title) item.title = fm.title;
+          if (fm.summary) item.summary = fm.summary;
+          list.push(item);
+        }
+      }
+      continue;
+    }
+
+    // 面向層：func.domain.<domain>.<band>.<age> — recommendations 以文章自己宣告的
+    // severity 為 key 的第一段（band 不進 key），與 runtime 查法一致。
     const domainMatch = entry.trigger.match(
       /^func\.domain\.([^.]+)\.(low|moderate)\.([^.]+)$/,
     );
