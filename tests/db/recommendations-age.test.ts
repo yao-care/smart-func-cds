@@ -169,3 +169,76 @@ describe('overlay merge (3-part key, age-independent)', () => {
     expect(unique.size).toBe(slugs.filter(Boolean).length);
   });
 });
+
+// ── 分流層（__triage__）併入 ──────────────────────────────────────────────────
+//
+// 結果頁的「建議閱讀」以 mergeRecommendationsForContext 取內容。分流層文章掛在
+// `__triage__` 這個虛擬 domain 下，必須被自動併入——否則被判 incomplete 的
+// 使用者（incomplete 不是面向 band，永遠不會有面向層推薦）會看到空白區塊。
+
+describe('分流層 __triage__ 併入', () => {
+  const TRIAGE_INDEX: RuntimeIndex = {
+    ...MOCK_INDEX,
+    recommendations: {
+      ...MOCK_INDEX.recommendations,
+      'incomplete::__triage__::13-24m': [
+        { source: 'internal', slug: 'incomplete-guide', title: '評估未完成怎麼看', summary: '部分結果的解讀範圍' },
+      ],
+      'monitor::__triage__::13-24m': [
+        { source: 'internal', slug: 'observe-next-steps', title: '追蹤觀察期間可以做什麼', summary: '記錄與重測時機' },
+      ],
+    },
+  };
+
+  beforeEach(async () => {
+    vi.resetModules();
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(TRIAGE_INDEX),
+    }));
+    vi.stubEnv('BASE_URL', '/');
+    const mod = await import('$lib/db/recommendations');
+    mergeRecommendationsForContext = mod.mergeRecommendationsForContext;
+  });
+
+  it('沒有任何面向推薦時（incomplete）仍取得分流層文章', async () => {
+    const items = await mergeRecommendationsForContext(
+      'demo-tenant',
+      'incomplete',
+      ['gross_motor'],
+      '13-24m',
+    );
+    expect(items.map(i => i.slug)).toContain('incomplete-guide');
+  });
+
+  it('分流層排在面向層之前（跨面向的總體指引先讀）', async () => {
+    const items = await mergeRecommendationsForContext(
+      'demo-tenant',
+      'monitor',
+      ['gross_motor'],
+      '13-24m',
+    );
+    expect(items[0]?.slug).toBe('observe-next-steps');
+    expect(items.map(i => i.slug)).toContain('gross-motor-activities');
+  });
+
+  it('多個面向時分流層只出現一次', async () => {
+    const items = await mergeRecommendationsForContext(
+      'demo-tenant',
+      'monitor',
+      ['gross_motor', 'fine_motor'],
+      '13-24m',
+    );
+    expect(items.filter(i => i.slug === 'observe-next-steps')).toHaveLength(1);
+  });
+
+  it('分流層無內容時不影響面向層結果', async () => {
+    const items = await mergeRecommendationsForContext(
+      'demo-tenant',
+      'refer',
+      ['gross_motor'],
+      '13-24m',
+    );
+    expect(items.map(i => i.slug)).toContain('when-to-seek-help');
+  });
+});

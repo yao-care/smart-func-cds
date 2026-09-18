@@ -56,8 +56,10 @@ describe('recommendations', () => {
     expect(Object.keys(neu.recommendations).length).toBeGreaterThan(0);
   });
 
-  it('所有 key 皆符合 <triageCategory>::<icDomain>::<ageGroup>', () => {
-    const domains = IC_DOMAIN_NAMES.join('|');
+  it('所有 key 皆符合 <triageCategory>::<icDomain|__triage__>::<ageGroup>', () => {
+    // `__triage__` 是分流層文章的虛擬 domain（見 build-content-index 的
+    // TRIAGE_PSEUDO_DOMAIN）；除它之外仍只允許真實面向，避免拼錯的 domain 混進來。
+    const domains = [...IC_DOMAIN_NAMES, '__triage__'].join('|');
     const ages = AGE_GROUPS_ADULT.join('|');
     const re = new RegExp(`^(normal|observe|consult|incomplete)::(${domains})::(${ages})$`);
     for (const key of Object.keys(neu.recommendations)) {
@@ -167,5 +169,59 @@ describe('clinicalEducation', () => {
   it('存在且為物件', () => {
     expect(neu.clinicalEducation).toBeDefined();
     expect(typeof neu.clinicalEducation).toBe('object');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 5. 分流層 recommendations（__triage__）
+//
+// 結果頁的「建議閱讀」查 recommendations[`<category>::<domain>::<age>`]；
+// 先前只有 func.domain.* 會產生這些 key，導致被判 incomplete 的使用者
+// 一定看到空的建議區塊。分流層文章改由 __triage__ 這個虛擬 domain 承載。
+// ---------------------------------------------------------------------------
+describe('分流層 recommendations（__triage__）', () => {
+  const TRIAGE_CATEGORIES_WITH_CONTENT = ['observe', 'consult', 'incomplete'] as const;
+
+  it('三種會被派生的分流類別 × 三個年齡組皆有內容', () => {
+    for (const cat of TRIAGE_CATEGORIES_WITH_CONTENT) {
+      for (const age of AGE_GROUPS_ADULT) {
+        const key = `${cat}::__triage__::${age}`;
+        const items = neu.recommendations[key];
+        expect(items, `${key} 應有分流層衛教`).toBeDefined();
+        expect(items!.length, `${key} 不可為空`).toBeGreaterThan(0);
+        for (const item of items!) {
+          expect(item.source).toBe('internal');
+          expect(item.slug).toBeTruthy();
+          // title/summary 由 frontmatter 帶入，缺了結果頁會顯示空卡片
+          expect(item.title, `${key} 的 ${item.slug} 缺 title`).toBeTruthy();
+          expect(item.summary, `${key} 的 ${item.slug} 缺 summary`).toBeTruthy();
+        }
+      }
+    }
+  });
+
+  it('normal 不產生分流層 key（trigger-derivation 明確跳過 normal）', () => {
+    for (const age of AGE_GROUPS_ADULT) {
+      expect(neu.recommendations[`normal::__triage__::${age}`]).toBeUndefined();
+    }
+  });
+
+  it('__triage__ 不是真實面向，不得混進面向 key', () => {
+    for (const domain of IC_DOMAIN_NAMES) {
+      expect(domain).not.toBe('__triage__');
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 6. 不可達的 trigger 不該存在
+//
+// `deriveFuncTriggers` 對 category==='normal' 明確跳過，故 func.triage.normal.*
+// 永遠派生不到。留著只會讓內容維護者以為那裡該填東西。
+// ---------------------------------------------------------------------------
+describe('不可達 trigger', () => {
+  it('不存在 func.triage.normal.*', () => {
+    const stale = Object.keys(neu.triggers).filter(k => k.startsWith('func.triage.normal.'));
+    expect(stale, `func.triage.normal.* 派生不到，不應存在：${stale.join(', ')}`).toEqual([]);
   });
 });

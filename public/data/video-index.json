@@ -4,9 +4,12 @@
     "attention-memory-care",
     "balanced-nutrition",
     "cognitive-health",
+    "consult-preparation",
     "fatigue-management",
     "hearing-care",
+    "incomplete-assessment-guide",
     "mood-self-awareness",
+    "observe-next-steps",
     "physical-activity-benefits",
     "psychological-wellbeing",
     "screen-eye-strain",
@@ -91,6 +94,30 @@
     ]
   },
   "recommendations": {
+    "consult::__triage__::18-39": [
+      {
+        "slug": "consult-preparation",
+        "source": "internal",
+        "summary": "評估建議諮詢時的準備方式：找哪一科、帶什麼資料、怎麼描述問題，以及這份結果在門診中的定位",
+        "title": "準備和醫師討論你的評估結果"
+      }
+    ],
+    "consult::__triage__::40-54": [
+      {
+        "slug": "consult-preparation",
+        "source": "internal",
+        "summary": "評估建議諮詢時的準備方式：找哪一科、帶什麼資料、怎麼描述問題，以及這份結果在門診中的定位",
+        "title": "準備和醫師討論你的評估結果"
+      }
+    ],
+    "consult::__triage__::55-64": [
+      {
+        "slug": "consult-preparation",
+        "source": "internal",
+        "summary": "評估建議諮詢時的準備方式：找哪一科、帶什麼資料、怎麼描述問題，以及這份結果在門診中的定位",
+        "title": "準備和醫師討論你的評估結果"
+      }
+    ],
     "consult::cognition::18-39": [
       {
         "slug": "cognitive-health",
@@ -371,6 +398,54 @@
         "source": "internal",
         "summary": "成人均衡飲食原則、食慾變化的覺察與維持良好營養狀態的實用建議",
         "title": "均衡營養與食慾照護"
+      }
+    ],
+    "incomplete::__triage__::18-39": [
+      {
+        "slug": "incomplete-assessment-guide",
+        "source": "internal",
+        "summary": "完成面向少於三個時結果的可信範圍：哪些能參考、哪些不能推論，以及接著完成評估的實用做法",
+        "title": "評估未完成時，怎麼看已經測到的部分"
+      }
+    ],
+    "incomplete::__triage__::40-54": [
+      {
+        "slug": "incomplete-assessment-guide",
+        "source": "internal",
+        "summary": "完成面向少於三個時結果的可信範圍：哪些能參考、哪些不能推論，以及接著完成評估的實用做法",
+        "title": "評估未完成時，怎麼看已經測到的部分"
+      }
+    ],
+    "incomplete::__triage__::55-64": [
+      {
+        "slug": "incomplete-assessment-guide",
+        "source": "internal",
+        "summary": "完成面向少於三個時結果的可信範圍：哪些能參考、哪些不能推論，以及接著完成評估的實用做法",
+        "title": "評估未完成時，怎麼看已經測到的部分"
+      }
+    ],
+    "observe::__triage__::18-39": [
+      {
+        "slug": "observe-next-steps",
+        "source": "internal",
+        "summary": "評估結果落在「追蹤觀察」時的自我管理重點：要記錄什麼、多久再測一次、什麼情況要提前就醫",
+        "title": "追蹤觀察期間可以做什麼"
+      }
+    ],
+    "observe::__triage__::40-54": [
+      {
+        "slug": "observe-next-steps",
+        "source": "internal",
+        "summary": "評估結果落在「追蹤觀察」時的自我管理重點：要記錄什麼、多久再測一次、什麼情況要提前就醫",
+        "title": "追蹤觀察期間可以做什麼"
+      }
+    ],
+    "observe::__triage__::55-64": [
+      {
+        "slug": "observe-next-steps",
+        "source": "internal",
+        "summary": "評估結果落在「追蹤觀察」時的自我管理重點：要記錄什麼、多久再測一次、什麼情況要提前就醫",
+        "title": "追蹤觀察期間可以做什麼"
       }
     ],
     "observe::cognition::18-39": [
@@ -964,50 +1039,74 @@
       "videoIds": []
     },
     "func.triage.consult.18-39": {
+      "articleSlugs": [
+        "consult-preparation"
+      ],
+      "educationSlug": "consult-preparation",
       "inapplicable": false,
       "videoIds": []
     },
     "func.triage.consult.40-54": {
+      "articleSlugs": [
+        "consult-preparation"
+      ],
+      "educationSlug": "consult-preparation",
       "inapplicable": false,
       "videoIds": []
     },
     "func.triage.consult.55-64": {
+      "articleSlugs": [
+        "consult-preparation"
+      ],
+      "educationSlug": "consult-preparation",
       "inapplicable": false,
       "videoIds": []
     },
     "func.triage.incomplete.18-39": {
+      "articleSlugs": [
+        "incomplete-assessment-guide"
+      ],
+      "educationSlug": "incomplete-assessment-guide",
       "inapplicable": false,
       "videoIds": []
     },
     "func.triage.incomplete.40-54": {
+      "articleSlugs": [
+        "incomplete-assessment-guide"
+      ],
+      "educationSlug": "incomplete-assessment-guide",
       "inapplicable": false,
       "videoIds": []
     },
     "func.triage.incomplete.55-64": {
-      "inapplicable": false,
-      "videoIds": []
-    },
-    "func.triage.normal.18-39": {
-      "inapplicable": false,
-      "videoIds": []
-    },
-    "func.triage.normal.40-54": {
-      "inapplicable": false,
-      "videoIds": []
-    },
-    "func.triage.normal.55-64": {
+      "articleSlugs": [
+        "incomplete-assessment-guide"
+      ],
+      "educationSlug": "incomplete-assessment-guide",
       "inapplicable": false,
       "videoIds": []
     },
     "func.triage.observe.18-39": {
+      "articleSlugs": [
+        "observe-next-steps"
+      ],
+      "educationSlug": "observe-next-steps",
       "inapplicable": false,
       "videoIds": []
     },
     "func.triage.observe.40-54": {
+      "articleSlugs": [
+        "observe-next-steps"
+      ],
+      "educationSlug": "observe-next-steps",
       "inapplicable": false,
       "videoIds": []
     },
     "func.triage.observe.55-64": {
+      "articleSlugs": [
+        "observe-next-steps"
+      ],
+      "educationSlug": "observe-next-steps",
       "inapplicable": false,
       "videoIds": []
     }

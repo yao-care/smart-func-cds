@@ -2,7 +2,8 @@
   import { authStore } from '../../lib/stores/auth.svelte';
   import { getTenantId, getTenantDisplayName } from '../../lib/utils/tenant';
   import {
-    DOMAINS,
+    MANAGEABLE_DOMAINS,
+    TRIAGE_PSEUDO_DOMAIN,
     CATEGORIES,
     getDefaultRecommendations,
     getOverlay,
@@ -20,6 +21,9 @@
   import { AGE_GROUPS_ADULT } from '../../lib/utils/age-groups';
 
   const DOMAIN_LABELS: Record<string, string> = {
+    // 分流層不是面向，而是「這個分流結果本身」的跨面向衛教（見 db/recommendations
+    // 的 TRIAGE_PSEUDO_DOMAIN）；列在最前面，與結果頁的呈現順序一致。
+    [TRIAGE_PSEUDO_DOMAIN]: '分流層（跨面向）',
     vitality: '身體活力',
     locomotion: '行動功能',
     cognition: '認知功能',
@@ -80,7 +84,7 @@
       const list = await getCustomEducation(tid);
       customEducation = list;
       const next: Record<string, CellState> = {};
-      for (const d of DOMAINS) {
+      for (const d of MANAGEABLE_DOMAINS) {
         const overlay = await getOverlay(tid, cat, d);
         next[d] = {
           hasOverlay: !!overlay,
@@ -230,7 +234,7 @@
   </nav>
 
   <ul class="domain-tree">
-    {#each DOMAINS as domain}
+    {#each MANAGEABLE_DOMAINS as domain}
       {@const cell = cells[domain]}
       {@const overlayItems = cell?.items ?? []}
       <li class="domain-row" class:has-overlay={cell?.hasOverlay} class:expanded={cell?.expanded}>

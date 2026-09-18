@@ -5,10 +5,17 @@
 #
 # trigger 格式：
 #   func.domain.<domain>.<band>.<ageGroup>   band ∈ {low, moderate}
-#   func.triage.<category>.<ageGroup>         category ∈ {normal, observe, consult, incomplete}
+#   func.triage.<category>.<ageGroup>         category ∈ {observe, consult, incomplete}
+#     （normal 不列：trigger-derivation.ts 明確跳過 normal，寫了也派生不到）
 # 每篇文章可標：
 #   browse:true       → 進入 /education 核心清單與矩陣主文章
 #   severities:[...]  → 進入 recommendations（observe / consult）；省略則僅瀏覽
+#
+# 兩層 trigger 的文章用途不同：
+#   func.domain.* 的文章 → recommendations[`<severity>::<domain>::<age>`]（面向導向）
+#   func.triage.*  的文章 → recommendations[`<category>::__triage__::<age>`]（跨面向的分流層內容，
+#                            由 mergeRecommendationsForContext 併入結果頁「建議閱讀」最前面）
+#   func.triage.* 的文章不需要 severities——category 已由 trigger 名稱決定。
 inapplicable:
   vitality: []
   locomotion: []
@@ -178,16 +185,40 @@ triggers:
       - { slug: hearing-care, browse: true, severities: [observe, consult] }
       - { slug: screen-eye-strain, browse: true, severities: [observe, consult] }
   # ── 分流 triage ────────────────────────────────────────────────────
-  - { trigger: func.triage.normal.18-39, videoIds: [], articles: [] }
-  - { trigger: func.triage.normal.40-54, videoIds: [], articles: [] }
-  - { trigger: func.triage.normal.55-64, videoIds: [], articles: [] }
-  - { trigger: func.triage.observe.18-39, videoIds: [], articles: [] }
-  - { trigger: func.triage.observe.40-54, videoIds: [], articles: [] }
-  - { trigger: func.triage.observe.55-64, videoIds: [], articles: [] }
-  - { trigger: func.triage.consult.18-39, videoIds: [], articles: [] }
-  - { trigger: func.triage.consult.40-54, videoIds: [], articles: [] }
-  - { trigger: func.triage.consult.55-64, videoIds: [], articles: [] }
-  - { trigger: func.triage.incomplete.18-39, videoIds: [], articles: [] }
-  - { trigger: func.triage.incomplete.40-54, videoIds: [], articles: [] }
-  - { trigger: func.triage.incomplete.55-64, videoIds: [], articles: [] }
+  - trigger: func.triage.observe.18-39
+    videoIds: []
+    articles:
+      - { slug: observe-next-steps }
+  - trigger: func.triage.observe.40-54
+    videoIds: []
+    articles:
+      - { slug: observe-next-steps }
+  - trigger: func.triage.observe.55-64
+    videoIds: []
+    articles:
+      - { slug: observe-next-steps }
+  - trigger: func.triage.consult.18-39
+    videoIds: []
+    articles:
+      - { slug: consult-preparation }
+  - trigger: func.triage.consult.40-54
+    videoIds: []
+    articles:
+      - { slug: consult-preparation }
+  - trigger: func.triage.consult.55-64
+    videoIds: []
+    articles:
+      - { slug: consult-preparation }
+  - trigger: func.triage.incomplete.18-39
+    videoIds: []
+    articles:
+      - { slug: incomplete-assessment-guide }
+  - trigger: func.triage.incomplete.40-54
+    videoIds: []
+    articles:
+      - { slug: incomplete-assessment-guide }
+  - trigger: func.triage.incomplete.55-64
+    videoIds: []
+    articles:
+      - { slug: incomplete-assessment-guide }
 clinicalAlertEducation: {}
