@@ -1086,18 +1086,6 @@
       "inapplicable": false,
       "videoIds": []
     },
-    "func.triage.normal.18-39": {
-      "inapplicable": false,
-      "videoIds": []
-    },
-    "func.triage.normal.40-54": {
-      "inapplicable": false,
-      "videoIds": []
-    },
-    "func.triage.normal.55-64": {
-      "inapplicable": false,
-      "videoIds": []
-    },
     "func.triage.observe.18-39": {
       "articleSlugs": [
         "observe-next-steps"

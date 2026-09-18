@@ -212,3 +212,16 @@ describe('分流層 recommendations（__triage__）', () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// 6. 不可達的 trigger 不該存在
+//
+// `deriveFuncTriggers` 對 category==='normal' 明確跳過，故 func.triage.normal.*
+// 永遠派生不到。留著只會讓內容維護者以為那裡該填東西。
+// ---------------------------------------------------------------------------
+describe('不可達 trigger', () => {
+  it('不存在 func.triage.normal.*', () => {
+    const stale = Object.keys(neu.triggers).filter(k => k.startsWith('func.triage.normal.'));
+    expect(stale, `func.triage.normal.* 派生不到，不應存在：${stale.join(', ')}`).toEqual([]);
+  });
+});

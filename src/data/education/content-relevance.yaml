@@ -5,7 +5,8 @@
 #
 # trigger 格式：
 #   func.domain.<domain>.<band>.<ageGroup>   band ∈ {low, moderate}
-#   func.triage.<category>.<ageGroup>         category ∈ {normal, observe, consult, incomplete}
+#   func.triage.<category>.<ageGroup>         category ∈ {observe, consult, incomplete}
+#     （normal 不列：trigger-derivation.ts 明確跳過 normal，寫了也派生不到）
 # 每篇文章可標：
 #   browse:true       → 進入 /education 核心清單與矩陣主文章
 #   severities:[...]  → 進入 recommendations（observe / consult）；省略則僅瀏覽
@@ -184,9 +185,6 @@ triggers:
       - { slug: hearing-care, browse: true, severities: [observe, consult] }
       - { slug: screen-eye-strain, browse: true, severities: [observe, consult] }
   # ── 分流 triage ────────────────────────────────────────────────────
-  - { trigger: func.triage.normal.18-39, videoIds: [], articles: [] }
-  - { trigger: func.triage.normal.40-54, videoIds: [], articles: [] }
-  - { trigger: func.triage.normal.55-64, videoIds: [], articles: [] }
   - trigger: func.triage.observe.18-39
     videoIds: []
     articles:

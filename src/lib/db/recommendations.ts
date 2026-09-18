@@ -4,9 +4,31 @@ import { loadVideoIndex } from '../education/index-loader';
 import { IC_DOMAIN_NAMES } from '../education/schemas';
 import type { AgeGroupAdult } from '../utils/age-groups';
 
+/**
+ * 分流層衛教所掛的虛擬 domain（見 scripts/build-content-index.ts 的
+ * TRIAGE_PSEUDO_DOMAIN）。內容來自 content-relevance 的
+ * `func.triage.<category>.<age>` trigger，屬於跨面向的總體指引。
+ *
+ * 它必須獨立於呼叫端傳入的 domains 之外被併入：`incomplete` 不是面向 band，
+ * 永遠不會出現在 `<severity>::<domain>::<age>`，少了這一層，被判 incomplete 的
+ * 使用者在結果頁只會看到「建議閱讀」標題配一片空白。
+ */
+export const TRIAGE_PSEUDO_DOMAIN = '__triage__';
+
 export const DOMAINS = IC_DOMAIN_NAMES;
 
 export const CATEGORIES: RecommendationCategory[] = ['normal', 'observe', 'consult', 'incomplete'];
+
+/**
+ * 設定頁「推薦清單管理」可編輯的軸。
+ *
+ * 比 DOMAINS 多一個分流層（`__triage__`）：它不是真實面向，但同樣有 overlay
+ * 可覆寫（key 為 `<tenant>::<category>::__triage__`），收案單位才改得到
+ * 跨面向的分流層衛教。DOMAINS 維持只代表五大面向，不要為了 UI 方便把它污染。
+ *
+ * 分流層放最前面——它是「這個結果代表什麼」，順序與結果頁的呈現一致。
+ */
+export const MANAGEABLE_DOMAINS: string[] = [TRIAGE_PSEUDO_DOMAIN, ...DOMAINS];
 
 export type Domain = typeof DOMAINS[number];
 
@@ -119,17 +141,6 @@ export async function mergeRecommendations(
   }
   return out;
 }
-
-/**
- * 分流層衛教所掛的虛擬 domain（見 scripts/build-content-index.ts 的
- * TRIAGE_PSEUDO_DOMAIN）。內容來自 content-relevance 的
- * `func.triage.<category>.<age>` trigger，屬於跨面向的總體指引。
- *
- * 它必須獨立於呼叫端傳入的 domains 之外被併入：`incomplete` 不是面向 band，
- * 永遠不會出現在 `<severity>::<domain>::<age>`，少了這一層，被判 incomplete 的
- * 使用者在結果頁只會看到「建議閱讀」標題配一片空白。
- */
-export const TRIAGE_PSEUDO_DOMAIN = '__triage__';
 
 /**
  * Merge across multiple domains for a single category — used by ResultView

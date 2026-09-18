@@ -256,3 +256,24 @@ describe('recommendations DAO + merge', () => {
     });
   });
 });
+
+// ── 設定頁可管理的軸（含分流層）────────────────────────────────────────────
+//
+// 分流層內容掛在 `__triage__` 這個虛擬 domain 下，先前不在設定頁的五大面向軸上，
+// 收案單位因此無法覆寫。管理軸獨立於 DOMAINS：DOMAINS 只代表真實面向。
+describe('MANAGEABLE_DOMAINS', () => {
+  it('分流層排在最前，其後為五大面向', async () => {
+    const mod = await import('../../../src/lib/db/recommendations');
+    expect(mod.MANAGEABLE_DOMAINS[0]).toBe(mod.TRIAGE_PSEUDO_DOMAIN);
+    expect(mod.MANAGEABLE_DOMAINS).toHaveLength(6);
+    for (const d of mod.DOMAINS) {
+      expect(mod.MANAGEABLE_DOMAINS).toContain(d);
+    }
+  });
+
+  it('DOMAINS 本身不受影響，仍只含真實面向', async () => {
+    const mod = await import('../../../src/lib/db/recommendations');
+    expect(mod.DOMAINS).not.toContain(mod.TRIAGE_PSEUDO_DOMAIN);
+    expect(mod.DOMAINS).toHaveLength(5);
+  });
+});
